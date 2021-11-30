@@ -1,0 +1,14 @@
+diff --git a/node_modules/leb/lib/bufs.js b/node_modules/leb/lib/bufs.js
+index a82f1e5..3e06ab4 100644
+--- a/node_modules/leb/lib/bufs.js
++++ b/node_modules/leb/lib/bufs.js
+@@ -16,6 +16,9 @@
+  * Module variables
+  */
+ 
++/** For client-side browser Buffer module */
++var { Buffer } = require('buffer')
++
+ /** Pool of buffers, where `bufPool[x].length === x`. */
+ var bufPool = [];
+ 
