@@ -1,10 +1,11 @@
 import { Buffer } from "buffer";
+import * as _ from "lodash";
+import { Mods } from "./Mods";
 
-const lzma = require("../lib/lzma/lzma_worker.js").LZMA;
+const lzma = require("../../lib/lzma/lzma_worker.js").LZMA;
 const leb = require("leb");
 
 const EPOCH = 621355968000000000;
-
 class Replay {
     gameMode = 0;
     gameVersion = 0;
@@ -34,52 +35,72 @@ class Replay {
             type: "application/octet-stream",
         });
     }
+
+    getReplayData() {
+        const replayDataString = this.replay_data;
+        return replayDataString
+            .split(",")
+            .map((row) => row.split("|").map(Number));
+    }
+
+    getMods() {
+        const mods = new Mods(this.mods);
+
+        return mods;
+    }
 }
 
 /* Parse Buffer to Replay Objcet */
 function read(buff: Buffer) {
     let offset = 0x00;
-    let replay = new Replay();
+    return new Promise<Replay>((resolve, reject) => {
+        let replay = new Replay();
 
-    try {
-        replay.gameMode = readByte(buff);
-        replay.gameVersion = readInteger(buff);
-        replay.beatmapMD5 = readString(buff);
-        replay.playerName = readString(buff);
-        replay.replayMD5 = readString(buff);
+        try {
+            replay.gameMode = readByte(buff);
+            replay.gameVersion = readInteger(buff);
+            replay.beatmapMD5 = readString(buff);
+            replay.playerName = readString(buff);
+            replay.replayMD5 = readString(buff);
 
-        replay.number_300s = readShort(buff);
-        replay.number_100s = readShort(buff);
-        replay.number_50s = readShort(buff);
+            replay.number_300s = readShort(buff);
+            replay.number_100s = readShort(buff);
+            replay.number_50s = readShort(buff);
 
-        replay.gekis = readShort(buff);
-        replay.katus = readShort(buff);
-        replay.misses = readShort(buff);
+            replay.gekis = readShort(buff);
+            replay.katus = readShort(buff);
+            replay.misses = readShort(buff);
 
-        replay.score = readInteger(buff);
-        replay.max_combo = readShort(buff);
+            replay.score = readInteger(buff);
+            replay.max_combo = readShort(buff);
 
-        replay.perfect_combo = readByte(buff);
+            replay.perfect_combo = readByte(buff);
 
-        replay.mods = readInteger(buff);
+            replay.mods = readInteger(buff);
 
-        replay.life_bar = readString(buff);
-        replay.timestamp = new Date(
-            Number(readLong(buff) - BigInt(EPOCH)) / 10000
-        );
-        replay.replay_length = readInteger(buff);
+            replay.life_bar = readString(buff);
+            replay.timestamp = new Date(
+                Number(readLong(buff) - BigInt(EPOCH)) / 10000
+            );
+            replay.replay_length = readInteger(buff);
 
-        if (replay.replay_length != 0) {
-            readCompressed(buff, replay.replay_length, (res: any, err: any) => {
-                replay.replay_data = res;
-                replay.unknown = Number(readLong(buff));
-            });
+            if (replay.replay_length != 0) {
+                readCompressed(
+                    buff,
+                    replay.replay_length,
+                    (res: any, err: any) => {
+                        replay.replay_data = res;
+                        replay.unknown = Number(readLong(buff));
+                    }
+                );
+            }
+
+            resolve(replay);
+        } catch (err) {
+            console.log(err);
+            reject(new Replay());
         }
-
-        return replay;
-    } catch (err) {
-        console.log(err);
-    }
+    });
 
     function readByte(buffer: Buffer) {
         offset++;

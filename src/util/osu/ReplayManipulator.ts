@@ -1,18 +1,16 @@
 import { Buffer } from "buffer";
-import { read, Replay, write } from "./util/osr-parser";
+import { Replay, read, write } from "./Replay";
 
-class ReplayParser {
-    parseFromBytes(_buffer: ArrayBuffer) {
+class ReplayManipulator {
+    async parseFromBytes(_buffer: ArrayBuffer) {
         const buffer = toBuffer(_buffer);
-        const result = read(buffer);
-        console.log(result);
+        const result = await read(buffer);
 
         return result;
     }
 
     async writeToBytes(replay: Replay) {
         const result = await write(replay);
-        console.log(result);
         return result;
     }
 
@@ -35,4 +33,4 @@ function toBuffer(ab: ArrayBuffer) {
     return buf;
 }
 
-export { ReplayParser, Replay };
+export { ReplayManipulator, Replay };
