@@ -12,6 +12,7 @@
     "devDependencies": {
         "@types/jquery": "^3.5.9",
         "@types/lodash": "^4.14.177",
+        "jest": "^27.4.3",
         "jquery": "^3.6.0",
         "lodash": "^4.17.21",
         "ts-loader": "^9.2.6",
