@@ -1,52 +1,48 @@
 import { Buffer } from "buffer";
-import * as _ from "lodash";
 import { Mods } from "./Mods";
+import { ReplayData } from "./ReplayData";
+import { ReplayNode } from "./ReplayNodes";
 
-const lzma = require("../../lib/lzma/lzma_worker.js").LZMA;
+const lzma = require("../../../lib/lzma/lzma_worker.js").LZMA;
 const leb = require("leb");
 
 const EPOCH = 621355968000000000;
 class Replay {
-    gameMode = 0;
-    gameVersion = 0;
-    beatmapMD5 = "";
-    playerName = "";
-    replayMD5 = "";
-    number_300s = 0;
-    number_100s = 0;
-    number_50s = 0;
-    gekis = 0;
-    katus = 0;
-    misses = 0;
-    score = 0;
-    max_combo = 0;
-    perfect_combo = 0;
-    mods = 0;
-    life_bar = "";
-    timestamp = new Date(0);
-    replay_length = 0;
-    replay_data = "";
-    unknown = 0;
+    public gameMode = 0;
+    public gameVersion = 0;
+    public beatmapMD5 = "";
+    public playerName = "";
+    public replayMD5 = "";
+    public number_300s = 0;
+    public number_100s = 0;
+    public number_50s = 0;
+    public gekis = 0;
+    public katus = 0;
+    public misses = 0;
+    public score = 0;
+    public maxCombo = 0;
+    public perfectCombo = 0;
+    public mods = new Mods();
+    public life_bar = "";
+    public timestamp = new Date(0);
+    public replayLength = 0;
+    public replayData = new ReplayData("");
+    public unknown = 0;
 
     async toBlob(): Promise<Blob> {
         const replayBytes = await write(this);
         const arrayBuffer = Uint8Array.from(replayBytes);
         return new Blob([arrayBuffer], {
-            type: "application/octet-stream",
+            type: "application/x-osu-replay",
         });
     }
 
-    getReplayData() {
-        const replayDataString = this.replay_data;
-        return replayDataString
-            .split(",")
-            .map((row) => row.split("|").map(Number));
+    public get replayNodes() {
+        return this.replayData.nodes;
     }
 
-    getMods() {
-        const mods = new Mods(this.mods);
-
-        return mods;
+    public set replayNodes(nodesArray: ReplayNode[]) {
+        this.replayData.nodes = nodesArray;
     }
 }
 
@@ -72,27 +68,22 @@ function read(buff: Buffer) {
             replay.misses = readShort(buff);
 
             replay.score = readInteger(buff);
-            replay.max_combo = readShort(buff);
+            replay.maxCombo = readShort(buff);
 
-            replay.perfect_combo = readByte(buff);
+            replay.perfectCombo = readByte(buff);
 
-            replay.mods = readInteger(buff);
+            replay.mods = new Mods(readInteger(buff));
 
             replay.life_bar = readString(buff);
-            replay.timestamp = new Date(
-                Number(readLong(buff) - BigInt(EPOCH)) / 10000
-            );
-            replay.replay_length = readInteger(buff);
+            replay.timestamp = new Date(Number(readLong(buff) - BigInt(EPOCH)) / 10000);
+            replay.replayLength = readInteger(buff);
 
-            if (replay.replay_length != 0) {
-                readCompressed(
-                    buff,
-                    replay.replay_length,
-                    (res: any, err: any) => {
-                        replay.replay_data = res;
-                        replay.unknown = Number(readLong(buff));
-                    }
-                );
+            if (replay.replayLength != 0) {
+                readCompressed(buff, replay.replayLength, (result: string, err: any) => {
+                    //console.log("LZMA Read: ", result);
+                    replay.replayData = new ReplayData(result);
+                    replay.unknown = Number(readLong(buff));
+                });
             }
 
             resolve(replay);
@@ -135,15 +126,9 @@ function read(buff: Buffer) {
         }
     }
 
-    function readCompressed(
-        buffer: Buffer,
-        length: number,
-        callback: Function
-    ) {
+    function readCompressed(buffer: Buffer, length: number, callback: Function) {
         offset += length;
-        return length != 0
-            ? lzma.decompress(buffer.slice(offset - length, offset), callback)
-            : callback(null, null);
+        return length != 0 ? lzma.decompress(buffer.slice(offset - length, offset), callback) : callback(null, null);
     }
 }
 
@@ -166,22 +151,22 @@ function write(replay: Replay) {
             let misses = writeShort(replay.misses || 0);
 
             let score = writeInteger(replay.score || 0);
-            let max_combo = writeShort(replay.max_combo || 0);
-            let perfect_combo = new Buffer([replay.perfect_combo] || [0x01]);
+            let maxCombo = writeShort(replay.maxCombo || 0);
+            let perfectCombo = new Buffer([replay.perfectCombo] || [0x01]);
 
-            let mods = writeInteger(replay.mods);
+            let mods = writeInteger(replay.mods.numeric);
             let life_bar = writeString(replay.life_bar || "");
 
-            let timestamp = writeLong(
-                (replay.timestamp || new Date()).getTime() * 10000 + EPOCH
-            );
+            let timestamp = writeLong((replay.timestamp || new Date()).getTime() * 10000 + EPOCH);
 
-            /* let replay_data = undefined;
-            let replay_length = undefined;
+            /* let replayData = undefined;
+            let replayLength = undefined;
             let unknown = undefined; */
-            lzma.compress(replay.replay_data || "", 1, (res: any, err: any) => {
-                let replay_data = Buffer.from(res);
-                let replay_length = writeInteger(replay_data.length);
+            //console.log("LZMA Compress :", replay.replayData.toString());
+
+            lzma.compress(replay.replayData.toString() || "", 1, (res: any, err: any) => {
+                let replayData = Buffer.from(res);
+                let replayLength = writeInteger(replayData.length);
                 let unknown = writeLong(replay.unknown || 0);
 
                 const finalResult = Buffer.concat([
@@ -197,13 +182,13 @@ function write(replay: Replay) {
                     katus,
                     misses,
                     score,
-                    max_combo,
-                    perfect_combo,
+                    maxCombo,
+                    perfectCombo,
                     mods,
                     life_bar,
                     timestamp,
-                    replay_length,
-                    replay_data,
+                    replayLength,
+                    replayData,
                     unknown,
                 ]);
 
@@ -217,11 +202,7 @@ function write(replay: Replay) {
 
     function writeString(text: String) {
         if (text.length > 0) {
-            return Buffer.concat([
-                Buffer.from([0x0b]),
-                leb.encodeUInt32(text.length),
-                Buffer.from(text),
-            ]);
+            return Buffer.concat([Buffer.from([0x0b]), leb.encodeUInt32(text.length), Buffer.from(text)]);
         }
         return Buffer.from([0x00]);
     }

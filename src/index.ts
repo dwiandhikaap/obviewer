@@ -1,5 +1,8 @@
-import { Replay, ReplayManipulator } from "./util/osu/ReplayManipulator";
 import * as $ from "jQuery";
+import { Mod } from "./util/osu/Replay/Mods";
+import { Replay } from "./util/osu/Replay/Replay";
+import { Keypress, ReplayNode } from "./util/osu/Replay/ReplayNodes";
+import { ReplayUtility } from "./util/osu/Replay/ReplayUtility";
 
 let replay = new Replay();
 
@@ -7,7 +10,7 @@ $("input:file").on("change", function () {
     let reader = new FileReader();
     reader.onload = async function () {
         let arrayBuffer = this.result as ArrayBuffer;
-        let parser = new ReplayManipulator();
+        let parser = new ReplayUtility();
         replay = await parser.parseFromBytes(arrayBuffer);
     };
 
@@ -16,9 +19,21 @@ $("input:file").on("change", function () {
 });
 
 $("button#replay-download").on("click", async function () {
-    const parser = new ReplayManipulator();
-    console.log(replay.getReplayData());
-    console.log(replay.getMods());
+    const parser = new ReplayUtility();
+    console.log(replay.replayData);
+    console.log(replay.mods.list);
 
-    //    parser.saveReplayFile(replay, "pog.osr");
+    const replayNode = new ReplayNode(300, 100, 100, 15);
+    replay.playerName = "siveroo??!";
+    replay.mods.enable(Mod.NoFail);
+    //replay.mods.enable(Mod.Relax);
+    replay.mods.enable(Mod.DoubleTime);
+
+    replay.replayNodes.forEach((node) => node.translate(rand(-15, 15), rand(-15, 15)));
+    parser.saveReplayFile(replay, "pog.osr");
 });
+
+function rand(min: number, max: number) {
+    // min and max included
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}

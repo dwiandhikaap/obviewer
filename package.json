@@ -4,15 +4,14 @@
     "description": "Replay Editor for osu!standard",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "postinstall": "npx patch-package"
+        "postinstall": "npx patch-package",
+        "test": "npx ts-node ./test/test.ts"
     },
     "author": "siveroo",
     "license": "ISC",
     "devDependencies": {
         "@types/jquery": "^3.5.9",
         "@types/lodash": "^4.14.177",
-        "jest": "^27.4.3",
         "jquery": "^3.6.0",
         "lodash": "^4.17.21",
         "ts-loader": "^9.2.6",

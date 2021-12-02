@@ -1,7 +1,7 @@
 import { Buffer } from "buffer";
 import { Replay, read, write } from "./Replay";
 
-class ReplayManipulator {
+class ReplayUtility {
     async parseFromBytes(_buffer: ArrayBuffer) {
         const buffer = toBuffer(_buffer);
         const result = await read(buffer);
@@ -33,4 +33,4 @@ function toBuffer(ab: ArrayBuffer) {
     return buf;
 }
 
-export { ReplayManipulator, Replay };
+export { ReplayUtility };
