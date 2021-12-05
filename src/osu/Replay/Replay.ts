@@ -3,7 +3,7 @@ import { Mods } from "./Mods";
 import { ReplayData } from "./ReplayData";
 import { ReplayNode } from "./ReplayNodes";
 
-const lzma = require("../../../lib/lzma/lzma_worker.js").LZMA;
+const lzma = require("../../lib/lzma/lzma_worker.js").LZMA;
 const leb = require("leb");
 
 const EPOCH = 621355968000000000;
