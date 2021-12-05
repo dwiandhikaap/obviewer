@@ -1,4 +1,5 @@
 import * as $ from "jQuery";
+import { Maps } from "./util/osu/Beatmap/Beatmap";
 import { Mod } from "./util/osu/Replay/Mods";
 import { Replay } from "./util/osu/Replay/Replay";
 import { Keypress, ReplayNode } from "./util/osu/Replay/ReplayNodes";
@@ -6,7 +7,7 @@ import { ReplayUtility } from "./util/osu/Replay/ReplayUtility";
 
 let replay = new Replay();
 
-$("input:file").on("change", function () {
+$("input#replayFile:file").on("change", function () {
     let reader = new FileReader();
     reader.onload = async function () {
         let arrayBuffer = this.result as ArrayBuffer;
@@ -16,6 +17,20 @@ $("input:file").on("change", function () {
 
     console.log(typeof $(this).prop("files"));
     reader.readAsArrayBuffer($(this).prop("files")[0]);
+});
+
+$("input#mapsFile:file").on("change", function () {
+    let reader = new FileReader();
+    reader.onload = async function () {
+        let resultString = this.result as string;
+        //console.log(resultString);
+        const map = new Maps(resultString);
+
+        console.log(map.hitObjects.getHitObjectByTime(31060));
+    };
+
+    //console.log(typeof $(this).prop("files"));
+    reader.readAsText($(this).prop("files")[0]);
 });
 
 $("button#replay-download").on("click", async function () {
