@@ -7,8 +7,7 @@ import { HitObjects } from "./BeatmapAttributes/HitObjects";
 import { Metadata } from "./BeatmapAttributes/Metadata";
 import { TimingPoints } from "./BeatmapAttributes/TimingPoints";
 
-class Maps {
-    formatVersion: string;
+class Beatmap {
     general = new General();
     editor = new Editor();
     metadata = new Metadata();
@@ -57,4 +56,4 @@ class Maps {
     }
 }
 
-export { Maps };
+export { Beatmap };

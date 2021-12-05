@@ -1,9 +1,9 @@
 import * as $ from "jQuery";
-import { Maps } from "./util/osu/Beatmap/Beatmap";
-import { Mod } from "./util/osu/Replay/Mods";
-import { Replay } from "./util/osu/Replay/Replay";
-import { Keypress, ReplayNode } from "./util/osu/Replay/ReplayNodes";
-import { ReplayUtility } from "./util/osu/Replay/ReplayUtility";
+import { Beatmap } from "./osu/Beatmap/Beatmap";
+import { Mod } from "./osu/Replay/Mods";
+import { Replay } from "./osu/Replay/Replay";
+import { ReplayNode } from "./osu/Replay/ReplayNodes";
+import { ReplayUtility } from "./osu/Replay/ReplayUtility";
 
 let replay = new Replay();
 
@@ -23,10 +23,8 @@ $("input#mapsFile:file").on("change", function () {
     let reader = new FileReader();
     reader.onload = async function () {
         let resultString = this.result as string;
-        //console.log(resultString);
-        const map = new Maps(resultString);
-
-        console.log(map.hitObjects.getHitObjectByTime(31060));
+        const map = new Beatmap(resultString);
+        console.log(map);
     };
 
     //console.log(typeof $(this).prop("files"));
@@ -45,7 +43,7 @@ $("button#replay-download").on("click", async function () {
     replay.mods.enable(Mod.DoubleTime);
 
     replay.replayNodes.forEach((node) => node.translate(rand(-15, 15), rand(-15, 15)));
-    parser.saveReplayFile(replay, "pog.osr");
+    //parser.saveReplayFile(replay, "pog.osr");
 });
 
 function rand(min: number, max: number) {

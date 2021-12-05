@@ -139,8 +139,8 @@ class HitObjects {
         }
     }
 
-    getHitObjectByTime(time: number): HitObject {
-        return this.objects.find((object) => object.time === time);
+    getHitObjectsBefore(time: number, count: number = 1): HitObject[] {
+        return this.objects.filter((hitObject) => hitObject.time < time).slice(-count);
     }
 }
 

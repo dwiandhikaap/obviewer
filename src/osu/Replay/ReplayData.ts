@@ -43,6 +43,23 @@ class ReplayData {
         }
         this.nodes = result;
     }
+
+    getReplayData(timestamp: number, prevCount: number = 0, nextCount: number = 0) {
+        let accumulatedTime = 0;
+        let index = 0;
+        while (true) {
+            accumulatedTime += this.nodes[index].deltaTime;
+            if (accumulatedTime >= timestamp) {
+                break;
+            }
+            index++;
+        }
+
+        const startIndex = index - prevCount;
+        const endIndex = index + nextCount + 1;
+
+        return this.nodes.slice(startIndex, endIndex);
+    }
 }
 
 export { ReplayData };
