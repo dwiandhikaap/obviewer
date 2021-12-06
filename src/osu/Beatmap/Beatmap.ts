@@ -53,6 +53,10 @@ class Beatmap {
         this.timingPoints.parseStringArray(sectionChunk[5]);
         this.colours.parseStringArray(sectionChunk[6]);
         this.hitObjects.parseStringArray(sectionChunk[7]);
+
+        // Set hitObjects colours
+        const hexColours = this.colours.hex;
+        this.hitObjects.setColour(hexColours);
     }
 }
 

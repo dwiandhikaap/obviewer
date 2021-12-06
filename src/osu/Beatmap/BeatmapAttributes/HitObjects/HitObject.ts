@@ -25,6 +25,7 @@ interface HitObjectConfig {
     type: HitObjectType;
     hitSound: number;
     hitSample?: Hitsample;
+    comboCount: number;
 }
 
 class HitObject {
@@ -33,15 +34,47 @@ class HitObject {
     time: number;
     type: HitObjectType;
     hitSound: number;
-    hitSample: Hitsample; // Could be undefined
+    hitSample: Hitsample;
+    comboCount: number;
+    colour: string;
+
     constructor(hitObjectConfig: HitObjectConfig) {
-        const { x, y, time, type, hitSound, hitSample } = hitObjectConfig;
+        const { x, y, time, type, hitSound, hitSample, comboCount } = hitObjectConfig;
         this.x = x;
         this.y = y;
         this.time = time;
         this.type = type;
         this.hitSound = hitSound;
         this.hitSample = hitSample;
+
+        this.comboCount = comboCount;
+    }
+
+    setNewCombo() {
+        this.type &= HitObjectType.NewCombo;
+    }
+
+    isNewCombo() {
+        return this.type & HitObjectType.NewCombo;
+    }
+
+    isHitCircle() {
+        return this.type & HitObjectType.HitCircle;
+    }
+
+    isSlider() {
+        return this.type & HitObjectType.Slider;
+    }
+
+    isSpinner() {
+        return this.type & HitObjectType.Spinner;
+    }
+
+    // How many colour(s) are skipped on the new combo
+    getColourHax() {
+        return (
+            ((this.type & (HitObjectType.ColorSkip1 | HitObjectType.ColorSkip2 | HitObjectType.ColorSkip3)) >> 4) + 1
+        );
     }
 }
 

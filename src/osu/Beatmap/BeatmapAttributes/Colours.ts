@@ -15,6 +15,10 @@ class Colours {
             }
         }
     }
+
+    get hex() {
+        return this.combo.map((colour) => `#${colour.map((c) => c.toString(16).padStart(2, "0")).join("")}`);
+    }
 }
 
 export { Colours };

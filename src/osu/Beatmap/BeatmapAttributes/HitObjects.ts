@@ -7,9 +7,14 @@ class HitObjects {
     objects: HitObject[] = [];
 
     parseStringArray(hitObjectStringArray: string[]) {
+        let comboCount = 0;
         for (let hitObjectString of hitObjectStringArray) {
             const hitObjectParams = hitObjectString.split(",");
             const hitObjectType = parseInt(hitObjectParams[3]);
+
+            // If new combo or spinner, reset the combo
+            (hitObjectType & HitObjectType.NewCombo || hitObjectType & HitObjectType.Spinner) && (comboCount = 0);
+            comboCount++;
 
             if (hitObjectType & HitObjectType.HitCircle) {
                 // General Parameter
@@ -20,7 +25,7 @@ class HitObjects {
                 const hitSample = new Hitsample(+normalSet, +additionSet, +index, +volume, filename);
 
                 // Add HitObject to array
-                const hitObjectConfig = { x, y, time, type, hitSound, hitSample };
+                const hitObjectConfig = { x, y, time, type, hitSound, hitSample, comboCount };
                 const hitCircle = new HitCircle(hitObjectConfig);
                 this.objects.push(hitCircle);
             } else if (hitObjectType & HitObjectType.Slider) {
@@ -43,7 +48,7 @@ class HitObjects {
                 }
 
                 // Add HitObject to array
-                const hitObjectConfig = { x, y, time, type, hitSound, hitSample };
+                const hitObjectConfig = { x, y, time, type, hitSound, hitSample, comboCount };
                 const sliderConfig = { curveType, curvePoints, slides, length, edgeSounds, edgeSets };
                 const slider = new Slider(hitObjectConfig, sliderConfig);
                 this.objects.push(slider);
@@ -56,10 +61,20 @@ class HitObjects {
                 const hitSample = new Hitsample(+normalSet, +additionSet, +index, +volume, filename);
 
                 // Add HitObject to array
-                const hitObjectConfig = { x, y, time, type, hitSound, hitSample };
+                const hitObjectConfig = { x, y, time, type, hitSound, hitSample, comboCount };
                 const spinner = new Spinner(hitObjectConfig, endTime);
                 this.objects.push(spinner);
             }
+        }
+    }
+
+    setColour(colour: string[]) {
+        let colourIndex = 0;
+        for (let hitObject of this.objects) {
+            if (hitObject.isNewCombo()) {
+                colourIndex = (colourIndex + hitObject.getColourHax()) % colour.length;
+            }
+            hitObject.colour = colour[colourIndex];
         }
     }
 }
