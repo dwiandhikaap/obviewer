@@ -1,0 +1,8 @@
+{
+    "sync": [
+        ["background", "assets/bg.jpg"],
+        ["bg2", "assets/bg copy.jpg"],
+        ["girls", "assets/girls.png"]
+    ],
+    "async": []
+}
