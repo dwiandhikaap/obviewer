@@ -1,11 +1,10 @@
 {
-    "name": "redraw-vanilla",
+    "name": "redos-web",
     "version": "1.0.0",
     "description": "Replay Editor for osu!standard",
     "main": "index.js",
     "scripts": {
-        "postinstall": "npx patch-package",
-        "test": "npx ts-node ./test/test.ts"
+        "postinstall": "npx patch-package"
     },
     "author": "siveroo",
     "license": "ISC",
@@ -21,10 +20,13 @@
     },
     "dependencies": {
         "@types/bytebuffer": "^5.0.42",
+        "@types/pixi.js": "^5.0.0",
         "buffer": "^6.0.3",
         "bytebuffer": "^5.0.1",
         "leb": "^0.3.0",
         "lzma": "^2.3.2",
-        "patch-package": "^6.4.7"
+        "patch-package": "^6.4.7",
+        "pixi-filters": "^4.1.5",
+        "pixi.js": "^6.2.2"
     }
 }
