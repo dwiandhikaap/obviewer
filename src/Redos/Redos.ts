@@ -14,6 +14,8 @@ class Redos {
     private isPaused: boolean = true;
     private timestamp: number = 0;
 
+    public playbackRate: number = 1;
+
     constructor(redosConfig: RedosConfig) {
         const { container } = redosConfig;
         this.renderer = new Renderer(container);
@@ -34,24 +36,24 @@ class Redos {
     }
 
     private lastFrameTimestamp: number = 0;
-    private loop = () => {
+    private loop = (time: number) => {
         if (this.isPaused) return;
 
-        const deltaTime = performance.now() - this.lastFrameTimestamp;
-        this.timestamp += deltaTime;
-        this.renderer.timestamp += deltaTime;
-        this.lastFrameTimestamp = performance.now();
+        const deltaTime = time - this.lastFrameTimestamp;
+        this.timestamp += deltaTime * this.playbackRate;
+        this.renderer.timestamp += deltaTime * this.playbackRate;
+        this.lastFrameTimestamp = time;
 
         requestAnimationFrame(this.loop);
     };
 
-    unpause() {
+    start() {
         this.isPaused = false;
         this.lastFrameTimestamp = performance.now();
-        this.loop();
+        this.loop(this.lastFrameTimestamp);
     }
 
-    pause() {
+    stop() {
         this.isPaused = true;
     }
 

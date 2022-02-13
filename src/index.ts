@@ -46,11 +46,14 @@ $("input#mapsFile:file").on("change", function () {
                 direction = 1;
             }
         }, 50); */
-        redraw.unpause();
-        await wait();
+        //await wait(2000);
+        redraw.playbackRate = 1;
+        redraw.seek(125000);
+        redraw.start();
+        /* await wait();
         redraw.pause();
         await wait(2000);
-        redraw.seek(10000);
+        redraw.seek(10000); */
     };
 
     //console.log(typeof $(this).prop("files"));
