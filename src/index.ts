@@ -4,11 +4,11 @@ import { Mod } from "./osu/Replay/Mods";
 import { Replay } from "./osu/Replay/Replay";
 import { ReplayNode } from "./osu/Replay/ReplayNodes";
 import { ReplayUtility } from "./osu/Replay/ReplayUtility";
-import { Redos } from "./Redos/Redos";
+import { Redraw } from "./Redraw/Redraw";
 
 let replay = new Replay();
 
-const redraw = new Redos({
+const redraw = new Redraw({
     container: "#main-canvas",
 });
 

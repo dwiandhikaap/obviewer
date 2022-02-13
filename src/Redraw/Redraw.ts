@@ -2,11 +2,11 @@ import { Beatmap } from "../osu/Beatmap/Beatmap";
 import { Replay } from "../osu/Replay/Replay";
 import { Renderer } from "../renderer/Renderer";
 
-interface RedosConfig {
+interface RedrawConfig {
     container: string;
 }
 
-class Redos {
+class Redraw {
     private beatmap: Beatmap;
     private replay: Replay;
     private renderer: Renderer;
@@ -16,8 +16,8 @@ class Redos {
 
     public playbackRate: number = 1;
 
-    constructor(redosConfig: RedosConfig) {
-        const { container } = redosConfig;
+    constructor(redrawConfig: RedrawConfig) {
+        const { container } = redrawConfig;
         this.renderer = new Renderer(container);
     }
 
@@ -63,4 +63,4 @@ class Redos {
     }
 }
 
-export { Redos };
+export { Redraw };

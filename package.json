@@ -1,5 +1,5 @@
 {
-    "name": "redos-web",
+    "name": "redraw-web",
     "version": "1.0.0",
     "description": "Replay Editor for osu!standard",
     "main": "index.js",
