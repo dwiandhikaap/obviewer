@@ -1,4 +1,4 @@
-import { Application, Container, Graphics, Sprite, Texture } from "pixi.js";
+import { Application, Container, Graphics, Sprite, Texture, Ticker } from "pixi.js";
 
 interface BackgroundConfig {
     texture?: Texture;
@@ -80,10 +80,10 @@ class Background extends Container {
     }
 
     // test for timestamp ticker thingy
-    update() {
-        /* const timestamp = Ticker.shared.lastTime;
+    update(timestamp: number) {
         const brightness = Math.abs(Math.sin(timestamp / 1000));
-        this.brightness = brightness; */
+        //this.brightness = brightness;
+        //console.log(timestamp);
     }
 }
 

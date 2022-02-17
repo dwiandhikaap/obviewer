@@ -3,7 +3,7 @@ enum Keypress {
     M2 = 1 << 1,
     K1 = 1 << 2,
     K2 = 1 << 3,
-    Smoke = 1 << 4
+    Smoke = 1 << 4,
 }
 
 class ReplayNode {
@@ -44,7 +44,8 @@ class ReplayNode {
         keys.forEach((key) => (this.keypress |= key));
     }
 
-    removeKeypress(key?: Keypress, ...keys: Keypress[]) {
+    // TODO: i forgot what the function below does and why did i make it in the first place !??!?!
+    /* removeKeypress(key?: Keypress, ...keys: Keypress[]) {
         if (key === undefined && keys.length === 0) {
             this.keypress = 0;
             return;
@@ -55,7 +56,7 @@ class ReplayNode {
             console.log(key);
             this.keypress ^= key;
         });
-    }
+    } */
 }
 
 export { ReplayNode, Keypress };

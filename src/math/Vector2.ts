@@ -1,10 +1,12 @@
 type IAddOverload = {
     (value: number): Vector2;
+    (tuple: [number, number]): Vector2;
     (vector: Vector2): Vector2;
 };
 
 type ISubtractOverload = {
     (value: number): Vector2;
+    (tuple: [number, number]): Vector2;
     (vector: Vector2): Vector2;
 };
 
@@ -14,16 +16,16 @@ export class Vector2 {
     constructor(numbers: number[]);
     constructor(x: number, y: number);
     constructor(x: number | number[], y?: number) {
-        if (typeof x === "number") {
+        if (typeof x === "number" && y !== undefined) {
             this[0] = x;
             this[1] = y;
-        } else {
+        } else if (x instanceof Array) {
             this[0] = x[0];
             this[1] = x[1];
         }
     }
 
-    add: IAddOverload = (valueOrVector: number | Vector2): Vector2 => {
+    add: IAddOverload = (valueOrVector: number | Vector2 | [number, number]): Vector2 => {
         if (typeof valueOrVector === "number") {
             return new Vector2(this[0] + valueOrVector, this[1] + valueOrVector);
         }
@@ -31,7 +33,7 @@ export class Vector2 {
         return new Vector2(this[0] + valueOrVector[0], this[1] + valueOrVector[1]);
     };
 
-    subtract: ISubtractOverload = (valueOrVector: number | Vector2) => {
+    subtract: ISubtractOverload = (valueOrVector: number | Vector2 | [number, number]) => {
         if (typeof valueOrVector === "number") {
             return new Vector2(this[0] - valueOrVector, this[1] - valueOrVector);
         }
@@ -63,11 +65,19 @@ export class Vector2 {
         return [this[0], this[1]];
     }
 
+    toTuple(): [number, number] {
+        return [this[0], this[1]];
+    }
+
     rotate(angle: number): Vector2 {
         return new Vector2(
             this[0] * Math.cos(angle) - this[1] * Math.sin(angle),
             this[0] * Math.sin(angle) + this[1] * Math.cos(angle)
         );
+    }
+
+    clone(): Vector2 {
+        return new Vector2(this[0], this[1]);
     }
 
     public static From(numbers: [number, number]): Vector2;
@@ -77,7 +87,7 @@ export class Vector2 {
             return new Vector2(numberOrArray[0], numberOrArray[1]);
         }
 
-        return new Vector2(numberOrArray, y);
+        return new Vector2(numberOrArray, y!); // typescript bruh moment
     }
 
     public static ToArray(vector: Vector2): number[] {
@@ -95,9 +105,14 @@ export class Vector2 {
         return new Vector2(-vector[1], vector[0]);
     }
 
+    public static PerpendicularLeft(vector: Vector2): Vector2 {
+        return new Vector2(vector[1], -vector[0]);
+    }
+
     public static Add(vector1: Vector2, vector2: Vector2): Vector2;
-    public static Add(vector1: Vector2, value: number): Vector2;
-    public static Add(vector1: Vector2, vector2OrValue: Vector2 | number): Vector2 {
+    public static Add(vector: Vector2, tuple: [number, number]): Vector2;
+    public static Add(vector: Vector2, value: number): Vector2;
+    public static Add(vector1: Vector2, vector2OrValue: Vector2 | [number, number] | number): Vector2 {
         if (typeof vector2OrValue === "number") {
             return new Vector2(vector1[0] + vector2OrValue, vector1[1] + vector2OrValue);
         }
@@ -106,8 +121,9 @@ export class Vector2 {
     }
 
     public static Subtract(vector: Vector2, vector2: Vector2): Vector2;
+    public static Subtract(vector: Vector2, tuple: [number, number]): Vector2;
     public static Subtract(vector: Vector2, value: number): Vector2;
-    public static Subtract(vector1: Vector2, vector2OrValue: Vector2 | number): Vector2 {
+    public static Subtract(vector1: Vector2, vector2OrValue: Vector2 | [number, number] | number): Vector2 {
         if (typeof vector2OrValue === "number") {
             return new Vector2(vector1[0] - vector2OrValue, vector1[1] - vector2OrValue);
         }
@@ -119,11 +135,11 @@ export class Vector2 {
         return new Vector2(vector[0] * scalar, vector[1] * scalar);
     }
 
-    public static DistanceSquared(vector1: Vector2, vector2: Vector2): number {
+    public static DistanceSquared(vector1: Vector2 | [number, number], vector2: Vector2 | [number, number]): number {
         return Math.pow(vector1[0] - vector2[0], 2) + Math.pow(vector1[1] - vector2[1], 2);
     }
 
-    public static Distance(vector1: Vector2, vector2: Vector2): number {
+    public static Distance(vector1: Vector2 | [number, number], vector2: Vector2 | [number, number]): number {
         return Math.sqrt(this.DistanceSquared(vector1, vector2));
     }
 
@@ -145,5 +161,29 @@ export class Vector2 {
 
     public static Equals(vector1: Vector2, vector2: Vector2): boolean {
         return vector1[0] === vector2[0] && vector1[1] === vector2[1];
+    }
+
+    public static LinearInterpolation(vector1: Vector2, vector2: Vector2, t: number): Vector2 {
+        return new Vector2(vector1[0] + (vector2[0] - vector1[0]) * t, vector1[1] + (vector2[1] - vector1[1]) * t);
+    }
+
+    public static CloseEnough(vector1: [number, number], vector2: [number, number], epsilon: number): boolean;
+    public static CloseEnough(vector1: [number, number], vector2: Vector2, epsilon: number): boolean;
+    public static CloseEnough(vector1: Vector2, vector2: [number, number], epsilon: number): boolean;
+    public static CloseEnough(vector1: Vector2, vector2: Vector2, epsilon: number): boolean;
+    public static CloseEnough(
+        vector1: Vector2 | [number, number],
+        vector2: Vector2 | [number, number],
+        epsilon: number
+    ): boolean {
+        return Math.abs(vector1[0] - vector2[0]) < epsilon && Math.abs(vector1[1] - vector2[1]) < epsilon;
+    }
+
+    public static Angle(from: [number, number], to: [number, number]): number;
+    public static Angle(from: [number, number], to: Vector2): number;
+    public static Angle(from: Vector2, to: [number, number]): number;
+    public static Angle(from: Vector2, to: Vector2): number;
+    public static Angle(from: Vector2 | [number, number], to: Vector2 | [number, number]): number {
+        return Math.atan2(to[1] - from[1], to[0] - from[0]);
     }
 }

@@ -7,10 +7,12 @@
         "target": "es6",
         "jsx": "react",
         "allowJs": true,
+        "strict": true,
         "moduleResolution": "node",
         "experimentalDecorators": true,
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
+        "strictPropertyInitialization": false,
         "lib": ["ES6", "DOM"]
     }
 }

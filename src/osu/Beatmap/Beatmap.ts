@@ -52,11 +52,14 @@ class Beatmap {
         this.events.parseStringArray(sectionChunk[4]);
         this.timingPoints.parseStringArray(sectionChunk[5]);
         this.colours.parseStringArray(sectionChunk[6]);
-        this.hitObjects.parseStringArray(sectionChunk[7]);
+        this.hitObjects.parseStringArray(sectionChunk[7], this.difficulty, this.timingPoints);
 
-        // Set hitObjects colours
+        // Set hitObjects colours and stacks
         const hexColours = this.colours.hex;
-        this.hitObjects.setColour(hexColours);
+        this.hitObjects.applyColour(hexColours);
+
+        const stackLeniency = this.general.stackLeniency;
+        this.hitObjects.applyStacking(this.difficulty, stackLeniency);
     }
 }
 

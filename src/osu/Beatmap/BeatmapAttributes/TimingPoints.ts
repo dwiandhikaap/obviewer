@@ -1,22 +1,28 @@
 class Timing {
+    public beatLength: number;
+    public beatLengthBase: number;
+
     constructor(
         public time: number,
-        public _beatlength: number,
-        public base: number,
+        _beatlength: number,
+        base: number,
         public meter: number,
         public sampleSet: number,
         public sampleIndex: number,
         public volume: number,
         public uninhereted: number,
         public effects: number
-    ) {}
-
-    public get beatLength() {
-        if (this.uninhereted) {
-            return this._beatlength;
+    ) {
+        this.beatLengthBase = base;
+        if (uninhereted) {
+            this.beatLength = _beatlength;
         } else {
-            return (Math.max(10, Math.min(1000, -this._beatlength)) * this.base) / 100;
+            this.beatLength = (Math.max(10, Math.min(1000, -_beatlength)) * base) / 100;
         }
+    }
+
+    get bpm() {
+        return (1 / this.beatLengthBase) * 1000 * 60;
     }
 }
 
@@ -48,6 +54,45 @@ class TimingPoints {
 
             this.timings.push(timing);
         }
+    }
+
+    getTimingAt(time: number) {
+        let timing = this.timings[0];
+        for (let i = 0; i < this.timings.length; i++) {
+            if (this.timings[i].time > time) {
+                break;
+            }
+            timing = this.timings[i];
+        }
+        return timing;
+    }
+
+    getInheritedTimingAt(time: number) {
+        let timing = this.timings[0];
+        for (let i = 0; i < this.timings.length; i++) {
+            if (this.timings[i].time > time) {
+                break;
+            }
+
+            if (!this.timings[i].uninhereted) {
+                timing = this.timings[i];
+            }
+        }
+        return timing;
+    }
+
+    getUninheritedTimingAt(time: number) {
+        let timing = this.timings[0];
+        for (let i = 0; i < this.timings.length; i++) {
+            if (this.timings[i].time > time) {
+                break;
+            }
+
+            if (this.timings[i].uninhereted) {
+                timing = this.timings[i];
+            }
+        }
+        return timing;
     }
 }
 

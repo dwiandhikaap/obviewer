@@ -1,5 +1,5 @@
 {
-    "name": "redraw-web",
+    "name": "replaytale-core",
     "version": "1.0.0",
     "description": "Replay Editor for osu!standard",
     "main": "index.js",

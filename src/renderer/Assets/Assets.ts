@@ -1,4 +1,4 @@
-import { Loader } from "pixi.js";
+import { Loader, LoaderResource, Texture, utils } from "pixi.js";
 import assetsConfig from "./assets.json";
 
 interface IAssetsData {
@@ -7,44 +7,60 @@ interface IAssetsData {
 }
 
 class AssetsLoader {
-    public loaderSync: Loader;
-    public loaderAsync: Loader;
+    private static loaderSync: Loader;
+    private static loaderAsync: Loader;
 
-    constructor() {
-        this.loaderSync = new Loader();
-        this.loaderAsync = new Loader();
+    public static assets: utils.Dict<LoaderResource> = {};
+
+    private static _staticConstructor = (function () {
+        AssetsLoader.loaderSync = new Loader();
+        AssetsLoader.loaderAsync = new Loader();
 
         const assetsData: IAssetsData = assetsConfig;
 
         const syncData = assetsData.sync;
         syncData.forEach((data) => {
             const [assetsName, assetsPath] = data;
-            this.loaderSync.add(assetsName, assetsPath);
+            AssetsLoader.loaderSync.add(assetsName, assetsPath);
         });
 
-        this.loaderSync.onStart.add(() => {
+        AssetsLoader.loaderSync.onStart.add(() => {
             console.log("[Assets Loader] Sync Loader - Start");
         });
 
-        this.loaderSync.onComplete.add(() => {
+        AssetsLoader.loaderSync.onComplete.add(() => {
             console.log("[Assets Loader] Sync Loader - Completed");
         });
 
-        this.loaderAsync.onStart.add(() => {
+        AssetsLoader.loaderAsync.onStart.add(() => {
             console.log("[Assets Loader] Async Loader - Start");
         });
 
-        this.loaderAsync.onComplete.add(() => {
+        AssetsLoader.loaderAsync.onComplete.add(() => {
             console.log("[Assets Loader] Async Loader - Completed");
         });
-    }
+    })();
 
-    async load() {
+    static async load() {
         this.loadAsync();
         await this.loadSync();
+
+        for (const key in this.loaderSync.resources) {
+            if (this.loaderSync.resources.hasOwnProperty(key)) {
+                const element = this.loaderSync.resources[key];
+                this.assets[key] = element;
+            }
+        }
+
+        for (const key in this.loaderAsync.resources) {
+            if (this.loaderAsync.resources.hasOwnProperty(key)) {
+                const element = this.loaderAsync.resources[key];
+                this.assets[key] = element;
+            }
+        }
     }
 
-    private async loadSync() {
+    private static async loadSync() {
         const loader = new Promise((resolve, reject) => {
             this.loaderSync.onComplete.add(resolve);
             this.loaderSync.onError.add(reject);
@@ -55,8 +71,16 @@ class AssetsLoader {
         await loader;
     }
 
-    private loadAsync() {
+    private static loadAsync() {
         this.loaderAsync.load();
+    }
+
+    public static getTexture(name: string) {
+        return this.assets[name].texture || Texture.EMPTY;
+    }
+
+    public static getTextureClone(name: string) {
+        return this.getTexture(name).clone();
     }
 }
 

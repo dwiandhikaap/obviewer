@@ -4,11 +4,11 @@ import { Mod } from "./osu/Replay/Mods";
 import { Replay } from "./osu/Replay/Replay";
 import { ReplayNode } from "./osu/Replay/ReplayNodes";
 import { ReplayUtility } from "./osu/Replay/ReplayUtility";
-import { Redraw } from "./Redraw/Redraw";
+import { ReplayTale } from "./ReplayTale/ReplayTale";
 
 let replay = new Replay();
 
-const redraw = new Redraw({
+const replaytale = new ReplayTale({
     container: "#main-canvas",
 });
 
@@ -34,26 +34,27 @@ $("input#mapsFile:file").on("change", function () {
         const map = new Beatmap(resultString);
         console.log(map);
 
-        redraw.loadBeatmap(map);
+        replaytale.loadBeatmap(map);
 
-        /* redraw.timestamp = 130000;
+        /* replaytale.timestamp = 130000;
         setInterval(() => {
-            redraw.timestamp += direction * 50;
-            if (redraw.timestamp >= 2000) {
+            replaytale.timestamp += direction * 50;
+            if (replaytale.timestamp >= 2000) {
                 direction = -1;
             }
-            if (redraw.timestamp <= 100) {
+            if (replaytale.timestamp <= 100) {
                 direction = 1;
             }
         }, 50); */
         //await wait(2000);
-        redraw.playbackRate = 1;
-        redraw.seek(125000);
-        redraw.start();
+        replaytale.playbackRate = 1;
+        //replaytale.seek(30000);
+        replaytale.seek(122000);
+        replaytale.start();
         /* await wait();
-        redraw.pause();
+        replaytale.pause();
         await wait(2000);
-        redraw.seek(10000); */
+        replaytale.seek(10000); */
     };
 
     //console.log(typeof $(this).prop("files"));

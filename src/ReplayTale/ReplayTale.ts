@@ -2,11 +2,11 @@ import { Beatmap } from "../osu/Beatmap/Beatmap";
 import { Replay } from "../osu/Replay/Replay";
 import { Renderer } from "../renderer/Renderer";
 
-interface RedrawConfig {
+interface ReplayTaleConfig {
     container: string;
 }
 
-class Redraw {
+class ReplayTale {
     private beatmap: Beatmap;
     private replay: Replay;
     private renderer: Renderer;
@@ -16,8 +16,8 @@ class Redraw {
 
     public playbackRate: number = 1;
 
-    constructor(redrawConfig: RedrawConfig) {
-        const { container } = redrawConfig;
+    constructor(replaytaleConfig: ReplayTaleConfig) {
+        const { container } = replaytaleConfig;
         this.renderer = new Renderer(container);
     }
 
@@ -29,10 +29,6 @@ class Redraw {
     loadReplay(replay: Replay) {
         this.replay = replay;
         //this.canvas.setMods(replay.mods);
-    }
-
-    log() {
-        console.log(this.renderer);
     }
 
     private lastFrameTimestamp: number = 0;
@@ -63,4 +59,4 @@ class Redraw {
     }
 }
 
-export { Redraw };
+export { ReplayTale };

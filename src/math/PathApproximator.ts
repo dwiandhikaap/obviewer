@@ -29,7 +29,7 @@ export class PathApproximator {
     private static CATMULL_DETAIL = 50;
 
     public static ApproximateLinear(controlPoints: readonly Vector2[]) {
-        return [...controlPoints];
+        return controlPoints.map((point) => point.clone());
     }
 
     public static ApproximateBezier(controlPoints: readonly Vector2[]) {
@@ -52,7 +52,7 @@ export class PathApproximator {
         toFlatten.push([...controlPoints]);
 
         while (toFlatten.length > 0) {
-            let parent = toFlatten.pop();
+            let parent = toFlatten.pop() as Vector2[];
 
             if (this.bezierIsFlatEnough(parent)) {
                 this.bezierApproximate(parent, output, subdivisionBuffer1, subdivisionBuffer2, n + 1);
@@ -61,7 +61,7 @@ export class PathApproximator {
                 continue;
             }
 
-            let rightChild = freeBuffers.length > 0 ? freeBuffers.pop() : new Array<Vector2>();
+            let rightChild = freeBuffers.length > 0 ? (freeBuffers.pop() as Vector2[]) : new Array<Vector2>();
             this.bezierSubdivide(parent, leftChild, rightChild, subdivisionBuffer1, n + 1);
 
             for (let i = 0; i < n + 1; i++) {
@@ -97,11 +97,13 @@ export class PathApproximator {
 
     public static ApproximateCircularArc(controlPoints: readonly Vector2[]) {
         const asd = [...controlPoints];
-        const pr = this.circularArcProperties(asd);
+        let circularArcProperty = this.circularArcProperties(asd);
 
-        if (!pr.isValid) {
+        if (!circularArcProperty.isValid) {
             return [...controlPoints];
         }
+
+        const pr = circularArcProperty as CircularArcProperties;
 
         const amountPoints =
             2 * pr.radius <= this.CIRCULAR_ARC_TOLERANCE
@@ -173,7 +175,7 @@ export class PathApproximator {
             l[count + i] = r[i + 1];
         }
 
-        output.push(controlPoints[0]);
+        output.push(controlPoints[0].clone());
 
         for (let i = 1; i < count - 1; i++) {
             let index = 2 * i;
@@ -187,7 +189,9 @@ export class PathApproximator {
         }
     }
 
-    private static circularArcProperties(controlPoints: Vector2[]): Partial<CircularArcProperties> {
+    private static circularArcProperties(
+        controlPoints: Vector2[]
+    ): CircularArcProperties | Pick<CircularArcProperties, "isValid"> {
         const [a, b, c] = controlPoints;
 
         // If we have a degenerate triangle where a side-length is almost zero, then give up and fallback to a more numerically stable method.

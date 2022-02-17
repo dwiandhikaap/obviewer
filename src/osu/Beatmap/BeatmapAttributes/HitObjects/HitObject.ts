@@ -1,3 +1,5 @@
+import { Difficulty } from "../Difficulty";
+
 enum HitObjectType {
     HitCircle = 1 << 0,
     Slider = 1 << 1,
@@ -19,35 +21,54 @@ class Hitsample {
 }
 
 interface HitObjectConfig {
-    x: number;
-    y: number;
-    time: number;
+    startPos: [number, number];
+    endPos: [number, number];
+    startTime: number;
+    endTime: number;
     type: HitObjectType;
     hitSound: number;
     hitSample?: Hitsample;
     comboCount: number;
+    difficulty: Difficulty;
 }
 
 class HitObject {
-    x: number;
-    y: number;
-    time: number;
+    startPos: [number, number];
+    endPos: [number, number];
+    startTime: number;
+    endTime: number;
     type: HitObjectType;
     hitSound: number;
-    hitSample: Hitsample;
+    hitSample?: Hitsample;
     comboCount: number;
-    colour: string;
+
+    colour: string = "#ffffff";
+    difficulty: Difficulty;
+
+    stackCount: number = 0;
+    stackOffset: number = 0;
 
     constructor(hitObjectConfig: HitObjectConfig) {
-        const { x, y, time, type, hitSound, hitSample, comboCount } = hitObjectConfig;
-        this.x = x;
-        this.y = y;
-        this.time = time;
+        const { startPos, endPos, startTime, endTime, type, hitSound, hitSample, comboCount, difficulty } =
+            hitObjectConfig;
+        this.startPos = startPos;
+        this.endPos = endPos;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.type = type;
         this.hitSound = hitSound;
         this.hitSample = hitSample;
+        this.difficulty = difficulty;
 
         this.comboCount = comboCount;
+    }
+
+    getStackedStartPos() {
+        return [this.startPos[0] - this.stackOffset, this.startPos[1] - this.stackOffset];
+    }
+
+    getStackedEndPos() {
+        return [this.endPos[0] - this.stackOffset, this.endPos[1] - this.stackOffset];
     }
 
     setNewCombo() {
@@ -68,6 +89,10 @@ class HitObject {
 
     isSpinner() {
         return this.type & HitObjectType.Spinner;
+    }
+
+    isVisibleAt(time: number) {
+        return time >= this.startTime - this.difficulty.preEmpt && time <= this.endTime + 150;
     }
 
     // How many colour(s) are skipped on the new combo

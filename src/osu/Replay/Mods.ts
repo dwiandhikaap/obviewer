@@ -50,10 +50,7 @@ class Mods {
             .split("")
             .map(Number)
             .reverse()
-            .reduce(
-                (prev, currVal, currIndex) =>
-                    currVal && result.push(currVal << currIndex)
-            );
+            .reduce((prev, currVal, currIndex) => currVal && result.push(currVal << currIndex));
 
         this._numeric = value;
         this._list = result.reverse();
@@ -61,11 +58,7 @@ class Mods {
 
     public contains(list: Array<Mod>): boolean;
     public contains(mod: Mod): boolean;
-    public contains(arg: any): boolean {
-        if (typeof arg === "number") {
-            return (arg & this._numeric) === arg;
-        }
-
+    public contains(arg: Mod | Array<Mod>): boolean {
         if (arg instanceof Array) {
             let result = true;
             for (const mod of arg) {
@@ -76,6 +69,8 @@ class Mods {
             }
             return result;
         }
+
+        return (arg & this._numeric) === arg;
     }
 
     public set(mod: Mod, enable: boolean) {
@@ -101,11 +96,9 @@ class Mods {
 function reduceCombinedMods(list: Array<String>) {
     const result = list;
 
-    result.includes(Mod[Mod.Nightcore]) &&
-        result.splice(result.indexOf(Mod[Mod.DoubleTime]), 1);
+    result.includes(Mod[Mod.Nightcore]) && result.splice(result.indexOf(Mod[Mod.DoubleTime]), 1);
 
-    result.includes(Mod[Mod.Perfect]) &&
-        result.splice(result.indexOf(Mod[Mod.SuddenDeath]), 1);
+    result.includes(Mod[Mod.Perfect]) && result.splice(result.indexOf(Mod[Mod.SuddenDeath]), 1);
 
     return result;
 }

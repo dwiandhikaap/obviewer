@@ -23,25 +23,25 @@ class General {
             if (rowFound) {
                 return rowFound.replace(/.+: */g, "");
             } else {
-                return undefined;
+                return null;
             }
         }
 
-        this.audioFilename = findValueByKey("audioFilename") || "";
-        this.audioLeadIn = parseInt(findValueByKey("audioLeadIn")) || 0;
-        this.previewTime = parseInt(findValueByKey("previewTime")) || -1;
-        this.countdown = parseInt(findValueByKey("countdown")) || 1;
-        this.sampleSet = findValueByKey("sampleSet") || "Normal";
-        this.stackLeniency = parseFloat(findValueByKey("stackLeniency")) || 0.7;
-        this.mode = parseInt(findValueByKey("mode")) || 0;
-        this.letterboxInBreaks = parseInt(findValueByKey("letterboxInBreaks")) || 0;
-        this.widescreenStoryboard = parseInt(findValueByKey("widescreenStoryboard")) || 0;
-        this.useSkinSprites = parseInt(findValueByKey("useSkinSprites")) || 0;
-        this.overlayPosition = findValueByKey("overlayPosition") || "NoChange";
-        this.skinPreference = findValueByKey("skinPreference") || "";
-        this.epilepsyWarning = parseInt(findValueByKey("epilepsyWarning")) || 0;
-        this.countdownOffset = parseInt(findValueByKey("countdownOffset")) || 0;
-        this.sampleMatchPlaybackRate = parseInt(findValueByKey("sampleMatchPlaybackRate")) || 0;
+        this.audioFilename = findValueByKey("audioFilename") ?? "";
+        this.audioLeadIn = parseInt(findValueByKey("audioLeadIn") ?? "0");
+        this.previewTime = parseInt(findValueByKey("previewTime") ?? "-1");
+        this.countdown = parseInt(findValueByKey("countdown") ?? "1");
+        this.sampleSet = findValueByKey("sampleSet") ?? "Normal";
+        this.stackLeniency = parseFloat(findValueByKey("stackLeniency") ?? "0.7");
+        this.mode = parseInt(findValueByKey("mode") ?? "0");
+        this.letterboxInBreaks = parseInt(findValueByKey("letterboxInBreaks") ?? "0");
+        this.widescreenStoryboard = parseInt(findValueByKey("widescreenStoryboard") ?? "0");
+        this.useSkinSprites = parseInt(findValueByKey("useSkinSprites") ?? "0");
+        this.overlayPosition = findValueByKey("overlayPosition") ?? "NoChange";
+        this.skinPreference = findValueByKey("skinPreference") ?? "";
+        this.epilepsyWarning = parseInt(findValueByKey("epilepsyWarning") ?? "0");
+        this.countdownOffset = parseInt(findValueByKey("countdownOffset") ?? "0");
+        this.sampleMatchPlaybackRate = parseInt(findValueByKey("sampleMatchPlaybackRate") ?? "0");
     }
 }
 

@@ -58,20 +58,22 @@ class Events {
     events: Event[] = [];
 
     parseStringArray(eventStringArray: string[]) {
-        this.events = eventStringArray.map((eventString) => {
-            const [eventType, startTime, ...eventParams] = eventString.split(",");
-            switch (+eventType) {
-                case EventType.Background: {
-                    return new BackgroundEvent(+startTime, eventParams);
+        this.events = eventStringArray
+            .map((eventString) => {
+                const [eventType, startTime, ...eventParams] = eventString.split(",");
+                switch (+eventType) {
+                    case EventType.Background: {
+                        return new BackgroundEvent(+startTime, eventParams);
+                    }
+                    case EventType.Video: {
+                        return new VideoEvent(+startTime, eventParams);
+                    }
+                    case EventType.Break: {
+                        return new BreakEvent(+startTime, eventParams);
+                    }
                 }
-                case EventType.Video: {
-                    return new VideoEvent(+startTime, eventParams);
-                }
-                case EventType.Break: {
-                    return new BreakEvent(+startTime, eventParams);
-                }
-            }
-        });
+            })
+            .filter((event) => event !== undefined) as Array<BackgroundEvent | VideoEvent | BreakEvent>;
     }
 }
 

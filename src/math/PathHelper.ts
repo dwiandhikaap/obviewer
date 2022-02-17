@@ -1,15 +1,16 @@
+import { MathHelper } from "./MathHelper";
 import { PathApproximator } from "./PathApproximator";
 import { Vector2 } from "./Vector2";
 
 export class PathHelper {
     //private static ANGLE_THRESHOLD = Math.PI / 8;
 
-    public static CalculateLength(path: readonly Vector2[]): number {
+    public static CalculateLength(pathPoints: readonly Vector2[]): number {
         let length = 0;
 
-        for (let i = 0; i < path.length - 1; i++) {
-            const current = path[i];
-            const next = path[i + 1];
+        for (let i = 0; i < pathPoints.length - 1; i++) {
+            const current = pathPoints[i];
+            const next = pathPoints[i + 1];
 
             length += Vector2.Distance(current, next);
         }
@@ -35,11 +36,47 @@ export class PathHelper {
             const distance = Vector2.Distance(prev, current);
 
             if (length + distance > maxLength) {
+                // interpolate between current and previous point
+                const t = (maxLength - length) / distance;
+                const interp = new Vector2(prev[0] * (1 - t) + current[0] * t, prev[1] * (1 - t) + current[1] * t);
+
+                result.push(interp);
                 break;
             }
 
             length += distance;
             result.push(path[i]);
+        }
+
+        return result;
+    }
+
+    public static GetPointAt(pathPoints: readonly Vector2[], time: number) {
+        time = MathHelper.Clamp(time, 0, 1);
+        let result: Vector2 | null = null;
+
+        const totalLength = PathHelper.CalculateLength(pathPoints);
+        const expectedLength = totalLength * time;
+
+        let length = 0;
+
+        for (let i = 1; i < pathPoints.length; i++) {
+            const prev = pathPoints[i - 1];
+            const current = pathPoints[i];
+
+            const dist = Vector2.Distance(prev, current);
+
+            if (length + dist > expectedLength) {
+                result = Vector2.LinearInterpolation(prev, current, time);
+                break;
+            }
+
+            length += dist;
+        }
+
+        // Just in case something weird happened related to float precision bullshit
+        if (!result) {
+            result = pathPoints[pathPoints.length - 1];
         }
 
         return result;
@@ -168,7 +205,7 @@ export class PathHelper {
         let prevPoint = path[0];
         let newPoints = [prevPoint];
 
-        let point: Vector2;
+        let point: Vector2 = path[1];
 
         for (let i = 1, len = path.length; i < len; i++) {
             point = path[i];
@@ -204,7 +241,7 @@ export class PathHelper {
         simplified: Vector2[]
     ) {
         let maxSqDist = sqTolerance;
-        let index: number;
+        let index: number = 0;
 
         for (let i = first + 1; i < last; i++) {
             let sqDist = this.getSqSegDist(path[i], path[first], path[last]);

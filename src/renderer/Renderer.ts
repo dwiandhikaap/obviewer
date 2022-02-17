@@ -1,13 +1,13 @@
 import * as PIXI from "pixi.js";
+import { Texture } from "pixi.js";
 import { Beatmap } from "../osu/Beatmap/Beatmap";
 import { AssetsLoader } from "./Assets/Assets";
+import { SliderTextureGenerator } from "./Drawable/HitObject/SliderTextureGenerator";
 import { Background } from "./Layers/Background";
 import { BeatmapField } from "./Layers/BeatmapField";
 
-// TODO: pake ticker pixi terus bikin callback ke app nya
 class Renderer {
     public pixi: PIXI.Application;
-    public assetsLoader = new AssetsLoader();
     public assets: PIXI.utils.Dict<PIXI.LoaderResource>;
 
     // Timestamp and Ticker
@@ -22,8 +22,8 @@ class Renderer {
         this._timestamp = value;
         this.ticker.update(value);
 
-        this.background.update();
-        this.beatmapField.update();
+        this.background.update(value);
+        this.beatmapField.update(value);
     }
 
     private background: Background;
@@ -32,7 +32,7 @@ class Renderer {
     constructor(querySelector: string) {
         // Set PIXI Application
         this.pixi = new PIXI.Application({
-            //powerPreference: "high-performance",
+            powerPreference: "high-performance",
             antialias: true,
             width: 1280,
             height: 720,
@@ -42,11 +42,14 @@ class Renderer {
         // Set PIXI Shared Ticker
         this.ticker = PIXI.Ticker.shared;
         this.ticker.autoStart = false;
-        this.ticker.maxFPS = 30;
         this.ticker.stop();
 
+        // Set TextureRenderer Renderer
+        // TODO: in case there are many TextureRenderers that need to be set, create a class that does that
+        SliderTextureGenerator.setRenderer(this.pixi.renderer as PIXI.Renderer);
+
         // Set Background
-        this.background = new Background(this.pixi, { brightness: 0.5, fit: "horizontal" });
+        this.background = new Background(this.pixi, { brightness: 0.2, fit: "horizontal" });
         this.background.interactiveChildren = false;
         this.pixi.stage.addChild(this.background);
 
@@ -56,7 +59,7 @@ class Renderer {
         this.pixi.stage.addChild(this.beatmapField);
 
         const view = document.querySelector(querySelector);
-        view.appendChild(this.pixi.view);
+        view && view.appendChild(this.pixi.view);
 
         // Initialize App
         this.init();
@@ -64,10 +67,10 @@ class Renderer {
 
     async init() {
         // Load Assets
-        await this.assetsLoader.load();
-        this.assets = this.assetsLoader.loaderSync.resources;
+        await AssetsLoader.load();
+        this.assets = AssetsLoader.assets;
 
-        const bgTexture = this.assets["bg2"].texture;
+        const bgTexture = this.assets["bg2"].texture || Texture.EMPTY;
         this.background.setImage(bgTexture);
     }
 
