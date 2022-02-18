@@ -33,16 +33,18 @@ class HitCircleDrawable extends Container {
     private createCircle() {
         const { radius, hitCircle, renderScale } = this;
         const { comboCount, colour } = hitCircle;
-        const texture = (this.assets["hitcircle"].texture || Texture.EMPTY).clone();
-        texture.baseTexture.setSize(radius * 2, radius * 2);
+        const texture = AssetsLoader.getTexture("hitcircle");
 
         const hitCircleSprite = new Sprite(texture);
+        hitCircleSprite.width = radius * 2;
+        hitCircleSprite.height = radius * 2;
         hitCircleSprite.tint = hexToInt(colour);
         hitCircleSprite.anchor.set(0.5, 0.5);
 
-        const hcOverlayTexture = (this.assets["hitcircleoverlay"].texture || Texture.EMPTY).clone();
-        hcOverlayTexture.baseTexture.setSize(radius * 2, radius * 2);
+        const hcOverlayTexture = AssetsLoader.getTexture("hitcircleoverlay");
         const sHCOverlay = new Sprite(hcOverlayTexture);
+        sHCOverlay.width = radius * 2;
+        sHCOverlay.height = radius * 2;
         sHCOverlay.anchor.set(0.5, 0.5);
 
         const style = new TextStyle({
@@ -62,9 +64,10 @@ class HitCircleDrawable extends Container {
     }
 
     private createApproachCircle() {
-        const texture = (this.assets["approachcircle"].texture || Texture.EMPTY).clone();
-        texture.baseTexture.setSize(this.radius * 2, this.radius * 2);
+        const texture = AssetsLoader.getTexture("approachcircle");
         const ac = new Sprite(texture);
+        ac.width = this.radius * 2;
+        ac.height = this.radius * 2;
         ac.anchor.set(0.5, 0.5);
 
         return ac;

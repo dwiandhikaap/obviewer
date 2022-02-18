@@ -78,10 +78,6 @@ class AssetsLoader {
     public static getTexture(name: string) {
         return this.assets[name].texture || Texture.EMPTY;
     }
-
-    public static getTextureClone(name: string) {
-        return this.getTexture(name).clone();
-    }
 }
 
 export { AssetsLoader };

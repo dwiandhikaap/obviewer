@@ -19,8 +19,6 @@ class SpinnerDrawable extends Container {
 
     private spinnerMeterMask: Sprite;
 
-    private assets = AssetsLoader.assets;
-
     constructor(private spinner: Spinner, difficulty: Difficulty, private renderScale: number) {
         super();
 
@@ -42,7 +40,7 @@ class SpinnerDrawable extends Container {
     }
 
     private createSpinnerBackground() {
-        const texture = (this.assets["spinner-background"].texture || Texture.EMPTY).clone();
+        const texture = AssetsLoader.getTexture("spinner-background");
 
         const playfieldWidth = 512 * this.renderScale;
         const playfieldHeight = 384 * this.renderScale;
@@ -50,16 +48,16 @@ class SpinnerDrawable extends Container {
         const ratio =
             SPINNER_BACKGROUND_SCALE *
             (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
-        texture.baseTexture.setSize(texture.width * ratio, texture.height * ratio);
 
         const sprite = new Sprite(texture);
+        sprite.scale.set(ratio);
         sprite.position.set(playfieldWidth / 2, playfieldHeight / 2);
         sprite.anchor.set(0.5);
         return sprite;
     }
 
     private createSpinnerMeter() {
-        const texture = (this.assets["spinner-metre"].texture || Texture.EMPTY).clone();
+        const texture = AssetsLoader.getTexture("spinner-metre");
 
         const playfieldWidth = 512 * this.renderScale;
         const playfieldHeight = 384 * this.renderScale;
@@ -67,9 +65,9 @@ class SpinnerDrawable extends Container {
         const ratio =
             SPINNER_BACKGROUND_SCALE *
             (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
-        texture.baseTexture.setSize(texture.width * ratio, texture.height * ratio);
 
         const sprite = new Sprite(texture);
+        sprite.scale.set(ratio);
         sprite.position.set(playfieldWidth / 2, playfieldHeight / 2);
         sprite.anchor.set(0.5);
 
@@ -77,16 +75,20 @@ class SpinnerDrawable extends Container {
     }
 
     private createSpinnerMeterMask() {
-        const texture = (this.assets["spinner-metre"].texture || Texture.EMPTY).clone();
+        const texture = AssetsLoader.getTexture("spinner-metre");
 
         const playfieldWidth = 512 * this.renderScale;
         const playfieldHeight = 384 * this.renderScale;
 
+        const ratio =
+            SPINNER_BACKGROUND_SCALE *
+            (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+
         const mask = new Sprite(Texture.WHITE);
         mask.y = 0;
-        mask.x = 200;
-        mask.width = texture.width;
-        mask.height = texture.height;
+        mask.x = 0;
+        mask.width = texture.width * ratio;
+        mask.height = texture.height * ratio;
         mask.position.set(playfieldWidth / 2, playfieldHeight);
         mask.anchor.set(0.5, 1.0);
 
@@ -94,7 +96,7 @@ class SpinnerDrawable extends Container {
     }
 
     private createSpinnerCircle() {
-        const texture = (this.assets["spinner-circle"].texture || Texture.EMPTY).clone();
+        const texture = AssetsLoader.getTexture("spinner-circle");
 
         const playfieldWidth = 512 * this.renderScale;
         const playfieldHeight = 384 * this.renderScale;
@@ -103,9 +105,8 @@ class SpinnerDrawable extends Container {
             SPINNER_CIRCLE_SCALE *
             (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
 
-        texture.baseTexture.setSize(texture.width * ratio, texture.height * ratio);
-
         const sprite = new Sprite(texture);
+        sprite.scale.set(ratio);
         sprite.position.set(playfieldWidth / 2, playfieldHeight / 2);
         sprite.anchor.set(0.5);
 
@@ -134,7 +135,7 @@ class SpinnerDrawable extends Container {
     }
 
     private createSpinnerSpin() {
-        const texture = (this.assets["spinner-spin"].texture || Texture.EMPTY).clone();
+        const texture = AssetsLoader.getTexture("spinner-spin");
 
         const playfieldWidth = 512 * this.renderScale;
         const playfieldHeight = 384 * this.renderScale;
@@ -143,9 +144,8 @@ class SpinnerDrawable extends Container {
             SPINNER_SPIN_SCALE *
             (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
 
-        texture.baseTexture.setSize(texture.width * ratio, texture.height * ratio);
-
         const sprite = new Sprite(texture);
+        sprite.scale.set(ratio);
         sprite.position.set(playfieldWidth / 2, (playfieldHeight * 3) / 4);
         sprite.anchor.set(0.5, 0.25);
 

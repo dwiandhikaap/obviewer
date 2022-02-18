@@ -18,8 +18,6 @@ class SliderDrawable extends Container {
     private sliderReverses: Container;
     private sliderTicks: Container;
 
-    private assets = AssetsLoader.assets;
-
     constructor(private slider: Slider, difficulty: Difficulty, private renderScale: number) {
         super();
         const startPos = slider.getStackedStartPos();
@@ -75,7 +73,7 @@ class SliderDrawable extends Container {
         const { slider, renderScale } = this;
         const stackedSliderTicks = slider.getStackedSliderTicks();
 
-        const tickTexture = (this.assets["sliderscorepoint"].texture || Texture.EMPTY).clone();
+        const tickTexture = AssetsLoader.getTexture("sliderscorepoint");
 
         const sliderTicks = new Container();
 
@@ -103,9 +101,10 @@ class SliderDrawable extends Container {
         const sliderReverses = new Container();
 
         for (const sliderReverse of stackedSliderReverses) {
-            const reverseTexture = (this.assets["reversearrow"].texture || Texture.EMPTY).clone();
-            reverseTexture.baseTexture.setSize(radius * 2, radius * 2);
+            const reverseTexture = AssetsLoader.getTexture("reversearrow");
             const reverse = new Sprite(reverseTexture);
+            reverse.width = radius * 2;
+            reverse.height = radius * 2;
             reverse.anchor.set(0.5);
 
             const relativePos = [
@@ -127,15 +126,20 @@ class SliderDrawable extends Container {
         const { comboCount, colour } = slider;
         const color = hexToInt(colour);
 
-        const hitcircleTexture = (this.assets["hitcircle"].texture || Texture.EMPTY).clone();
-        hitcircleTexture.baseTexture.setSize(radius * 2, radius * 2);
+        const hitcircleTexture = AssetsLoader.getTexture("hitcircle");
+
         const sliderHeadCircle = new Sprite(hitcircleTexture);
         sliderHeadCircle.tint = color;
+
+        sliderHeadCircle.width = Math.ceil(radius) * 2;
+
+        sliderHeadCircle.height = Math.ceil(radius) * 2;
         sliderHeadCircle.anchor.set(0.5, 0.5);
 
-        const hcOverlayTexture = (this.assets["hitcircleoverlay"].texture || Texture.EMPTY).clone();
-        hcOverlayTexture.baseTexture.setSize(radius * 2, radius * 2);
+        const hcOverlayTexture = AssetsLoader.getTexture("hitcircleoverlay");
         const sHCOverlay = new Sprite(hcOverlayTexture);
+        sHCOverlay.width = Math.ceil(radius * 2);
+        sHCOverlay.height = Math.ceil(radius * 2);
         sHCOverlay.anchor.set(0.5, 0.5);
 
         // number part
@@ -151,27 +155,26 @@ class SliderDrawable extends Container {
         sliderHead.addChild(sliderHeadCircle);
         sliderHead.addChild(sHCOverlay);
         sliderHead.addChild(sliderHeadNumber);
-        sliderHead.scale.set(1);
 
         return sliderHead;
     }
 
     private createSliderBall() {
-        const { radius } = this;
-
-        const texture = (this.assets["sliderb0"].texture || Texture.EMPTY).clone();
-        texture.baseTexture.setSize(radius * 2, radius * 2);
+        const texture = AssetsLoader.getTexture("sliderb0");
         const sliderBall = new Sprite(texture);
         sliderBall.anchor.set(0.5, 0.5);
+        sliderBall.width = this.radius * 2;
+        sliderBall.height = this.radius * 2;
         sliderBall.alpha = 0;
 
         return sliderBall;
     }
 
     private createApproachCircle() {
-        const texture = (this.assets["approachcircle"].texture || Texture.EMPTY).clone();
-        texture.baseTexture.setSize(this.radius * 2, this.radius * 2);
+        const texture = AssetsLoader.getTexture("approachcircle");
         const approachCircle = new Sprite(texture);
+        approachCircle.width = this.radius * 2;
+        approachCircle.height = this.radius * 2;
         approachCircle.anchor.set(0.5, 0.5);
 
         return approachCircle;
