@@ -1,3 +1,10 @@
+const DEFAULT_COLOURS = [
+    [141, 174, 240],
+    [115, 129, 241],
+    [214, 214, 214],
+    [160, 160, 160],
+];
+
 class Colours {
     combo: number[][] = [];
     sliderTrackOverride: number[];
@@ -13,6 +20,10 @@ class Colours {
             } else {
                 this.combo.push(colourString.replace(/.+: */g, "").split(",").map(Number));
             }
+        }
+
+        if (this.combo.length === 0) {
+            this.combo = DEFAULT_COLOURS;
         }
     }
 
