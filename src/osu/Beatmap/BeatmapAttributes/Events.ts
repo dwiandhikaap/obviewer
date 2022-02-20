@@ -1,8 +1,10 @@
-enum EventType {
+/* enum EventType {
     Background = 0,
     Video = 1,
     Break = 2,
-}
+} */
+
+type EventType = "background" | "video" | "break";
 
 interface Event {
     eventType: EventType;
@@ -10,7 +12,7 @@ interface Event {
 }
 
 class BackgroundEvent implements Event {
-    eventType = EventType.Background;
+    eventType: EventType = "background";
     startTime: number;
     filename: string;
     xOffset: number;
@@ -27,7 +29,7 @@ class BackgroundEvent implements Event {
 }
 
 class VideoEvent implements Event {
-    eventType = EventType.Video;
+    eventType: EventType = "video";
     startTime: number;
     filename: string;
     xOffset: number;
@@ -44,7 +46,7 @@ class VideoEvent implements Event {
 }
 
 class BreakEvent implements Event {
-    eventType = EventType.Break;
+    eventType: EventType = "break";
     startTime: number;
     endTime: number;
 
@@ -62,18 +64,18 @@ class Events {
             .map((eventString) => {
                 const [eventType, startTime, ...eventParams] = eventString.split(",");
                 switch (+eventType) {
-                    case EventType.Background: {
+                    case 0: {
                         return new BackgroundEvent(+startTime, eventParams);
                     }
-                    case EventType.Video: {
+                    case 1: {
                         return new VideoEvent(+startTime, eventParams);
                     }
-                    case EventType.Break: {
+                    case 2: {
                         return new BreakEvent(+startTime, eventParams);
                     }
                 }
             })
-            .filter((event) => event !== undefined) as Array<BackgroundEvent | VideoEvent | BreakEvent>;
+            .filter((event) => event !== undefined) as Array<Event>;
     }
 }
 
