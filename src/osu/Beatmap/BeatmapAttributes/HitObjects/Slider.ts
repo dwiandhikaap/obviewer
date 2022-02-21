@@ -93,7 +93,7 @@ class Slider extends HitObject {
     private initializeTiming() {
         const sliderStartTime = this.startTime;
 
-        const timing = this.timing.getInheritedTimingAt(sliderStartTime);
+        const timing = this.timing.getTimingAt(sliderStartTime);
         const beatLength = timing.beatLength;
         const sliderMult = this.difficulty.sliderMultiplier;
         const sliderPixelVelocity = sliderMult * 100; // sliderMult*100 pixels for every beat
@@ -109,7 +109,7 @@ class Slider extends HitObject {
 
     // TODO: fix bug where ticks fall on the different places for long fast repeating slider
     private initializeSliderTicks() {
-        const timing = this.timing.getInheritedTimingAt(this.startTime);
+        const timing = this.timing.getTimingAt(this.startTime);
 
         const sliderTickRate = this.difficulty.sliderTickRate;
         const sliderTickDuration = timing.beatLengthBase / sliderTickRate;
