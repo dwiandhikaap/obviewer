@@ -1,4 +1,4 @@
-import { Mod, Mods } from "../../Replay/Mods";
+import { Mod, Mods } from "../../Mods/Mods";
 
 const PREEMPT_MIN = 450;
 const TIME_PREEMPT = 600;

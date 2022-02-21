@@ -1,5 +1,5 @@
 import { Buffer } from "buffer";
-import { Mods } from "./Mods";
+import { Mods } from "../Mods/Mods";
 import { ReplayData } from "./ReplayData";
 import { ReplayNode } from "./ReplayNodes";
 
