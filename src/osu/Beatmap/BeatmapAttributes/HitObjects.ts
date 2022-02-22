@@ -1,5 +1,4 @@
 import { Path } from "../../../math/Path";
-import { Spannable } from "../../../math/Spannable";
 import { Vector2 } from "../../../math/Vector2";
 import { Difficulty } from "./Difficulty";
 import { HitCircle } from "./HitObjects/HitCircle";
@@ -196,19 +195,19 @@ class HitObjects {
         }
     }
 
-    /*     getIndexNear(timestamp: number) {
+    getIndexNear(timestamp: number) {
         let mid;
         let lo = 0;
         let hi = this.objects.length - 1;
         while (hi - lo > 1) {
             mid = Math.floor((lo + hi) / 2);
-            if (this.objects[mid].time < timestamp) {
+            if (this.objects[mid].startTime < timestamp) {
                 lo = mid;
             } else {
                 hi = mid;
             }
         }
-        if (timestamp - this.objects[lo].time <= this.objects[hi].time - timestamp) {
+        if (timestamp - this.objects[lo].startTime <= this.objects[hi].startTime - timestamp) {
             return lo;
         }
         return hi;
@@ -220,13 +219,13 @@ class HitObjects {
     }
 
     grab(startTime: number, endTime: number) {
-        const lastObjectTimestamp = this.objects[this.objects.length - 1].time;
+        const lastObjectTimestamp = this.objects[this.objects.length - 1].startTime;
 
         const startIndex = this.getIndexNear(Math.max(0, startTime));
         const endIndex = this.getIndexNear(Math.min(endTime, lastObjectTimestamp));
 
         return this.objects.slice(startIndex, endIndex + 1);
-    } */
+    }
 }
 
 export { HitObjects, HitObject, HitCircle, Slider, Spinner };
