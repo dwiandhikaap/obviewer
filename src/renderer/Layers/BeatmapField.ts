@@ -1,12 +1,12 @@
-import { Application, Container, Graphics, Renderer } from "pixi.js";
+import { Application, Container } from "pixi.js";
+import * as PIXI from "pixi.js";
 import { Beatmap } from "../../osu/Beatmap/Beatmap";
 import { getOsuPixelScale } from "../../util/osu-calculation";
 import { DrawableGenerator } from "../Drawable/DrawableGenerator";
 import { HitObjectDrawable } from "../Drawable/DrawableTypes";
-import { SliderTextureGenerator } from "../Drawable/HitObject/SliderTextureGenerator";
 
 class BeatmapField extends Container {
-    private _beatmap: Beatmap;
+    private beatmap: Beatmap;
     private hitObjectDrawables: HitObjectDrawable[] = [];
     private playfieldResolution: [number, number];
 
@@ -40,10 +40,10 @@ class BeatmapField extends Container {
     }
 
     loadBeatmap(beatmap: Beatmap) {
-        this._beatmap = beatmap;
+        this.beatmap = beatmap;
 
-        const hitObjects = this._beatmap.hitObjects;
-        const difficulty = this._beatmap.difficulty;
+        const hitObjects = this.beatmap.hitObjects;
+        const difficulty = this.beatmap.difficulty;
 
         const scale = getOsuPixelScale(this.playfieldResolution[0], this.playfieldResolution[1]);
 
@@ -52,16 +52,17 @@ class BeatmapField extends Container {
             this.hitObjectDrawables.push(drawable);
         });
 
-        const objectCount = Math.min(30, this.hitObjectDrawables.length);
+        const objectCount = this.hitObjectDrawables.length;
         for (let i = objectCount - 1; i >= 0; i--) {
             this.addChild(this.hitObjectDrawables[i]);
         }
     }
 
     update(timestamp: number) {
-        this.hitObjectDrawables.forEach((drawable) => {
-            drawable.update(timestamp);
-        });
+        for (let i = 0; i < this.hitObjectDrawables.length; i++) {
+            // would it be nice just to update some instead of all of them ?
+            this.hitObjectDrawables[i].update(timestamp);
+        }
     }
 }
 
