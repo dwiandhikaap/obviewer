@@ -1,7 +1,7 @@
 import { Colours } from "./BeatmapAttributes/Colours";
 import { Difficulty } from "./BeatmapAttributes/Difficulty";
 import { Editor } from "./BeatmapAttributes/Editor";
-import { Events } from "./BeatmapAttributes/Events";
+import { BackgroundEvent, Events } from "./BeatmapAttributes/Events";
 import { General } from "./BeatmapAttributes/General";
 import { HitObjects } from "./BeatmapAttributes/HitObjects";
 import { Metadata } from "./BeatmapAttributes/Metadata";
@@ -60,6 +60,20 @@ class Beatmap {
 
         const stackLeniency = this.general.stackLeniency;
         this.hitObjects.applyStacking(this.difficulty, stackLeniency);
+    }
+
+    getBackgroundFileNames(): string[] {
+        const backgroundNames: string[] = [];
+        this.events.events.forEach((event) => {
+            if (event.eventType === "background") {
+                backgroundNames.push((event as BackgroundEvent).filename);
+            }
+        });
+        return backgroundNames;
+    }
+
+    getAudioFilename(): string {
+        return this.general.audioFilename;
     }
 }
 
