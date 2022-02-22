@@ -26,7 +26,7 @@ class Replay {
     public life_bar = "";
     public timestamp = new Date(0);
     public replayLength = 0;
-    public replayData = new ReplayData("");
+    public replayData = new ReplayData();
     public unknown = 0;
 
     async toBlob(): Promise<Blob> {
@@ -37,19 +37,25 @@ class Replay {
         });
     }
 
-    public get replayNodes() {
-        return this.replayData.nodes;
+    public static async FromBuffer(buffer: Buffer) {
+        return await read(buffer);
     }
 
-    public set replayNodes(nodesArray: ReplayNode[]) {
-        this.replayData.nodes = nodesArray;
+    public static async FromArrayBuffer(arrayBuffer: ArrayBuffer) {
+        const buffer = Buffer.alloc(arrayBuffer.byteLength);
+        const view = new Uint8Array(arrayBuffer);
+        for (let i = 0; i < buffer.length; ++i) {
+            buffer[i] = view[i];
+        }
+
+        return await read(buffer);
     }
 }
 
 /* Parse Buffer to Replay Objcet */
 function read(buff: Buffer) {
     let offset = 0x00;
-    return new Promise<Replay>((resolve, reject) => {
+    return new Promise<Replay>(async (resolve, reject) => {
         let replay = new Replay();
 
         try {
@@ -79,17 +85,14 @@ function read(buff: Buffer) {
             replay.replayLength = readInteger(buff);
 
             if (replay.replayLength != 0) {
-                readCompressed(buff, replay.replayLength, (result: string, err: any) => {
-                    //console.log("LZMA Read: ", result);
-                    replay.replayData = new ReplayData(result);
-                    replay.unknown = Number(readLong(buff));
-                });
+                const replayDataString = await readCompressedPromise(buff, replay.replayLength);
+                replay.replayData = new ReplayData(replayDataString);
+                replay.unknown = Number(readLong(buff));
             }
 
             resolve(replay);
         } catch (err) {
-            console.log(err);
-            reject(new Replay());
+            reject(null);
         }
     });
 
@@ -129,6 +132,18 @@ function read(buff: Buffer) {
     function readCompressed(buffer: Buffer, length: number, callback: Function) {
         offset += length;
         return length != 0 ? lzma.decompress(buffer.slice(offset - length, offset), callback) : callback(null, null);
+    }
+
+    function readCompressedPromise(buffer: Buffer, length: number) {
+        return new Promise<string>((resolve, reject) => {
+            readCompressed(buffer, length, (result: string, err: Error) => {
+                if (result !== undefined) {
+                    resolve(result);
+                } else {
+                    reject(err);
+                }
+            });
+        });
     }
 }
 
@@ -225,4 +240,4 @@ function write(replay: Replay) {
     }
 }
 
-export { Replay, read, write };
+export { Replay, ReplayNode, ReplayData };

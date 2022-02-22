@@ -1,64 +1,124 @@
 import { ReplayNode } from "./ReplayNodes";
 
-class ReplayData {
-    nodes = new Array<ReplayNode>();
+class ReplayData extends Array<ReplayNode> {
+    constructor();
     constructor(replayData: string);
     constructor(replayData: ReplayNode[]);
-    constructor(replayData: string | ReplayNode[]) {
+    constructor(replayData?: string | ReplayNode[]) {
+        if (replayData === undefined) {
+            super(); // <-- is it necesarry?
+            return;
+        }
+
+        let nodes: ReplayNode[] = [];
         if (typeof replayData === "string") {
-            this.nodes = replayData
+            const parsedReplayData = replayData
                 .split(",")
                 .slice(0, -1) // there's an extra ',' on the last part of the replaydata string
-                .map((row) => row.split("|").map(Number))
-                .map((row) => new ReplayNode(row[0], row[1], row[2], row[3]));
+                .map((row) => row.split("|").map(Number));
+
+            let accumulatedTime = 0;
+
+            for (let i = 0; i < parsedReplayData.length; i++) {
+                const data = parsedReplayData[i];
+                const [deltaTime, x, y, numericKeys] = data;
+
+                accumulatedTime += deltaTime;
+                nodes.push(new ReplayNode(accumulatedTime, deltaTime, x, y, numericKeys));
+            }
         } else if (replayData instanceof ReplayNode) {
-            this.nodes = replayData;
+            nodes = replayData;
+        }
+
+        super(nodes.length);
+        for (let i = 0; i < nodes.length; i++) {
+            this[i] = nodes[i];
         }
     }
 
     toString() {
         let str = "";
-        this.nodes.forEach((node) => {
+        this.forEach((node) => {
             str += `${node.deltaTime}|${node.x}|${node.y}|${node.keypress},`;
         });
 
         return str;
     }
 
-    // JS array operators/methods
-    concat(...replayData: ReplayData[]) {
-        replayData.forEach((data) => {
-            this.nodes.concat(data.nodes);
-        });
+    getMultipleNear(timestamp: number, prevCount: number = 0, nextCount: number = 0) {
+        const index = this.getIndexNear(timestamp);
+
+        const startIndex = Math.max(index - prevCount, 0);
+        const endIndex = Math.min(index + nextCount + 1, this.length);
+
+        return this.slice(startIndex, endIndex);
     }
 
-    fill(replayNode: ReplayNode, start: number = 0, end: number = this.nodes.length) {
-        this.nodes.fill(replayNode, start, end);
-    }
-
-    filter(predicate: (value: ReplayNode) => boolean, start: number = 0, end: number = this.nodes.length - 1) {
-        const result = [];
-        for (let i = start; i <= end; i++) {
-            predicate(this.nodes[i]) && result.push(this.nodes[i]);
-        }
-        this.nodes = result;
-    }
-
-    getReplayData(timestamp: number, prevCount: number = 0, nextCount: number = 0) {
-        let accumulatedTime = 0;
-        let index = 0;
-        while (true) {
-            accumulatedTime += this.nodes[index].deltaTime;
-            if (accumulatedTime >= timestamp) {
-                break;
+    getIndexNear(timestamp: number) {
+        let mid;
+        let lo = 0;
+        let hi = this.length - 1;
+        while (hi - lo > 1) {
+            mid = Math.floor((lo + hi) / 2);
+            if (this[mid].timestamp < timestamp) {
+                lo = mid;
+            } else {
+                hi = mid;
             }
-            index++;
+        }
+        if (timestamp - this[lo].timestamp <= this[hi].timestamp - timestamp) {
+            return lo;
+        }
+        return hi;
+    }
+
+    getNear(timestamp: number) {
+        return this[this.getIndexNear(timestamp)];
+    }
+
+    getPositionAt(timestamp: number, interpolate = false): [number, number] {
+        const index = this.getIndexNear(timestamp);
+        const node = this[index];
+
+        if (!interpolate) {
+            return [node.x, node.y];
         }
 
-        const startIndex = index - prevCount;
-        const endIndex = index + nextCount + 1;
+        if (node.timestamp === timestamp) {
+            return [node.x, node.y];
+        }
 
-        return this.nodes.slice(startIndex, endIndex);
+        if (node.timestamp < timestamp) {
+            const nextNode = this[index + 1];
+
+            if (!nextNode) {
+                return [node.x, node.y];
+            }
+
+            const deltaTime = nextNode.deltaTime;
+            const deltaX = nextNode.x - node.x;
+            const deltaY = nextNode.y - node.y;
+
+            const timeDiff = timestamp - node.timestamp;
+            const timeRatio = timeDiff / deltaTime;
+
+            return [node.x + deltaX * timeRatio, node.y + deltaY * timeRatio];
+        } else {
+            const prevNode = this[index - 1];
+
+            if (!prevNode) {
+                return [node.x, node.y];
+            }
+
+            const deltaTime = node.deltaTime;
+            const deltaX = node.x - prevNode.x;
+            const deltaY = node.y - prevNode.y;
+
+            const timeDiff = timestamp - prevNode.timestamp;
+            const timeRatio = timeDiff / deltaTime;
+
+            return [prevNode.x + deltaX * timeRatio, prevNode.y + deltaY * timeRatio];
+        }
     }
 }
 

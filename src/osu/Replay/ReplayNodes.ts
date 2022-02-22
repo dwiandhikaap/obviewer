@@ -7,15 +7,17 @@ enum Keypress {
 }
 
 class ReplayNode {
+    timestamp: number;
     deltaTime: number;
     x: number;
     y: number;
     keypress: number;
-    constructor(deltaTime: number, x: number, y: number, numericKeys: number) {
+    constructor(timestamp: number, deltaTime: number, x: number, y: number, numericKeys: number) {
         this.deltaTime = deltaTime;
         this.x = x;
         this.y = y;
         this.keypress = numericKeys;
+        this.timestamp = timestamp;
     }
 
     translate(x: number, y: number) {
@@ -44,19 +46,9 @@ class ReplayNode {
         keys.forEach((key) => (this.keypress |= key));
     }
 
-    // TODO: i forgot what the function below does and why did i make it in the first place !??!?!
-    /* removeKeypress(key?: Keypress, ...keys: Keypress[]) {
-        if (key === undefined && keys.length === 0) {
-            this.keypress = 0;
-            return;
-        }
-
-        this.keypress ^= key;
-        keys.forEach((key) => {
-            console.log(key);
-            this.keypress ^= key;
-        });
-    } */
+    removeKeypress(key: Keypress) {
+        this.keypress = this.keypress & ~(this.keypress & key);
+    }
 }
 
 export { ReplayNode, Keypress };
