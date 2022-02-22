@@ -190,14 +190,14 @@ function calculateSliderVertices(points: Vector2[], radius: number) {
     let indicesOffset = 0;
 
     const quads = calculateQuad(points, radius, indicesOffset);
-    positions.push(...quads.positions);
-    indices.push(...quads.indices);
+    positions = positions.concat(quads.positions);
+    indices = indices.concat(quads.indices);
 
     indicesOffset += positions.length / 3;
 
     const joins = calculateJoins(points, radius, indicesOffset);
-    positions.push(...joins.positions);
-    indices.push(...joins.indices);
+    positions = positions.concat(joins.positions);
+    indices = indices.concat(joins.indices);
 
     for (let i = 0; i < positions.length; i += 2) {
         vertX.push(positions[i]);
