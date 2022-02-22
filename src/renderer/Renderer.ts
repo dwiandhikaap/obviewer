@@ -1,10 +1,12 @@
 import * as PIXI from "pixi.js";
 import { Texture } from "pixi.js";
 import { Beatmap } from "../osu/Beatmap/Beatmap";
+import { Replay } from "../osu/Replay/Replay";
 import { AssetsLoader } from "./Assets/Assets";
 import { SliderTextureGenerator } from "./Drawable/HitObject/SliderTextureGenerator";
 import { Background } from "./Layers/Background";
 import { BeatmapField } from "./Layers/BeatmapField";
+import { ReplayField } from "./Layers/ReplayField";
 
 class Renderer {
     public pixi: PIXI.Application;
@@ -24,10 +26,12 @@ class Renderer {
 
         this.background.update(value);
         this.beatmapField.update(value);
+        this.replayField.update(value);
     }
 
     private background: Background;
     private beatmapField: BeatmapField;
+    private replayField: ReplayField;
 
     constructor(querySelector: string) {
         // Set PIXI Application
@@ -45,11 +49,10 @@ class Renderer {
         this.ticker.stop();
 
         // Set TextureRenderer Renderer
-        // TODO: in case there are many TextureRenderers that need to be set, create a class that does that
         SliderTextureGenerator.setRenderer(this.pixi.renderer as PIXI.Renderer);
 
         // Set Background
-        this.background = new Background(this.pixi, { brightness: 0.2, fit: "horizontal" });
+        this.background = new Background(this.pixi, { brightness: 0.25, fit: "horizontal" });
         this.background.interactiveChildren = false;
         this.pixi.stage.addChild(this.background);
 
@@ -57,6 +60,11 @@ class Renderer {
         this.beatmapField = new BeatmapField(this.pixi);
         this.beatmapField.interactiveChildren = false;
         this.pixi.stage.addChild(this.beatmapField);
+
+        // Set ReplayField
+        this.replayField = new ReplayField(this.pixi);
+        this.replayField.interactiveChildren = false;
+        this.pixi.stage.addChild(this.replayField);
 
         const view = document.querySelector(querySelector);
         view && view.appendChild(this.pixi.view);
@@ -69,13 +77,19 @@ class Renderer {
         // Load Assets
         await AssetsLoader.load();
         this.assets = AssetsLoader.assets;
-
-        const bgTexture = this.assets["bg2"].texture || Texture.EMPTY;
-        this.background.setImage(bgTexture);
     }
 
     loadBeatmap(beatmap: Beatmap) {
         this.beatmapField.loadBeatmap(beatmap);
+    }
+
+    loadReplay(replay: Replay) {
+        this.replayField.loadReplay(replay);
+    }
+
+    setBackground(image: HTMLImageElement) {
+        const texture = Texture.from(image);
+        this.background.setImage(texture);
     }
 }
 

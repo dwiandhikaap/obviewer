@@ -1,9 +1,8 @@
 import * as $ from "jQuery";
+import { Logger } from "./logger/Logger";
 import { Beatmap } from "./osu/Beatmap/Beatmap";
-import { Mod } from "./osu/Replay/Mods";
-import { Replay } from "./osu/Replay/Replay";
-import { ReplayNode } from "./osu/Replay/ReplayNodes";
-import { ReplayUtility } from "./osu/Replay/ReplayUtility";
+import { Mod } from "./osu/Mods/Mods";
+import { Replay, ReplayNode } from "./osu/Replay/Replay";
 import { ReplayTale } from "./ReplayTale/ReplayTale";
 
 let replay = new Replay();
@@ -16,64 +15,159 @@ $("input#replayFile:file").on("change", function () {
     let reader = new FileReader();
     reader.onload = async function () {
         let arrayBuffer = this.result as ArrayBuffer;
-        let parser = new ReplayUtility();
-        replay = await parser.parseFromBytes(arrayBuffer);
+        replay = await Replay.FromArrayBuffer(arrayBuffer);
         console.log(replay);
     };
 
-    console.log(typeof $(this).prop("files"));
     reader.readAsArrayBuffer($(this).prop("files")[0]);
 });
 
 let direction = 1;
 
-$("input#mapsFile:file").on("change", function () {
+$("input#mapsFile:file").on("change", async function () {
     let reader = new FileReader();
     reader.onload = async function () {
         let resultString = this.result as string;
         const map = new Beatmap(resultString);
         console.log(map);
 
-        replaytale.loadBeatmap(map);
-
-        /* replaytale.timestamp = 130000;
-        setInterval(() => {
-            replaytale.timestamp += direction * 50;
-            if (replaytale.timestamp >= 2000) {
-                direction = -1;
-            }
-            if (replaytale.timestamp <= 100) {
-                direction = 1;
-            }
-        }, 50); */
-        //await wait(2000);
-        replaytale.playbackRate = 1;
-        //replaytale.seek(30000);
-        replaytale.seek(122000);
-        replaytale.start();
-        /* await wait();
-        replaytale.pause();
-        await wait(2000);
-        replaytale.seek(10000); */
+        return map;
     };
 
-    //console.log(typeof $(this).prop("files"));
-    reader.readAsText($(this).prop("files")[0]);
+    const files = $(this).prop("files");
+
+    let audioFileName: string = "";
+    let backgroundFile: string = "";
+
+    let audioFile: HTMLAudioElement | undefined = undefined;
+    let backgroundImage: HTMLImageElement | undefined = undefined;
+    let beatmap: Beatmap | undefined = undefined;
+
+    for (const file of files) {
+        if (file.name.endsWith(".osu")) {
+            const text = await file.text();
+            beatmap = new Beatmap(text);
+            console.log(beatmap);
+
+            audioFileName = beatmap.getAudioFilename();
+            backgroundFile = beatmap.getBackgroundFileNames()[0];
+
+            break;
+        }
+    }
+
+    for (const file of files) {
+        if (file.name === audioFileName) {
+            const audioFileBuffer = await file.arrayBuffer();
+            const audioFileBlob = new Blob([audioFileBuffer], { type: "audio/mp3" });
+            const audioFileUrl = URL.createObjectURL(audioFileBlob);
+
+            // create audio file
+            audioFile = new Audio(audioFileUrl);
+        } else if (file.name === backgroundFile) {
+            const backgroundFileBuffer = await file.arrayBuffer();
+            const fileExt = backgroundFile.split(".").pop();
+            const backgroundFileBlob = new Blob([backgroundFileBuffer], { type: `image/${fileExt}` });
+            const backgroundFileUrl = URL.createObjectURL(backgroundFileBlob);
+
+            // create background image
+            backgroundImage = new Image();
+            backgroundImage.src = backgroundFileUrl;
+
+            const backgroundImageLoaded = new Promise((resolve) => {
+                backgroundImage!.onload = resolve;
+            });
+
+            await backgroundImageLoaded;
+        }
+    }
+
+    beatmap && replaytale.loadBeatmap(beatmap, audioFile, backgroundImage);
+    if (replay === undefined) {
+        throw new Error("replay is undefined");
+    }
+    replaytale.loadReplay(replay);
+    //replaytale.seek(0);
+    replaytale.playbackRate = 1;
+    replaytale.start();
+});
+
+$("body").on("keypress", async function (e) {
+    // check spacebar
+    if (e.key === " ") {
+        if (replaytale.isPaused) {
+            replaytale.start();
+        } else {
+            replaytale.stop();
+        }
+    }
 });
 
 $("button#replay-download").on("click", async function () {
-    const parser = new ReplayUtility();
     console.log(replay.replayData);
     console.log(replay.mods.list);
 
-    const replayNode = new ReplayNode(300, 100, 100, 15);
+    const replayNode = new ReplayNode(0, 300, 100, 100, 15);
     replay.playerName = "siveroo??!";
     replay.mods.enable(Mod.NoFail);
     //replay.mods.enable(Mod.Relax);
     replay.mods.enable(Mod.DoubleTime);
 
-    replay.replayNodes.forEach((node) => node.translate(rand(-15, 15), rand(-15, 15)));
+    //replay.replayData.forEach((node) => node.translate(rand(-15, 15), rand(-15, 15)));
     //parser.saveReplayFile(replay, "pog.osr");
+});
+
+// temporary testing lol
+$("button#startTest").on("click", async function (e) {
+    e.preventDefault();
+    this.style.backgroundColor = "lightgreen";
+
+    this.textContent = "Parsing Replay...";
+
+    const replayBuffer = await fetch(`/dist/assets/test/replay.osr`).then((ah) => ah.arrayBuffer());
+    replay = await Replay.FromArrayBuffer(replayBuffer);
+
+    this.textContent = "Parsing Beatmap...";
+
+    const music = new Audio("/dist/assets/test/audio.mp3");
+    const map = await fetch(`/dist/assets/test/map.osu`).then((ah) => ah.text());
+
+    const mapBeatmap = new Beatmap(map);
+
+    this.textContent = "Loading Image...";
+
+    const background = new Image();
+    background.src = `/dist/assets/test/bg.jpg`;
+
+    const backgroundImageLoaded = new Promise((resolve) => {
+        background!.onload = resolve;
+    });
+
+    await backgroundImageLoaded;
+
+    try {
+        if (replay && mapBeatmap && music) {
+            this.textContent = "Loading Replay";
+            console.log(replay);
+
+            replaytale.loadReplay(replay);
+
+            this.textContent = "Loading Beatmap";
+
+            replaytale.loadBeatmap(mapBeatmap, music, background);
+
+            this.textContent = "Starting Replay";
+            replaytale.playbackRate = 1;
+            replaytale.start();
+        } else {
+            this.textContent = "Failed Loading Game";
+
+            console.log(replay, mapBeatmap, music);
+        }
+    } catch (error) {
+        this.textContent = error as string;
+        console.error(error);
+    }
 });
 
 function rand(min: number, max: number) {
@@ -88,3 +182,7 @@ async function wait(time: number = 1000) {
         }, time);
     });
 }
+
+const logger = Logger.view;
+const loggerContainer = document.getElementById("logger") as HTMLDivElement;
+loggerContainer.appendChild(logger);

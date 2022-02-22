@@ -16,7 +16,10 @@
         ["spinner-clear", "assets/osu/spinner-clear.png"],
         ["spinner-metre", "assets/osu/spinner-metre.png"],
         ["spinner-middle", "assets/osu/spinner-middle.png"],
-        ["spinner-spin", "assets/osu/spinner-spin.png"]
+        ["spinner-spin", "assets/osu/spinner-spin.png"],
+
+        ["main-cursor", "assets/osu/cursor.png"],
+        ["cursornode", "assets/replay-tale/cursornode.png"]
     ],
     "async": []
 }

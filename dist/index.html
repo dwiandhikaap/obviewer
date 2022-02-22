@@ -5,13 +5,15 @@
         <title>ReplayTale - Replay Drawing Tool for osu! standard</title>
     </head>
     <body>
-        <input type="file" id="replayFile" name="replayFile" />
+        <input type="file" id="replayFile" name="replayFile" accept=".osr" />
         <br />
 
-        <input type="file" id="mapsFile" name="mapsFile" />
+        <input type="file" id="mapsFile" name="mapsFile" multiple />
         <br />
         <button id="replay-download">Download Replay</button>
+        <button id="startTest" style="width: 160px; height: 80px">Start Test</button>
         <div id="main-canvas"></div>
+        <div id="logger"></div>
         <script src="bundle.js"></script>
     </body>
 </html>
