@@ -1,4 +1,3 @@
-import { Logger } from "../logger/Logger";
 import { Beatmap } from "../osu/Beatmap/Beatmap";
 import { Replay } from "../osu/Replay/Replay";
 import { AudioHandler } from "../renderer/AudioHandler";
@@ -69,12 +68,10 @@ class ReplayTale {
             this.audioHandler.seekAudio("beatmap", this.timestamp / 1000);
         }
 
-        Logger.log("Time Diff", timeDiff);
-
         requestAnimationFrame(this.loop);
     };
 
-    start() {
+    play() {
         this.isPaused = false;
         this.lastFrameTimestamp = performance.now();
         this.audioHandler.playAudio("beatmap");
@@ -83,7 +80,7 @@ class ReplayTale {
         this.loop(this.lastFrameTimestamp);
     }
 
-    stop() {
+    pause() {
         this.isPaused = true;
         this.audioHandler.pauseAudio("beatmap");
     }

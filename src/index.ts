@@ -89,16 +89,16 @@ $("input#mapsFile:file").on("change", async function () {
     replaytale.loadReplay(replay);
     //replaytale.seek(0);
     replaytale.playbackRate = 1;
-    replaytale.start();
+    replaytale.play();
 });
 
 $("body").on("keypress", async function (e) {
     // check spacebar
     if (e.key === " ") {
         if (replaytale.isPaused) {
-            replaytale.start();
+            replaytale.play();
         } else {
-            replaytale.stop();
+            replaytale.pause();
         }
     }
 });
@@ -158,7 +158,7 @@ $("button#startTest").on("click", async function (e) {
 
             this.textContent = "Starting Replay";
             replaytale.playbackRate = 1;
-            replaytale.start();
+            replaytale.play();
         } else {
             this.textContent = "Failed Loading Game";
 
