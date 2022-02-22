@@ -22,7 +22,7 @@ class BackgroundEvent implements Event {
         const [filename, xOffset, yOffset] = eventParams;
 
         this.startTime = startTime;
-        this.filename = filename;
+        this.filename = filename.replace(/^"(.*)"$/, "$1");
         this.xOffset = parseInt(xOffset);
         this.yOffset = parseInt(yOffset);
     }
@@ -39,7 +39,7 @@ class VideoEvent implements Event {
         const [filename, xOffset, yOffset] = eventParams;
 
         this.startTime = startTime;
-        this.filename = filename;
+        this.filename = filename.replace(/^"(.*)"$/, "$1");
         this.xOffset = parseInt(xOffset);
         this.yOffset = parseInt(yOffset);
     }
@@ -79,4 +79,4 @@ class Events {
     }
 }
 
-export { Events };
+export { Events, BackgroundEvent, VideoEvent, BreakEvent };
