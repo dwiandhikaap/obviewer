@@ -3,8 +3,6 @@ import { PathApproximator } from "./PathApproximator";
 import { Vector2 } from "./Vector2";
 
 export class PathHelper {
-    //private static ANGLE_THRESHOLD = Math.PI / 8;
-
     public static CalculateLength(pathPoints: readonly Vector2[]): number {
         let length = 0;
 
@@ -36,7 +34,6 @@ export class PathHelper {
             const distance = Vector2.Distance(prev, current);
 
             if (length + distance > maxLength) {
-                // interpolate between current and previous point
                 const t = (maxLength - length) / distance;
                 const interp = new Vector2(prev[0] * (1 - t) + current[0] * t, prev[1] * (1 - t) + current[1] * t);
 
@@ -67,7 +64,10 @@ export class PathHelper {
             const dist = Vector2.Distance(prev, current);
 
             if (length + dist > expectedLength) {
-                result = Vector2.LinearInterpolation(prev, current, time);
+                const t = (expectedLength - length) / dist;
+
+                result = Vector2.LinearInterpolation(prev, current, t);
+
                 break;
             }
 
