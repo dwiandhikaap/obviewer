@@ -66,25 +66,20 @@ class Background extends Container {
 
         switch (this.fit) {
             case "horizontal": {
-                const scale = this.canvasWidth / this.backgroundSprite.texture.width;
+                const scale = this.canvasWidth / texture.width;
                 this.backgroundSprite.scale.set(scale);
                 break;
             }
 
             case "vertical": {
-                const scale = this.canvasHeight / this.backgroundSprite.texture.height;
+                const scale = this.canvasHeight / texture.height;
                 this.backgroundSprite.scale.set(scale);
                 break;
             }
         }
     }
 
-    // test for timestamp ticker thingy
-    update(timestamp: number) {
-        const brightness = Math.abs(Math.sin(timestamp / 1000));
-        //this.brightness = brightness;
-        //console.log(timestamp);
-    }
+    update(timestamp: number) {}
 }
 
 export { Background };
