@@ -10,8 +10,6 @@ class HitCircleDrawable extends Container {
     private circle: Container;
     private approachCircle: Sprite;
 
-    private assets = AssetsLoader.assets;
-
     constructor(private hitCircle: HitCircle, difficulty: Difficulty, private renderScale: number) {
         super();
 
@@ -28,6 +26,7 @@ class HitCircleDrawable extends Container {
         this.addChild(this.approachCircle);
 
         this.position.set(x, y);
+        this.visible = false;
     }
 
     private createCircle() {
@@ -74,8 +73,9 @@ class HitCircleDrawable extends Container {
     }
 
     update(timestamp: number) {
-        this.visible = this.hitCircle.isVisibleAt(timestamp);
-        if (!this.visible) return;
+        const visible = this.hitCircle.isVisibleAt(timestamp);
+        this.visible = visible;
+        if (!visible) return;
 
         this.hitCircle.updateState(timestamp, false);
 
@@ -83,8 +83,9 @@ class HitCircleDrawable extends Container {
 
         this.circle.alpha = opacity.value;
 
-        this.approachCircle.scale.set(approachCircleScale.value, approachCircleScale.value);
         this.approachCircle.alpha = approachCircleOpacity.value;
+        this.approachCircle.width = approachCircleScale.value * this.radius * 2;
+        this.approachCircle.height = approachCircleScale.value * this.radius * 2;
     }
 }
 

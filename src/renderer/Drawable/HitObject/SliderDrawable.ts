@@ -46,6 +46,7 @@ class SliderDrawable extends Container {
         this.addChild(this.sliderApproachCircle);
 
         this.position.set(x, y);
+        this.visible = false;
     }
 
     private createSliderBody() {
@@ -181,8 +182,9 @@ class SliderDrawable extends Container {
     }
 
     update(timestamp: number) {
-        this.visible = this.slider.isVisibleAt(timestamp);
-        if (!this.visible) return;
+        const visible = this.slider.isVisibleAt(timestamp);
+        this.visible = visible;
+        if (!visible) return;
 
         this.slider.updateState(timestamp, false);
 
@@ -198,7 +200,8 @@ class SliderDrawable extends Container {
         } = this.slider.state;
 
         this.sliderApproachCircle.alpha = approachCircleOpacity.value;
-        this.sliderApproachCircle.transform.scale.set(approachCircleScale.value);
+        this.sliderApproachCircle.width = approachCircleScale.value * this.radius * 2;
+        this.sliderApproachCircle.height = approachCircleScale.value * this.radius * 2;
 
         this.alpha = opacity.value;
 
@@ -207,6 +210,7 @@ class SliderDrawable extends Container {
                 (progressPosition[0] - this.slider.getStackedStartPos()[0]) * this.renderScale,
                 (progressPosition[1] - this.slider.getStackedStartPos()[1]) * this.renderScale,
             ];
+
             this.sliderBall.transform.position.set(ballPos[0], ballPos[1]);
             this.sliderBall.alpha = ballOpacity.value;
 

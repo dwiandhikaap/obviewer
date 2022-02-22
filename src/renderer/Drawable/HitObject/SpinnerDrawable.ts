@@ -37,6 +37,8 @@ class SpinnerDrawable extends Container {
         this.addChild(this.spinnerCircle);
         this.addChild(this.spinnerSpin);
         this.addChild(this.spinnerCounter);
+
+        this.visible = false;
     }
 
     private createSpinnerBackground() {
@@ -153,8 +155,9 @@ class SpinnerDrawable extends Container {
     }
 
     update(timestamp: number) {
-        this.visible = this.spinner.isVisibleAt(timestamp);
-        if (!this.visible) return;
+        const visible = this.spinner.isVisibleAt(timestamp);
+        this.visible = visible;
+        if (!visible) return;
 
         this.spinner.updateState(timestamp, false);
 
