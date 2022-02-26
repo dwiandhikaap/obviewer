@@ -3,7 +3,7 @@ enum Keypress {
     M2 = 1 << 1,
     K1 = 1 << 2,
     K2 = 1 << 3,
-    Smoke = 1 << 4,
+    SMOKE = 1 << 4,
 }
 
 class ReplayNode {
@@ -35,6 +35,26 @@ class ReplayNode {
 
     isPressing() {
         return this.keypress > 0;
+    }
+
+    isPressingM1() {
+        return this.keypress & Keypress.M1;
+    }
+
+    isPressingM2() {
+        return this.keypress & Keypress.M2;
+    }
+
+    isPressingK1() {
+        return this.keypress & Keypress.K1;
+    }
+
+    isPressingK2() {
+        return this.keypress & Keypress.K2;
+    }
+
+    isPressingSmoke() {
+        return this.keypress & Keypress.SMOKE;
     }
 
     setKeypress(...keys: Keypress[]) {
