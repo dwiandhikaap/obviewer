@@ -29,6 +29,7 @@ interface HitObjectConfig {
     hitSound: number;
     hitSample?: Hitsample;
     comboCount: number;
+    objectIndex: number;
     difficulty: Difficulty;
 }
 
@@ -41,6 +42,7 @@ class HitObject {
     hitSound: number;
     hitSample?: Hitsample;
     comboCount: number;
+    objectIndex: number;
 
     colour: string = "#ffffff";
     difficulty: Difficulty;
@@ -49,7 +51,7 @@ class HitObject {
     stackOffset: number = 0;
 
     constructor(hitObjectConfig: HitObjectConfig) {
-        const { startPos, endPos, startTime, endTime, type, hitSound, hitSample, comboCount, difficulty } =
+        const { startPos, endPos, startTime, endTime, type, hitSound, hitSample, comboCount, difficulty, objectIndex } =
             hitObjectConfig;
         this.startPos = startPos;
         this.endPos = endPos;
@@ -60,6 +62,7 @@ class HitObject {
         this.hitSample = hitSample;
         this.difficulty = difficulty;
 
+        this.objectIndex = objectIndex;
         this.comboCount = comboCount;
     }
 
@@ -92,7 +95,7 @@ class HitObject {
     }
 
     isVisibleAt(time: number) {
-        return time >= this.startTime - this.difficulty.preEmpt && time <= this.endTime + 150;
+        return time >= this.startTime - this.difficulty.getPreempt() && time <= this.endTime + 150;
     }
 
     // How many colour(s) are skipped on the new combo

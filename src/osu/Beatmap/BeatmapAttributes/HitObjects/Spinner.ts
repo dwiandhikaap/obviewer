@@ -23,30 +23,12 @@ class Spinner extends HitObject {
     private initializeState(): SpinnerState {
         const opacity = new Spannable();
 
-        const appearTime = this.startTime - this.difficulty.preEmpt;
+        const appearTime = this.startTime - this.difficulty.getPreempt();
         const dissapearTime = this.endTime + 150;
 
         opacity.addSpan(appearTime, this.startTime, 0, 1);
         opacity.addSpan(this.startTime, this.endTime, 1, 1);
         opacity.addSpan(this.endTime, dissapearTime, 1, 0);
-
-        // mocks spinning action (for demo)
-
-        /* const meterSpan = new Spannable();
-        const quarterDuration = (this.endTime - this.startTime) / 4;
-        meterSpan.addSpan(this.startTime, this.startTime + quarterDuration, 0, 0);
-        meterSpan.addSpan(this.startTime + quarterDuration, this.startTime + quarterDuration * 2, 0.33, 0.33);
-        meterSpan.addSpan(this.startTime + quarterDuration * 2, this.startTime + quarterDuration * 3, 0.66, 0.66);
-        meterSpan.addSpan(this.startTime + quarterDuration * 3, this.startTime + quarterDuration * 4, 1, 1);
-
-        const rpmSpan = new Spannable();
-        rpmSpan.addSpan(this.startTime, this.startTime + quarterDuration, 0, 470);
-        rpmSpan.addSpan(this.startTime + quarterDuration, this.startTime + quarterDuration * 2, 470, 445);
-        rpmSpan.addSpan(this.startTime + quarterDuration * 2, this.endTime, 447, 477);
-
-        const rotationSpan = new Spannable();
-        rotationSpan.addSpan(this.startTime + 100, this.startTime + quarterDuration, 0, 360);
-        rotationSpan.addSpan(this.startTime + quarterDuration, this.endTime, 360, 360 * 10); */
 
         return {
             rpm: 0,

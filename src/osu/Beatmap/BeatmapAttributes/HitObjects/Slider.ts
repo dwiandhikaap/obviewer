@@ -2,6 +2,7 @@ import { MathHelper } from "../../../../math/MathHelper";
 import { Path } from "../../../../math/Path";
 import { Spannable } from "../../../../math/Spannable";
 import { Vector2 } from "../../../../math/Vector2";
+import { Mod } from "../../../Mods/Mods";
 import { TimingPoints } from "../TimingPoints";
 import { HitObject, HitObjectConfig } from "./HitObject";
 
@@ -170,7 +171,7 @@ class Slider extends HitObject {
             const tickOpacity = new Spannable(0);
             const tickFadeStart =
                 i === 1
-                    ? this.startTime - this.difficulty.preEmpt + this.difficulty.fadeIn
+                    ? this.startTime - this.difficulty.getPreempt() + this.difficulty.fadeIn
                     : this.startTime + slideDuration * (i - 2);
             tickOpacity.addSpan(tickFadeStart, tickFadeStart + 250, 0, 1);
             tickOpacity.addSpan(tickFadeStart + 250, reverseTime - 1, 1, 1);
@@ -185,14 +186,20 @@ class Slider extends HitObject {
 
     private initializeState(): SliderState {
         const diff = this.difficulty;
-        const { preEmpt, fadeIn } = diff;
+        const fadeIn = diff.fadeIn;
+        const preempt = diff.getPreempt();
 
         const opacity: Spannable = new Spannable();
-        const appearTime = this.startTime - preEmpt;
+        const appearTime = this.startTime - preempt;
 
-        opacity.addSpan(appearTime, appearTime + fadeIn, 0, 1);
-        opacity.addSpan(appearTime + fadeIn, this.endTime, 1, 1);
-        opacity.addSpan(this.endTime, this.endTime + 150, 1, 0);
+        if (diff.mods.contains(Mod.Hidden)) {
+            opacity.addSpan(appearTime, appearTime + fadeIn, 0, 1);
+            opacity.addSpan(appearTime + fadeIn, this.endTime, 1, 0);
+        } else {
+            opacity.addSpan(appearTime, appearTime + fadeIn, 0, 1);
+            opacity.addSpan(appearTime + fadeIn, this.endTime, 1, 1);
+            opacity.addSpan(this.endTime, this.endTime + 150, 1, 0);
+        }
 
         const headOpacity: Spannable = new Spannable();
         headOpacity.addSpan(this.startTime, this.startTime + 150, 1, 0);
@@ -201,10 +208,19 @@ class Slider extends HitObject {
         ballOpacity.addSpan(this.startTime, this.endTime, 1, 1);
 
         const approachCircleOpacity: Spannable = new Spannable(0);
-        approachCircleOpacity.addSpan(appearTime, appearTime + Math.min(fadeIn * 2, preEmpt), 0, 1);
-        approachCircleOpacity.addSpan(appearTime + Math.min(fadeIn * 2, preEmpt), this.startTime, 1, 1);
+
+        if (diff.mods.contains(Mod.Hidden)) {
+            if (this.objectIndex === 0) {
+                approachCircleOpacity.addSpan(0, Math.min(fadeIn * 2, preempt), 0, 1);
+                approachCircleOpacity.addSpan(Math.min(fadeIn * 2, preempt), Math.min(fadeIn * 2, preempt) * 2, 1, 0);
+            }
+        } else {
+            approachCircleOpacity.addSpan(appearTime, appearTime + Math.min(fadeIn * 2, preempt), 0, 1);
+            approachCircleOpacity.addSpan(appearTime + Math.min(fadeIn * 2, preempt), this.startTime, 1, 1);
+        }
 
         const approachCircleScale: Spannable = new Spannable(1);
+
         approachCircleScale.addSpan(appearTime, this.startTime, 4, 1);
 
         return {
@@ -236,6 +252,8 @@ class Slider extends HitObject {
         this.state.ballOpacity.time = time;
         this.state.approachCircleOpacity.time = time;
         this.state.approachCircleScale.time = time;
+
+        this.reverseTicks.forEach((ticks) => (ticks.time = time));
 
         if (hit !== undefined) {
             this.state.hit = hit;
