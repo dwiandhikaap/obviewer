@@ -15,11 +15,11 @@ export class DrawableGenerator {
         renderScale: number
     ): HitObjectDrawable {
         if (hitObject.isHitCircle()) {
-            return new HitCircleDrawable(hitObject as HitCircle, difficulty, renderScale);
+            return new HitCircleDrawable(hitObject as HitCircle, renderScale);
         } else if (hitObject.isSlider()) {
-            return new SliderDrawable(hitObject as Slider, difficulty, renderScale);
+            return new SliderDrawable(hitObject as Slider, renderScale);
         } else {
-            return new SpinnerDrawable(hitObject as Spinner, difficulty, renderScale);
+            return new SpinnerDrawable(hitObject as Spinner, renderScale);
         }
     }
 }

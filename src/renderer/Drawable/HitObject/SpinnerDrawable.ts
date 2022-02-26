@@ -9,6 +9,116 @@ const SPINNER_BACKGROUND_SCALE = 1.05;
 const SPINNER_CIRCLE_SCALE = 0.8;
 const SPINNER_SPIN_SCALE = 0.175;
 
+function createSpinnerBackground(renderScale: number) {
+    const texture = AssetsLoader.getTexture("spinner-background");
+
+    const playfieldWidth = 512 * renderScale;
+    const playfieldHeight = 384 * renderScale;
+
+    const ratio =
+        SPINNER_BACKGROUND_SCALE *
+        (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+
+    const sprite = new Sprite(texture);
+    sprite.scale.set(ratio);
+    sprite.position.set(playfieldWidth / 2, playfieldHeight / 2);
+    sprite.anchor.set(0.5);
+    return sprite;
+}
+
+function createSpinnerMeter(renderScale: number) {
+    const texture = AssetsLoader.getTexture("spinner-metre");
+
+    const playfieldWidth = 512 * renderScale;
+    const playfieldHeight = 384 * renderScale;
+
+    const ratio =
+        SPINNER_BACKGROUND_SCALE *
+        (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+
+    const sprite = new Sprite(texture);
+    sprite.scale.set(ratio);
+    sprite.position.set(playfieldWidth / 2, playfieldHeight / 2);
+    sprite.anchor.set(0.5);
+
+    return sprite;
+}
+
+function createSpinnerMeterMask(renderScale: number) {
+    const texture = AssetsLoader.getTexture("spinner-metre");
+
+    const playfieldWidth = 512 * renderScale;
+    const playfieldHeight = 384 * renderScale;
+
+    const ratio =
+        SPINNER_BACKGROUND_SCALE *
+        (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+
+    const mask = new Sprite(Texture.WHITE);
+    mask.y = 0;
+    mask.x = 0;
+    mask.width = texture.width * ratio;
+    mask.height = texture.height * ratio;
+    mask.position.set(playfieldWidth / 2, playfieldHeight);
+    mask.anchor.set(0.5, 1.0);
+
+    return mask;
+}
+
+function createSpinnerCircle(renderScale: number) {
+    const texture = AssetsLoader.getTexture("spinner-circle");
+
+    const playfieldWidth = 512 * renderScale;
+    const playfieldHeight = 384 * renderScale;
+
+    const ratio =
+        SPINNER_CIRCLE_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+
+    const sprite = new Sprite(texture);
+    sprite.scale.set(ratio);
+    sprite.position.set(playfieldWidth / 2, playfieldHeight / 2);
+    sprite.anchor.set(0.5);
+
+    return sprite;
+}
+
+function createSpinnerCounter(renderScale: number) {
+    const style = new TextStyle({
+        fill: "white",
+        fontFamily: "Comic Sans MS",
+        fontSize: 18 * renderScale,
+        fontWeight: "600",
+        lineJoin: "round",
+        strokeThickness: 7,
+    });
+
+    const text = new Text("0 RPM", style);
+
+    const playfieldWidth = 512 * renderScale;
+    const playfieldHeight = 384 * renderScale;
+
+    text.position.set(playfieldWidth / 2, playfieldHeight);
+    text.anchor.set(0.5, 1.0);
+
+    return text;
+}
+
+function createSpinnerSpin(renderScale: number) {
+    const texture = AssetsLoader.getTexture("spinner-spin");
+
+    const playfieldWidth = 512 * renderScale;
+    const playfieldHeight = 384 * renderScale;
+
+    const ratio =
+        SPINNER_SPIN_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+
+    const sprite = new Sprite(texture);
+    sprite.scale.set(ratio);
+    sprite.position.set(playfieldWidth / 2, (playfieldHeight * 3) / 4);
+    sprite.anchor.set(0.5, 0.25);
+
+    return sprite;
+}
 class SpinnerDrawable extends Container {
     private spinnerBackground: Sprite;
     private spinnerCircle: Sprite;
@@ -19,16 +129,16 @@ class SpinnerDrawable extends Container {
 
     private spinnerMeterMask: Sprite;
 
-    constructor(private spinner: Spinner, difficulty: Difficulty, private renderScale: number) {
+    constructor(private spinner: Spinner, private renderScale: number) {
         super();
 
-        this.spinnerBackground = this.createSpinnerBackground();
-        this.spinnerMeter = this.createSpinnerMeter();
-        this.spinnerCircle = this.createSpinnerCircle();
-        this.spinnerSpin = this.createSpinnerSpin();
-        this.spinnerCounter = this.createSpinnerCounter();
+        this.spinnerBackground = createSpinnerBackground(renderScale);
+        this.spinnerMeter = createSpinnerMeter(renderScale);
+        this.spinnerCircle = createSpinnerCircle(renderScale);
+        this.spinnerSpin = createSpinnerSpin(renderScale);
+        this.spinnerCounter = createSpinnerCounter(renderScale);
 
-        this.spinnerMeterMask = this.createSpinnerMeterMask();
+        this.spinnerMeterMask = createSpinnerMeterMask(renderScale);
         this.spinnerMeter.mask = this.spinnerMeterMask;
 
         this.addChild(this.spinnerMeterMask);
@@ -39,119 +149,6 @@ class SpinnerDrawable extends Container {
         this.addChild(this.spinnerCounter);
 
         this.visible = false;
-    }
-
-    private createSpinnerBackground() {
-        const texture = AssetsLoader.getTexture("spinner-background");
-
-        const playfieldWidth = 512 * this.renderScale;
-        const playfieldHeight = 384 * this.renderScale;
-
-        const ratio =
-            SPINNER_BACKGROUND_SCALE *
-            (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
-
-        const sprite = new Sprite(texture);
-        sprite.scale.set(ratio);
-        sprite.position.set(playfieldWidth / 2, playfieldHeight / 2);
-        sprite.anchor.set(0.5);
-        return sprite;
-    }
-
-    private createSpinnerMeter() {
-        const texture = AssetsLoader.getTexture("spinner-metre");
-
-        const playfieldWidth = 512 * this.renderScale;
-        const playfieldHeight = 384 * this.renderScale;
-
-        const ratio =
-            SPINNER_BACKGROUND_SCALE *
-            (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
-
-        const sprite = new Sprite(texture);
-        sprite.scale.set(ratio);
-        sprite.position.set(playfieldWidth / 2, playfieldHeight / 2);
-        sprite.anchor.set(0.5);
-
-        return sprite;
-    }
-
-    private createSpinnerMeterMask() {
-        const texture = AssetsLoader.getTexture("spinner-metre");
-
-        const playfieldWidth = 512 * this.renderScale;
-        const playfieldHeight = 384 * this.renderScale;
-
-        const ratio =
-            SPINNER_BACKGROUND_SCALE *
-            (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
-
-        const mask = new Sprite(Texture.WHITE);
-        mask.y = 0;
-        mask.x = 0;
-        mask.width = texture.width * ratio;
-        mask.height = texture.height * ratio;
-        mask.position.set(playfieldWidth / 2, playfieldHeight);
-        mask.anchor.set(0.5, 1.0);
-
-        return mask;
-    }
-
-    private createSpinnerCircle() {
-        const texture = AssetsLoader.getTexture("spinner-circle");
-
-        const playfieldWidth = 512 * this.renderScale;
-        const playfieldHeight = 384 * this.renderScale;
-
-        const ratio =
-            SPINNER_CIRCLE_SCALE *
-            (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
-
-        const sprite = new Sprite(texture);
-        sprite.scale.set(ratio);
-        sprite.position.set(playfieldWidth / 2, playfieldHeight / 2);
-        sprite.anchor.set(0.5);
-
-        return sprite;
-    }
-
-    private createSpinnerCounter() {
-        const style = new TextStyle({
-            fill: "white",
-            fontFamily: "Comic Sans MS",
-            fontSize: 18 * this.renderScale,
-            fontWeight: "600",
-            lineJoin: "round",
-            strokeThickness: 7,
-        });
-
-        const text = new Text("0 RPM", style);
-
-        const playfieldWidth = 512 * this.renderScale;
-        const playfieldHeight = 384 * this.renderScale;
-
-        text.position.set(playfieldWidth / 2, playfieldHeight);
-        text.anchor.set(0.5, 1.0);
-
-        return text;
-    }
-
-    private createSpinnerSpin() {
-        const texture = AssetsLoader.getTexture("spinner-spin");
-
-        const playfieldWidth = 512 * this.renderScale;
-        const playfieldHeight = 384 * this.renderScale;
-
-        const ratio =
-            SPINNER_SPIN_SCALE *
-            (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
-
-        const sprite = new Sprite(texture);
-        sprite.scale.set(ratio);
-        sprite.position.set(playfieldWidth / 2, (playfieldHeight * 3) / 4);
-        sprite.anchor.set(0.5, 0.25);
-
-        return sprite;
     }
 
     update(timestamp: number) {
