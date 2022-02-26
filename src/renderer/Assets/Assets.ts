@@ -11,6 +11,7 @@ class AssetsLoader {
     private static loaderAsync: Loader;
 
     public static assets: utils.Dict<LoaderResource> = {};
+    private static _cachedTextures: { [key: string]: Texture } = {};
 
     private static _staticConstructor = (function () {
         AssetsLoader.loaderSync = new Loader();
@@ -75,8 +76,24 @@ class AssetsLoader {
         this.loaderAsync.load();
     }
 
-    public static getTexture(name: string) {
-        return this.assets[name].texture || Texture.EMPTY;
+    private static _getCachedTexture(name: string) {
+        return this._cachedTextures[name];
+    }
+
+    private static _setCachedTexture(name: string, texture: Texture) {
+        this._cachedTextures[name] = texture;
+    }
+
+    // utils.TextureCache is kinda fucky
+    public static getTexture(name: string): Texture {
+        const cached = this._getCachedTexture(name);
+
+        if (!cached || !cached.valid) {
+            const texture = (this.assets[name].texture || Texture.EMPTY).clone();
+            this._setCachedTexture(name, texture);
+        }
+
+        return this._getCachedTexture(name);
     }
 }
 
