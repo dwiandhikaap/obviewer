@@ -20,18 +20,31 @@ enum Mod {
 }
 
 class Mods {
-    @constrainCorrection()
+    public constrain = true;
+
     private _numeric: number;
     private _list = new Array<Mod>();
 
     constructor(value: number = 0) {
-        this.numeric = value;
+        this._numeric = value;
+    }
+
+    public get reducedListString() {
+        let reducedMods = reduceCombinedMods(this._list);
+
+        return reducedMods.map((mod) => Mod[mod]);
+    }
+
+    public get listString() {
+        return this._list.map((mod) => Mod[mod]);
+    }
+
+    public get reducedList() {
+        return reduceCombinedMods(this._list);
     }
 
     public get list() {
-        let fullModsString = this._list.map((mod) => Mod[mod]);
-
-        return reduceCombinedMods(fullModsString);
+        return this._list;
     }
 
     public get numeric() {
@@ -45,14 +58,21 @@ class Mods {
         }
 
         let result = new Array<Mod>();
-        (value >>> 0)
+        let sum = 0;
+
+        value
             .toString(2)
             .split("")
             .map(Number)
             .reverse()
-            .reduce((prev, currVal, currIndex) => currVal && result.push(currVal << currIndex));
+            .forEach((currentValue, index) => {
+                if (currentValue === 1) {
+                    result.push(currentValue << index);
+                    sum += currentValue << index;
+                }
+            });
 
-        this._numeric = value;
+        this._numeric = sum;
         this._list = result.reverse();
     }
 
@@ -81,50 +101,92 @@ class Mods {
         }
     }
 
+    private _enable(...mods: Mod[]) {
+        mods.forEach((mod) => (this.numeric |= mod));
+    }
+
+    private _disable(...mods: Mod[]) {
+        mods.forEach((mod) => (this.numeric ^= this.numeric & mod));
+    }
+
     public enable(mod: Mod) {
-        this.numeric |= mod;
+        if (!this.constrain) {
+            this._enable(mod);
+            return;
+        }
+
+        if ([Mod.DoubleTime, Mod.Nightcore, Mod.HalfTime].includes(mod)) {
+            this._disable(Mod.DoubleTime, Mod.Nightcore, Mod.HalfTime);
+        }
+
+        if ([Mod.Easy, Mod.HardRock].includes(mod)) {
+            this._disable(Mod.Easy, Mod.HardRock);
+        }
+
+        if ([Mod.NoFail, Mod.Relax, Mod.Relax2, Mod.SuddenDeath, Mod.Perfect].includes(mod)) {
+            this._disable(Mod.NoFail, Mod.Relax, Mod.Relax2, Mod.SuddenDeath, Mod.Perfect);
+            this._disable(Mod.Autoplay);
+        }
+
+        if ([Mod.SpunOut, Mod.Relax2].includes(mod)) {
+            this._disable(Mod.SpunOut, Mod.Relax2);
+        }
+
+        if ([Mod.Autoplay].includes(mod)) {
+            this._disable(Mod.NoFail, Mod.Relax, Mod.Relax2, Mod.SuddenDeath, Mod.Perfect);
+        }
+
+        if (mod === Mod.Nightcore) {
+            this._enable(Mod.DoubleTime);
+        }
+
+        if (mod === Mod.Perfect) {
+            this._enable(Mod.SuddenDeath);
+        }
+
+        this._enable(mod);
         return this;
     }
 
     public disable(mod: Mod) {
-        this.numeric ^= this.numeric & mod;
+        if (!this.constrain) {
+            this._disable(mod);
+            return;
+        }
+
+        if (mod === Mod.DoubleTime) {
+            this._disable(Mod.Nightcore);
+        }
+
+        if (mod === Mod.SuddenDeath) {
+            this._disable(Mod.Perfect);
+        }
+
+        this._disable(mod);
         return this;
     }
 }
 
 /* Reduce from "[..., Nightcore, DoubleTime]" to [..., Nightcore] */
-function reduceCombinedMods(list: Array<String>) {
-    const result = list;
+function reduceCombinedMods(list: Array<Mod>) {
+    const result = [...list];
 
-    result.includes(Mod[Mod.Nightcore]) && result.splice(result.indexOf(Mod[Mod.DoubleTime]), 1);
+    // fancy oneliners are bad bro
+    if (result.includes(Mod.Nightcore)) {
+        const index = result.indexOf(Mod.DoubleTime);
+        if (index !== -1) {
+            result.splice(index, 1);
+        }
+    }
 
-    result.includes(Mod[Mod.Perfect]) && result.splice(result.indexOf(Mod[Mod.SuddenDeath]), 1);
+    if (result.includes(Mod.Perfect)) {
+        const index = result.indexOf(Mod.SuddenDeath);
+        if (index !== -1) {
+            result.splice(index, 1);
+        }
+    }
 
     return result;
-}
-
-/* Correct combined list bitwise, example (NC only -> NC + DT) */
-function constrainCorrection() {
-    return function (target: any, key: string) {
-        let val = target[key];
-
-        const getter = () => {
-            return val;
-        };
-
-        const setter = (next: number) => {
-            next & Mod.Nightcore && (next |= Mod.DoubleTime);
-            next & Mod.Perfect && (next |= Mod.SuddenDeath);
-            val = next;
-        };
-
-        Object.defineProperty(target, key, {
-            get: getter,
-            set: setter,
-            enumerable: true,
-            configurable: true,
-        });
-    };
 }
 
 export { Mods, Mod };
