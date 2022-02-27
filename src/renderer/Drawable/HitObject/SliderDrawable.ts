@@ -43,7 +43,7 @@ function createSliderHead(slider: Slider, radius: number) {
 
     const style = new TextStyle({
         fill: "white",
-        fontSize: radius,
+        fontSize: (radius * 4) / 5,
         strokeThickness: 3,
     });
     const number = new Text(count.toString(), style);
@@ -177,16 +177,8 @@ class SliderDrawable extends Container {
 
         this.slider.updateState(timestamp);
 
-        const {
-            isSliding,
-            slideIndex,
-            progressPosition,
-            opacity,
-            headOpacity,
-            ballOpacity,
-            approachCircleOpacity,
-            approachCircleScale,
-        } = this.slider.state;
+        const { isSliding, slideIndex, progressPosition, opacity, headOpacity, ballOpacity, approachCircleOpacity, approachCircleScale } =
+            this.slider.state;
 
         this.alpha = opacity.value;
         this.sliderApproachCircle.alpha = approachCircleOpacity.value;

@@ -23,7 +23,7 @@ function createCircle(hitCircle: HitCircle, radius: number) {
 
     const style = new TextStyle({
         fill: "white",
-        fontSize: 28 * renderScale,
+        fontSize: (radius * 4) / 5,
         strokeThickness: 3,
     });
     const circleNumber = new Text(comboCount.toString(), style);
