@@ -1,3 +1,4 @@
+import { Mods } from "../Mods/Mods";
 import { Colours } from "./BeatmapAttributes/Colours";
 import { Difficulty } from "./BeatmapAttributes/Difficulty";
 import { Editor } from "./BeatmapAttributes/Editor";
@@ -8,18 +9,40 @@ import { Metadata } from "./BeatmapAttributes/Metadata";
 import { TimingPoints } from "./BeatmapAttributes/TimingPoints";
 
 class Beatmap {
-    general = new General();
-    editor = new Editor();
-    metadata = new Metadata();
-    difficulty = new Difficulty();
-    events = new Events();
-    timingPoints = new TimingPoints();
-    colours = new Colours();
-    hitObjects = new HitObjects();
+    general: General;
+    editor: Editor;
+    metadata: Metadata;
+    difficulty: Difficulty;
+    events: Events;
+    timingPoints: TimingPoints;
+    colours: Colours;
+    hitObjects: HitObjects;
 
-    constructor(mapData: string) {
+    constructor(private mapData: string = "", mods?: Mods) {
+        const { general, editor, metadata, difficulty, events, timingPoints, colours, hitObjects } =
+            this.parseBeatmap(mods);
+        this.general = general;
+        this.editor = editor;
+        this.metadata = metadata;
+        this.difficulty = difficulty;
+        this.events = events;
+        this.timingPoints = timingPoints;
+        this.colours = colours;
+        this.hitObjects = hitObjects;
+    }
+
+    private parseBeatmap(mods?: Mods) {
+        const general = new General();
+        const editor = new Editor();
+        const metadata = new Metadata();
+        const difficulty = new Difficulty();
+        const events = new Events();
+        const timingPoints = new TimingPoints();
+        const colours = new Colours();
+        const hitObjects = new HitObjects();
+
         // Split the map data into lines
-        const row = mapData
+        const row = this.mapData
             .replace(/(\/\/.+)/g, "")
             .split(/\r?\n/)
             .filter((str) => str !== "");
@@ -45,21 +68,35 @@ class Beatmap {
         sectionChunk.reverse();
 
         // Parse sections into their own objects
-        this.general.parseStringArray(sectionChunk[0]);
-        this.editor.parseStringArray(sectionChunk[1]);
-        this.metadata.parseStringArray(sectionChunk[2]);
-        this.difficulty.parseStringArray(sectionChunk[3]);
-        this.events.parseStringArray(sectionChunk[4]);
-        this.timingPoints.parseStringArray(sectionChunk[5]);
-        this.colours.parseStringArray(sectionChunk[6]);
-        this.hitObjects.parseStringArray(sectionChunk[7], this.difficulty, this.timingPoints);
+        general.parseStringArray(sectionChunk[0]);
+        editor.parseStringArray(sectionChunk[1]);
+        metadata.parseStringArray(sectionChunk[2]);
+        difficulty.parseStringArray(sectionChunk[3], mods);
+        events.parseStringArray(sectionChunk[4]);
+        timingPoints.parseStringArray(sectionChunk[5]);
+        colours.parseStringArray(sectionChunk[6]);
+        hitObjects.parseStringArray(sectionChunk[7], difficulty, timingPoints);
 
         // Set hitObjects colours and stacks
-        const hexColours = this.colours.hex;
-        this.hitObjects.applyColour(hexColours);
+        const hexColours = colours.hex;
+        hitObjects.applyColour(hexColours);
 
-        const stackLeniency = this.general.stackLeniency;
-        this.hitObjects.applyStacking(this.difficulty, stackLeniency);
+        const stackLeniency = general.stackLeniency;
+        hitObjects.applyStacking(difficulty, stackLeniency);
+
+        return { general, editor, metadata, difficulty, events, timingPoints, colours, hitObjects };
+    }
+
+    getMods() {
+        return this.difficulty.mods;
+    }
+
+    setMods(mods: Mods) {
+        const { general, editor, metadata, difficulty, events, timingPoints, colours, hitObjects } =
+            this.parseBeatmap(mods);
+
+        this.difficulty = difficulty;
+        this.hitObjects = hitObjects;
     }
 
     getBackgroundFileNames(): string[] {
