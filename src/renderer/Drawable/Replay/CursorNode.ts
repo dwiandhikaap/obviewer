@@ -47,6 +47,12 @@ class CursorNode extends Container {
 
             const alpha = 1 - (Math.abs(index - i) / count) * 2;
 
+            if (node.isPressingK1() || node.isPressingM1()) {
+                nodeSprite.tint = 0xffff00;
+            } else if (node.isPressingK2() || node.isPressingM2()) {
+                nodeSprite.tint = 0xff00ff;
+            }
+
             nodeSprite.alpha = alpha;
             nodeSprite.position.set(node.x * this.renderScale, node.y * this.renderScale);
         }

@@ -17,8 +17,6 @@ class MainCursor extends Container {
         this.addChild(this.mainCursor);
 
         this.position.set(x, y);
-
-        console.log(x, y, this.mainCursor.width, this.mainCursor.height);
     }
 
     private createMainCursor() {

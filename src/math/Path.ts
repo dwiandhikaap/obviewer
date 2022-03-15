@@ -6,6 +6,7 @@ type TPath = {
     (path: number[][]): Path;
 };
 
+// kinda buggy dont touch pls
 export class Path {
     private controlPoints: Vector2[];
 
@@ -40,11 +41,12 @@ export class Path {
         this.points = PathHelper.Interpolate(this.points, this.PATH_DETAIL);
     }
 
-    public move(startX: number, startY: number, endX: number, endY: number): void {
+    public move(startX: number, startY: number, endX: number, endY: number) {
         for (let i = 0; i < this.points.length; i++) {
             this.points[i][0] += endX - startX;
             this.points[i][1] += endY - startY;
         }
+        return this;
     }
 
     public translate(x: number, y: number) {
@@ -52,13 +54,25 @@ export class Path {
             this.points[i][0] += x;
             this.points[i][1] += y;
         }
+        return this;
     }
 
-    public scale(scale: number) {
-        for (let i = 0; i < this.points.length; i++) {
-            this.points[i][0] *= scale;
-            this.points[i][1] *= scale;
+    public scale(scale: number): Path;
+    public scale(x: number, y: number): Path;
+    public scale(xOrScale: number, y?: number): Path {
+        if (y === undefined) {
+            for (let i = 0; i < this.points.length; i++) {
+                this.points[i][0] *= xOrScale;
+                this.points[i][1] *= xOrScale;
+            }
+        } else {
+            for (let i = 0; i < this.points.length; i++) {
+                this.points[i][0] *= xOrScale;
+                this.points[i][1] *= y;
+            }
         }
+
+        return this;
     }
 
     public getLength(): number {

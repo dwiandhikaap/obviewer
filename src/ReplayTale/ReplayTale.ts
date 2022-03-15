@@ -1,4 +1,5 @@
 import { Beatmap } from "../osu/Beatmap/Beatmap";
+import { Mod, Mods } from "../osu/Mods/Mods";
 import { Replay } from "../osu/Replay/Replay";
 import { AudioHandler } from "../renderer/AudioHandler";
 import { Renderer } from "../renderer/Renderer";
@@ -8,8 +9,12 @@ interface ReplayTaleConfig {
 }
 
 class ReplayTale {
-    private beatmap: Beatmap;
-    private replay: Replay;
+    beatmap: Beatmap | null = null;
+    replay: Replay | null = null;
+
+    public isModsOverriden: Boolean = false;
+    private _replayModsNumeric: number | null;
+    private mods: Mods | null = null;
 
     private renderer: Renderer;
     private audioHandler: AudioHandler;
@@ -32,10 +37,7 @@ class ReplayTale {
         this.audioHandler = new AudioHandler();
     }
 
-    loadBeatmap(beatmap: Beatmap, audio?: HTMLAudioElement, background?: HTMLImageElement) {
-        this.beatmap = beatmap;
-        this.renderer.loadBeatmap(beatmap);
-
+    loadBeatmapAssets(audio?: HTMLAudioElement, background?: HTMLImageElement) {
         if (audio !== undefined) {
             this.audioHandler.loadAudio("beatmap", audio, { volume: 0.5, offsetMS: 0 });
         }
@@ -45,9 +47,76 @@ class ReplayTale {
         }
     }
 
+    loadBeatmap(beatmap: Beatmap) {
+        if (this.mods !== null) {
+            beatmap.setMods(this.mods);
+        }
+
+        if (this.mods === null && this.replay && this.replay.mods.numeric !== beatmap.getMods().numeric) {
+            const mods = this.replay.mods;
+            beatmap.setMods(mods);
+        }
+
+        this.beatmap = beatmap;
+        this.renderer.loadBeatmap(beatmap);
+    }
+
     loadReplay(replay: Replay) {
+        this._replayModsNumeric = replay.mods.numeric;
+
+        if (this.mods !== null) {
+            replay.mods = this.mods;
+        }
+
+        if (this.beatmap && this.beatmap.getMods().numeric !== replay.mods.numeric) {
+            this.beatmap.setMods(replay.mods);
+        }
+
         this.replay = replay;
         this.renderer.loadReplay(replay);
+    }
+
+    enableModsOverride(mods: Mods) {
+        //console.log(`Enabling Overrides : ${mods.list}`);
+
+        this.isModsOverriden = true;
+
+        if (mods.numeric === this.mods?.numeric) {
+            return;
+        }
+
+        this.mods = mods;
+        this.replay && (this.replay.mods = mods);
+        if (this.beatmap) {
+            const oldMods = this.beatmap.getMods().numeric;
+            this.beatmap.setMods(mods);
+
+            if (oldMods !== mods.numeric) {
+                this.renderer.loadBeatmap(this.beatmap);
+            }
+        }
+    }
+
+    disableModsOverride() {
+        //console.log(`Disabling Overrides! Previous Beatmap Mods : ${this.beatmap?.getMods().list}`);
+
+        this.mods = null;
+        if (this._replayModsNumeric === null) {
+            return;
+        }
+
+        const oldReplayMods = new Mods(this._replayModsNumeric);
+
+        this.replay && (this.replay.mods = oldReplayMods);
+
+        if (this.beatmap) {
+            const oldMapMods = this.beatmap.getMods().numeric;
+            this.beatmap.setMods(oldReplayMods);
+
+            if (oldMapMods !== oldReplayMods.numeric) {
+                this.renderer.loadBeatmap(this.beatmap);
+            }
+        }
     }
 
     private lastFrameTimestamp: number = 0;

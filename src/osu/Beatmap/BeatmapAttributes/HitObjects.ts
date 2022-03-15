@@ -1,5 +1,6 @@
 import { Path } from "../../../math/Path";
 import { Vector2 } from "../../../math/Vector2";
+import { Mod } from "../../Mods/Mods";
 import { Difficulty } from "./Difficulty";
 import { HitCircle } from "./HitObjects/HitCircle";
 import { HitObject, HitObjectType, Hitsample } from "./HitObjects/HitObject";
@@ -12,6 +13,8 @@ class HitObjects {
 
     parseStringArray(hitObjectStringArray: string[], difficulty: Difficulty, timing: TimingPoints) {
         let comboCount = 0;
+        let objectIndex = 0;
+
         for (let hitObjectString of hitObjectStringArray) {
             const hitObjectParams = hitObjectString.split(",");
             const hitObjectType = parseInt(hitObjectParams[3]);
@@ -21,7 +24,13 @@ class HitObjects {
             comboCount++;
             if (hitObjectType & HitObjectType.HitCircle) {
                 // General Parameter
-                const [x, y, time, type, hitSound] = hitObjectParams.slice(0, 5).map(Number);
+                let [x, y, time, type, hitSound] = hitObjectParams.slice(0, 5).map(Number);
+
+                // Flip Vertically on HardRock Mod
+                if (difficulty.mods.contains(Mod.HardRock)) {
+                    y = 384 - y;
+                }
+
                 const startPos: [number, number] = [x, y];
                 const endPos: [number, number] = [x, y];
                 const startTime = time;
@@ -42,20 +51,27 @@ class HitObjects {
                     hitSample,
                     comboCount,
                     difficulty,
+                    objectIndex,
                 };
                 const hitCircle = new HitCircle(hitObjectConfig);
                 this.objects.push(hitCircle);
             } else if (hitObjectType & HitObjectType.Slider) {
                 // General Parameter
-                const [x, y, time, type, hitSound] = hitObjectParams.slice(0, 5).map(Number);
+                let [x, y, time, type, hitSound] = hitObjectParams.slice(0, 5).map(Number);
                 const startTime = time;
                 const endTime = time; // will be overwritten later on applyTiming() method
 
                 // Slider Parameter
                 const [curveType, ...curvePointsStr] = hitObjectParams[5].split("|");
                 const [slides, length] = hitObjectParams.slice(6, 8).map(Number);
-
                 const curvePoints = curvePointsStr.map((curvePoint) => curvePoint.split(":").map(Number));
+
+                // Flip Vertically on HardRock Mod
+                if (difficulty.mods.contains(Mod.HardRock)) {
+                    y = 384 - y;
+                    curvePoints.forEach((curvePoint) => (curvePoint[1] = 384 - curvePoint[1]));
+                }
+
                 const curvePath = new Path(curveType, [[x, y]].concat(curvePoints), length);
 
                 // Slider Position
@@ -87,6 +103,7 @@ class HitObjects {
                     hitSample,
                     comboCount,
                     difficulty,
+                    objectIndex,
                 };
                 const sliderConfig = { curveType, curvePoints, curvePath, slides, length, edgeSounds, edgeSets };
                 const slider = new Slider(hitObjectConfig, sliderConfig, timing);
@@ -113,10 +130,13 @@ class HitObjects {
                     hitSample,
                     comboCount,
                     difficulty,
+                    objectIndex,
                 };
                 const spinner = new Spinner(hitObjectConfig);
                 this.objects.push(spinner);
             }
+
+            objectIndex++;
         }
     }
 
@@ -137,7 +157,7 @@ class HitObjects {
         const stackOffset = hitObjectRadius / 10;
 
         const STACK_LENIENCE = 3;
-        const stackThreshold = difficulty.preEmpt * stackLeniency;
+        const stackThreshold = difficulty.getPreempt() * stackLeniency;
 
         // Reverse pass for stack calculation
         for (let i = this.objects.length - 1; i > 0; i--) {
