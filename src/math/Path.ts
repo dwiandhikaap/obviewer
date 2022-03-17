@@ -17,11 +17,7 @@ export class Path {
 
     constructor(pathType: string, controlPoints: readonly number[][], maxLength?: number);
     constructor(pathType: string, controlPoints: readonly Vector2[], maxLength?: number);
-    constructor(
-        public pathType: string,
-        controlPoints: readonly Vector2[] | readonly number[][],
-        private maxLength?: number
-    ) {
+    constructor(public pathType: string, controlPoints: readonly Vector2[] | readonly number[][], private maxLength?: number) {
         if (controlPoints[0] instanceof Vector2) {
             this.controlPoints = controlPoints as Vector2[];
         } else {
@@ -36,9 +32,9 @@ export class Path {
             this.points = PathHelper.TrimPath(this.points, maxLength);
         }
 
-        // Equal-ish distance between points no matter where it is
-        this.points = PathHelper.Simplify(this.points, 1, true);
-        this.points = PathHelper.Interpolate(this.points, this.PATH_DETAIL);
+        // Equal-ish distance between points no matter where it is, useful for reducing the amount of points
+        // this.points = PathHelper.Simplify(this.points, 1, true);
+        // this.points = PathHelper.Interpolate(this.points, this.PATH_DETAIL);
     }
 
     public move(startX: number, startY: number, endX: number, endY: number) {
