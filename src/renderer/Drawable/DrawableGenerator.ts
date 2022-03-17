@@ -9,11 +9,7 @@ export class DrawableGenerator {
         return new Grid(width, height, gridSize, color, alpha);
     }
 
-    public static CreateHitObject(
-        hitObject: HitObject,
-        difficulty: Difficulty,
-        renderScale: number
-    ): HitObjectDrawable {
+    public static CreateHitObject(hitObject: HitObject, renderScale: number): HitObjectDrawable {
         if (hitObject.isHitCircle()) {
             return new HitCircleDrawable(hitObject as HitCircle, renderScale);
         } else if (hitObject.isSlider()) {

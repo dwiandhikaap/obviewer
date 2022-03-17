@@ -28,13 +28,7 @@ class BeatmapField extends Container {
         const translateX = (canvasWidth - this.playfieldResolution[0]) / 2;
         const translateY = (canvasHeight - this.playfieldResolution[1]) / 2;
 
-        const grid = DrawableGenerator.CreateGrid(
-            this.playfieldResolution[0],
-            this.playfieldResolution[1],
-            "LARGE",
-            0xffffff,
-            0.25
-        );
+        const grid = DrawableGenerator.CreateGrid(this.playfieldResolution[0], this.playfieldResolution[1], "LARGE", 0xffffff, 0.25);
         this.addChild(grid);
         this.position.set(translateX, translateY);
     }
@@ -51,7 +45,7 @@ class BeatmapField extends Container {
         const scale = getOsuPixelScale(this.playfieldResolution[0], this.playfieldResolution[1]);
 
         hitObjects.objects.forEach((hitObject) => {
-            const drawable = DrawableGenerator.CreateHitObject(hitObject, difficulty, scale);
+            const drawable = DrawableGenerator.CreateHitObject(hitObject, scale);
             this.hitObjectDrawables.push(drawable);
         });
 
