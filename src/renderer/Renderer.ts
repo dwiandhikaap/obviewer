@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { Texture } from "pixi.js";
 import { Beatmap } from "../osu/Beatmap/Beatmap";
 import { Replay } from "../osu/Replay/Replay";
+import { Settings } from "../settings/Settings";
 import { AssetsLoader } from "./Assets/Assets";
 import { SliderTextureGenerator } from "./Drawable/HitObject/SliderTextureGenerator";
 import { Background } from "./Layers/Background";
@@ -38,8 +39,8 @@ class Renderer {
         this.pixi = new PIXI.Application({
             powerPreference: "high-performance",
             antialias: true,
-            width: 1280,
-            height: 720,
+            width: Settings.get("AppWidth"),
+            height: Settings.get("AppHeight"),
             backgroundColor: 0xffffff,
         });
 

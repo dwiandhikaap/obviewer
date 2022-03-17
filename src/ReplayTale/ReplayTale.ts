@@ -3,6 +3,7 @@ import { Mod, Mods } from "../osu/Mods/Mods";
 import { Replay } from "../osu/Replay/Replay";
 import { AudioHandler } from "../renderer/AudioHandler";
 import { Renderer } from "../renderer/Renderer";
+import { Settings } from "../settings/Settings";
 
 interface ReplayTaleConfig {
     container: string;
@@ -39,7 +40,17 @@ class ReplayTale {
 
     loadBeatmapAssets(audio?: HTMLAudioElement, background?: HTMLImageElement) {
         if (audio !== undefined) {
-            this.audioHandler.loadAudio("beatmap", audio, { volume: 0.5, offsetMS: 0 });
+            const volume = Settings.get("AudioVolume");
+            const offset = Settings.get("AudioOffset");
+            this.audioHandler.loadAudio("beatmap", audio, { volume: volume / 100, offsetMS: offset });
+
+            Settings.addUpdateListener("AudioVolume", (volume: number) => {
+                this.audioHandler.setAudioOptions("beatmap", { volume: volume / 100 });
+            });
+
+            Settings.addUpdateListener("AudioOffset", (offset: number) => {
+                this.audioHandler.setAudioOptions("beatmap", { offsetMS: offset });
+            });
         }
 
         if (background !== undefined) {
