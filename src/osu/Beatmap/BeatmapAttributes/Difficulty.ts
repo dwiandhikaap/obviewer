@@ -91,6 +91,13 @@ class Difficulty {
 
         return r;
     }
+
+    getHitWindows(mods = this.mods): [number, number, number] {
+        const hit300 = 79 - this.getOD(mods) * 6 + 0.5;
+        const hit100 = 139 - this.getOD(mods) * 8 + 0.5;
+        const hit50 = 199 - this.getOD(mods) * 10 + 0.5;
+        return [hit300, hit100, hit50];
+    }
 }
 
 /* 
