@@ -24,7 +24,13 @@ class ReplayData extends Array<ReplayNode> {
                 const [deltaTime, x, y, numericKeys] = data;
 
                 accumulatedTime += deltaTime;
-                nodes.push(new ReplayNode(accumulatedTime, deltaTime, x, y, numericKeys));
+                const node = new ReplayNode(accumulatedTime, deltaTime, x, y, numericKeys);
+                nodes.push(node);
+            }
+
+            for (let i = 0; i < parsedReplayData.length; i++) {
+                if (i > 0) nodes[i].prev = nodes[i - 1];
+                else if (i < parsedReplayData.length - 1) nodes[i].next = nodes[i + 1];
             }
         } else if (replayData instanceof ReplayNode) {
             nodes = replayData;
@@ -50,6 +56,13 @@ class ReplayData extends Array<ReplayNode> {
 
         const startIndex = Math.max(index - prevCount, 0);
         const endIndex = Math.min(index + nextCount + 1, this.length);
+
+        return this.slice(startIndex, endIndex);
+    }
+
+    getMultiple(from: number, to: number) {
+        const startIndex = this.getIndexNear(from);
+        const endIndex = this.getIndexNear(to);
 
         return this.slice(startIndex, endIndex);
     }

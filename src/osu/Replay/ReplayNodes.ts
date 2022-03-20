@@ -6,12 +6,17 @@ enum Keypress {
     SMOKE = 1 << 4,
 }
 
+type KeypressType = keyof typeof Keypress;
+
 class ReplayNode {
+    prev: ReplayNode | null = null;
+    next: ReplayNode | null = null;
     timestamp: number;
     deltaTime: number;
     x: number;
     y: number;
     keypress: number;
+
     constructor(timestamp: number, deltaTime: number, x: number, y: number, numericKeys: number) {
         this.deltaTime = deltaTime;
         this.x = x;
@@ -33,28 +38,44 @@ class ReplayNode {
         this.y += y;
     }
 
-    isPressing() {
-        return this.keypress > 0;
+    isHolding(key?: KeypressType) {
+        switch (key) {
+            case "K1": {
+                return this.keypress & Keypress.K1;
+            }
+
+            case "K2": {
+                return this.keypress & Keypress.K2;
+            }
+
+            case "M1": {
+                return this.keypress & Keypress.M1;
+            }
+
+            case "M2": {
+                return this.keypress & Keypress.M2;
+            }
+
+            default: {
+                return this.keypress > 0;
+            }
+        }
     }
 
-    isPressingM1() {
-        return this.keypress & Keypress.M1;
+    isKeyPressed(key?: KeypressType) {
+        if (this.prev === null) {
+            return this.isHolding(key);
+        }
+
+        return !this.prev.isHolding(key) && this.isHolding(key);
     }
 
-    isPressingM2() {
-        return this.keypress & Keypress.M2;
-    }
+    isKeyReleased(key?: KeypressType) {
+        if (this.next === null) {
+            return this.isHolding(key);
+        }
 
-    isPressingK1() {
-        return this.keypress & Keypress.K1;
-    }
-
-    isPressingK2() {
-        return this.keypress & Keypress.K2;
-    }
-
-    isPressingSmoke() {
-        return this.keypress & Keypress.SMOKE;
+        return !this.next.isHolding(key) && this.isHolding(key);
     }
 
     setKeypress(...keys: Keypress[]) {
