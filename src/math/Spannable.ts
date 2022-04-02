@@ -31,8 +31,7 @@ class Spannable {
             }
 
             result =
-                ((time - transform.startTime) / (transform.endTime - transform.startTime)) *
-                    (transform.targetTo - transform.targetFrom) +
+                ((time - transform.startTime) / (transform.endTime - transform.startTime)) * (transform.targetTo - transform.targetFrom) +
                 transform.targetFrom;
 
             break;
@@ -74,6 +73,8 @@ class Spannable {
             targetFrom,
             targetTo,
         });
+
+        return this;
     }
 }
 
