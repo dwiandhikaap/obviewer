@@ -1,11 +1,12 @@
 import * as $ from "jQuery";
 import { Logger } from "./logger/Logger";
 import { Beatmap } from "./osu/Beatmap/Beatmap";
-import { Mod } from "./osu/Mods/Mods";
+import { Mod, Mods } from "./osu/Mods/Mods";
 import { Replay, ReplayNode } from "./osu/Replay/Replay";
 import { ReplayTale } from "./ReplayTale/ReplayTale";
+import { Settings } from "./settings/Settings";
 
-let replay = new Replay();
+let replay: Replay;
 
 const replaytale = new ReplayTale({
     container: "#main-canvas",
@@ -16,7 +17,7 @@ $("input#replayFile:file").on("change", function () {
     reader.onload = async function () {
         let arrayBuffer = this.result as ArrayBuffer;
         replay = await Replay.FromArrayBuffer(arrayBuffer);
-        console.log(replay);
+        //console.log(replay);
     };
 
     reader.readAsArrayBuffer($(this).prop("files")[0]);
@@ -29,7 +30,7 @@ $("input#mapsFile:file").on("change", async function () {
     reader.onload = async function () {
         let resultString = this.result as string;
         const map = new Beatmap(resultString);
-        console.log(map);
+        //(map);
 
         return map;
     };
@@ -47,7 +48,7 @@ $("input#mapsFile:file").on("change", async function () {
         if (file.name.endsWith(".osu")) {
             const text = await file.text();
             beatmap = new Beatmap(text);
-            console.log(beatmap);
+            //console.log(beatmap);
 
             audioFileName = beatmap.getAudioFilename();
             backgroundFile = beatmap.getBackgroundFileNames()[0];
@@ -59,7 +60,9 @@ $("input#mapsFile:file").on("change", async function () {
     for (const file of files) {
         if (file.name === audioFileName) {
             const audioFileBuffer = await file.arrayBuffer();
-            const audioFileBlob = new Blob([audioFileBuffer], { type: "audio/mp3" });
+            const audioFileBlob = new Blob([audioFileBuffer], {
+                type: "audio/mp3",
+            });
             const audioFileUrl = URL.createObjectURL(audioFileBlob);
 
             // create audio file
@@ -67,7 +70,9 @@ $("input#mapsFile:file").on("change", async function () {
         } else if (file.name === backgroundFile) {
             const backgroundFileBuffer = await file.arrayBuffer();
             const fileExt = backgroundFile.split(".").pop();
-            const backgroundFileBlob = new Blob([backgroundFileBuffer], { type: `image/${fileExt}` });
+            const backgroundFileBlob = new Blob([backgroundFileBuffer], {
+                type: `image/${fileExt}`,
+            });
             const backgroundFileUrl = URL.createObjectURL(backgroundFileBlob);
 
             // create background image
@@ -82,12 +87,14 @@ $("input#mapsFile:file").on("change", async function () {
         }
     }
 
-    beatmap && replaytale.loadBeatmap(beatmap, audioFile, backgroundImage);
+    console.log(replay);
+
+    replaytale.loadReplay(replay);
+    replaytale.loadBeatmapAssets(audioFile, backgroundImage);
+    beatmap && replaytale.loadBeatmap(beatmap);
     if (replay === undefined) {
         throw new Error("replay is undefined");
     }
-    replaytale.loadReplay(replay);
-    //replaytale.seek(0);
     replaytale.playbackRate = 1;
     replaytale.play();
 });
@@ -104,8 +111,8 @@ $("body").on("keypress", async function (e) {
 });
 
 $("button#replay-download").on("click", async function () {
-    console.log(replay.replayData);
-    console.log(replay.mods.list);
+    //console.log(replay.replayData);
+    //console.log(replay.mods.list);
 
     const replayNode = new ReplayNode(0, 300, 100, 100, 15);
     replay.playerName = "siveroo??!";
@@ -124,13 +131,17 @@ $("button#startTest").on("click", async function (e) {
 
     this.textContent = "Parsing Replay...";
 
-    const replayBuffer = await fetch(`/dist/assets/test/replay.osr`).then((ah) => ah.arrayBuffer());
+    const replayBuffer = await fetch(`/dist/assets/test/replay.osr`).then(
+        (ah) => ah.arrayBuffer()
+    );
     replay = await Replay.FromArrayBuffer(replayBuffer);
 
     this.textContent = "Parsing Beatmap...";
 
     const music = new Audio("/dist/assets/test/audio.mp3");
-    const map = await fetch(`/dist/assets/test/map.osu`).then((ah) => ah.text());
+    const map = await fetch(`/dist/assets/test/map.osu`).then((ah) =>
+        ah.text()
+    );
 
     const mapBeatmap = new Beatmap(map);
 
@@ -148,21 +159,83 @@ $("button#startTest").on("click", async function (e) {
     try {
         if (replay && mapBeatmap && music) {
             this.textContent = "Loading Replay";
-            console.log(replay);
+            //console.log(replay);
 
             replaytale.loadReplay(replay);
 
             this.textContent = "Loading Beatmap";
 
-            replaytale.loadBeatmap(mapBeatmap, music, background);
+            replaytale.loadBeatmapAssets(music, background);
+            replaytale.loadBeatmap(mapBeatmap);
+            //console.log(mapBeatmap.difficulty.mods.contains([Mod.HardRock, Mod.Hidden]));
 
             this.textContent = "Starting Replay";
-            replaytale.playbackRate = 1;
+            const mods = new Mods();
+
+            //mods.enable(Mod.HardRock);
+            // mods.enable(Mod.Hidden);
+            mods.enable(Mod.Hidden);
+            console.log("Contains Hidden : ", mods.contains(Mod.Hidden));
+            mods.disable(Mod.Hidden);
+            console.log("Contains Hidden : ", mods.contains(Mod.Hidden));
+            mods.enable(Mod.Hidden);
+
+            console.log("Contains Hidden : ", mods.contains(Mod.Hidden));
+
+            console.log(replay);
+
+            const speed = 1;
+
+            replaytale.enableModsOverride(mods);
+            replaytale.disableModsOverride();
+            replaytale.playbackRate = speed;
+            Settings.set("AudioVolume", 15);
+            //Settings.set("AudioOffset", 0);
+            replaytale.seek(0);
             replaytale.play();
+
+            const waitTime = 2000 / speed;
+            const seekTime = 2000;
+
+            await wait(26000);
+
+            /* await wait(waitTime);
+            replaytale.seek(seekTime);
+            await wait(waitTime);
+            replaytale.seek(seekTime);
+            await wait(waitTime);
+            replaytale.seek(seekTime);
+            await wait(waitTime);
+            replaytale.seek(seekTime);
+            await wait(waitTime);
+            replaytale.seek(seekTime); */
+
+            /* await wait(3000);
+            // replaytale.enableModsOverride(new Mods(Mod.HardRock));
+            await wait(3000);
+            //replaytale.disableModsOverride();
+            replaytale.enableModsOverride(new Mods(Mod.Hidden));
+            await wait(3000);
+            replaytale.disableModsOverride();
+            // replaytale.enableModsOverride(new Mods(Mod.Easy));
+            await wait(3000);
+            replaytale.enableModsOverride(new Mods(Mod.HardRock));
+            await wait(3000);
+            replaytale.disableModsOverride();
+            await wait(3000);
+            replaytale.enableModsOverride(new Mods(Mod.None));
+            await wait(3000);
+            replaytale.enableModsOverride(new Mods(Mod.Easy));
+            await wait(3000);
+            replaytale.enableModsOverride(new Mods(Mod.HardRock));
+            await wait(3000);
+            replaytale.enableModsOverride(new Mods(Mod.None));
+            await wait(3000);
+            replaytale.disableModsOverride(); */
         } else {
             this.textContent = "Failed Loading Game";
 
-            console.log(replay, mapBeatmap, music);
+            //console.log(replay, mapBeatmap, music);
         }
     } catch (error) {
         this.textContent = error as string;
