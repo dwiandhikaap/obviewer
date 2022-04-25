@@ -53,6 +53,7 @@ class Mods {
 
     public set numeric(value: number) {
         if (value <= 0) {
+            this._numeric = 0;
             this._list = [Mod.None];
             return;
         }
@@ -123,8 +124,22 @@ class Mods {
             this._disable(Mod.Easy, Mod.HardRock);
         }
 
-        if ([Mod.NoFail, Mod.Relax, Mod.Relax2, Mod.SuddenDeath, Mod.Perfect].includes(mod)) {
-            this._disable(Mod.NoFail, Mod.Relax, Mod.Relax2, Mod.SuddenDeath, Mod.Perfect);
+        if (
+            [
+                Mod.NoFail,
+                Mod.Relax,
+                Mod.Relax2,
+                Mod.SuddenDeath,
+                Mod.Perfect,
+            ].includes(mod)
+        ) {
+            this._disable(
+                Mod.NoFail,
+                Mod.Relax,
+                Mod.Relax2,
+                Mod.SuddenDeath,
+                Mod.Perfect
+            );
             this._disable(Mod.Autoplay);
         }
 
@@ -133,7 +148,13 @@ class Mods {
         }
 
         if ([Mod.Autoplay].includes(mod)) {
-            this._disable(Mod.NoFail, Mod.Relax, Mod.Relax2, Mod.SuddenDeath, Mod.Perfect);
+            this._disable(
+                Mod.NoFail,
+                Mod.Relax,
+                Mod.Relax2,
+                Mod.SuddenDeath,
+                Mod.Perfect
+            );
         }
 
         if (mod === Mod.Nightcore) {
@@ -158,8 +179,16 @@ class Mods {
             this._disable(Mod.Nightcore);
         }
 
+        if (mod === Mod.Nightcore && this.contains(Mod.Nightcore)) {
+            this._disable(Mod.DoubleTime);
+        }
+
         if (mod === Mod.SuddenDeath) {
             this._disable(Mod.Perfect);
+        }
+
+        if (mod === Mod.Perfect && this.contains(Mod.Perfect)) {
+            this._disable(Mod.SuddenDeath);
         }
 
         this._disable(mod);
