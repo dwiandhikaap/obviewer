@@ -174,11 +174,6 @@ function write(replay: Replay) {
 
             let timestamp = writeLong((replay.timestamp || new Date()).getTime() * 10000 + EPOCH);
 
-            /* let replayData = undefined;
-            let replayLength = undefined;
-            let unknown = undefined; */
-            //console.log("LZMA Compress :", replay.replayData.toString());
-
             lzma.compress(replay.replayData.toString() || "", 1, (res: any, err: any) => {
                 let replayData = Buffer.from(res);
                 let replayLength = writeInteger(replayData.length);
@@ -210,7 +205,6 @@ function write(replay: Replay) {
                 resolve(finalResult);
             });
         } catch (err) {
-            console.log(err);
             reject(Buffer.from([0x00]));
         }
     });
