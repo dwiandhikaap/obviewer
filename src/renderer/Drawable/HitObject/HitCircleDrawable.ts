@@ -1,12 +1,10 @@
-import { Container, Sprite, Text, TextStyle, Texture, Ticker } from "pixi.js";
-import { Difficulty } from "../../../osu/Beatmap/BeatmapAttributes/Difficulty";
+import { Container, Sprite, Text, TextStyle } from "pixi.js";
 import { HitCircle } from "../../../osu/Beatmap/BeatmapAttributes/HitObjects/HitCircle";
 import { hexToInt } from "../../../util/color";
 import { AssetsLoader } from "../../Assets/Assets";
 
 function createCircle(hitCircle: HitCircle, radius: number) {
     const { comboCount, colour } = hitCircle;
-    const renderScale = radius / hitCircle.difficulty.getObjectRadius();
     const texture = AssetsLoader.getTexture("hitcircle");
 
     const hitCircleSprite = new Sprite(texture);
@@ -53,7 +51,7 @@ class HitCircleDrawable extends Container {
     private circle: Container;
     private approachCircle: Sprite;
 
-    constructor(private hitCircle: HitCircle, private renderScale: number) {
+    constructor(private hitCircle: HitCircle, renderScale: number) {
         super();
 
         const startPos = hitCircle.getStackedStartPos();
@@ -72,14 +70,12 @@ class HitCircleDrawable extends Container {
         this.visible = false;
     }
 
-    update(timestamp: number) {
+    draw(timestamp: number) {
         const visible = this.hitCircle.isVisibleAt(timestamp);
         this.visible = visible;
         if (!visible) return;
 
-        this.hitCircle.updateState(timestamp, false);
-
-        const { opacity, approachCircleScale, approachCircleOpacity } = this.hitCircle.state;
+        const { opacity, approachCircleScale, approachCircleOpacity } = this.hitCircle.drawProperty;
 
         this.circle.alpha = opacity.value;
 

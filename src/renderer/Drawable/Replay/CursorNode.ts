@@ -1,19 +1,34 @@
 import { Container, Graphics, Sprite } from "pixi.js";
 import { Replay } from "../../../osu/Replay/Replay";
 import { AssetsLoader } from "../../Assets/Assets";
+import { Drawable } from "../DrawableTypes";
 
 const NODE_SCALE = 0.1;
 const NODE_COUNT_AFTER = 7;
 const NODE_COUNT_BEFORE = 7;
 
-class CursorNode extends Container {
+function createCursorNodes(size: number) {
+    const nodeSprites: Sprite[] = [];
+    for (let i = 0; i < NODE_COUNT_BEFORE + NODE_COUNT_AFTER + 1; i++) {
+        const texture = AssetsLoader.getTexture("cursornode");
+
+        const sprite = new Sprite(texture);
+        sprite.anchor.set(0.5);
+        sprite.scale.set(size);
+        nodeSprites.push(sprite);
+    }
+
+    return nodeSprites;
+}
+
+class CursorNode extends Container implements Drawable {
     private nodeSprites: Sprite[];
     private nodeLine: Graphics;
 
     constructor(private replay: Replay, private renderScale: number) {
         super();
 
-        this.nodeSprites = this.createCursorNodes();
+        this.nodeSprites = createCursorNodes(renderScale * NODE_SCALE);
         this.nodeLine = new Graphics();
 
         this.addChild(this.nodeLine);
@@ -21,21 +36,7 @@ class CursorNode extends Container {
         this.visible = true;
     }
 
-    private createCursorNodes() {
-        const nodeSprites: Sprite[] = [];
-        for (let i = 0; i < NODE_COUNT_BEFORE + NODE_COUNT_AFTER + 1; i++) {
-            const texture = AssetsLoader.getTexture("cursornode");
-
-            const sprite = new Sprite(texture);
-            sprite.anchor.set(0.5);
-            sprite.scale.set(this.renderScale * NODE_SCALE);
-            nodeSprites.push(sprite);
-        }
-
-        return nodeSprites;
-    }
-
-    update(timestamp: number) {
+    draw(timestamp: number) {
         const index = this.replay.replayData.getIndexNear(timestamp);
         const indexStart = Math.max(0, index - NODE_COUNT_BEFORE);
         const indexEnd = Math.min(this.replay.replayData.length - 1, index + NODE_COUNT_AFTER);
@@ -45,12 +46,15 @@ class CursorNode extends Container {
             const node = this.replay.replayData[i];
             const nodeSprite = this.nodeSprites[i - indexStart];
 
-            const alpha = 1 - (Math.abs(index - i) / count) * 2;
+            let alpha = 1 - (Math.abs(index - i) / count) * 2;
 
-            if (node.isPressingK1() || node.isPressingM1()) {
+            if (node.isPressing("K1") || node.isPressing("M1")) {
                 nodeSprite.tint = 0xffff00;
-            } else if (node.isPressingK2() || node.isPressingM2()) {
+            } else if (node.isPressing("K2") || node.isPressing("M2")) {
                 nodeSprite.tint = 0xff00ff;
+            } else {
+                nodeSprite.tint = 0xffffff;
+                nodeSprite.scale.set(this.renderScale * NODE_SCALE);
             }
 
             nodeSprite.alpha = alpha;

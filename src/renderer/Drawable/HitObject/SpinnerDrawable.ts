@@ -1,8 +1,8 @@
-import { Container, Graphics, Sprite, Text, TextStyle, Texture, Ticker } from "pixi.js";
-import { Difficulty } from "../../../osu/Beatmap/BeatmapAttributes/Difficulty";
+import { Container, Sprite, Text, TextStyle, Texture } from "pixi.js";
 import { Spinner } from "../../../osu/Beatmap/BeatmapAttributes/HitObjects";
-import { calculateFitRatio, getOsuPixelScale } from "../../../util/osu-calculation";
+import { calculateFitRatio } from "../../../util/osu-calculation";
 import { AssetsLoader } from "../../Assets/Assets";
+import { Drawable } from "../DrawableTypes";
 
 // the ultimate hack of all time
 const SPINNER_BACKGROUND_SCALE = 1.05;
@@ -15,9 +15,7 @@ function createSpinnerBackground(renderScale: number) {
     const playfieldWidth = 512 * renderScale;
     const playfieldHeight = 384 * renderScale;
 
-    const ratio =
-        SPINNER_BACKGROUND_SCALE *
-        (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+    const ratio = SPINNER_BACKGROUND_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
 
     const sprite = new Sprite(texture);
     sprite.scale.set(ratio);
@@ -32,9 +30,7 @@ function createSpinnerMeter(renderScale: number) {
     const playfieldWidth = 512 * renderScale;
     const playfieldHeight = 384 * renderScale;
 
-    const ratio =
-        SPINNER_BACKGROUND_SCALE *
-        (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+    const ratio = SPINNER_BACKGROUND_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
 
     const sprite = new Sprite(texture);
     sprite.scale.set(ratio);
@@ -50,9 +46,7 @@ function createSpinnerMeterMask(renderScale: number) {
     const playfieldWidth = 512 * renderScale;
     const playfieldHeight = 384 * renderScale;
 
-    const ratio =
-        SPINNER_BACKGROUND_SCALE *
-        (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+    const ratio = SPINNER_BACKGROUND_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
 
     const mask = new Sprite(Texture.WHITE);
     mask.y = 0;
@@ -71,8 +65,7 @@ function createSpinnerCircle(renderScale: number) {
     const playfieldWidth = 512 * renderScale;
     const playfieldHeight = 384 * renderScale;
 
-    const ratio =
-        SPINNER_CIRCLE_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+    const ratio = SPINNER_CIRCLE_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
 
     const sprite = new Sprite(texture);
     sprite.scale.set(ratio);
@@ -109,8 +102,7 @@ function createSpinnerSpin(renderScale: number) {
     const playfieldWidth = 512 * renderScale;
     const playfieldHeight = 384 * renderScale;
 
-    const ratio =
-        SPINNER_SPIN_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+    const ratio = SPINNER_SPIN_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
 
     const sprite = new Sprite(texture);
     sprite.scale.set(ratio);
@@ -119,7 +111,7 @@ function createSpinnerSpin(renderScale: number) {
 
     return sprite;
 }
-class SpinnerDrawable extends Container {
+class SpinnerDrawable extends Container implements Drawable {
     private spinnerBackground: Sprite;
     private spinnerCircle: Sprite;
     private spinnerMeter: Sprite;
@@ -129,7 +121,7 @@ class SpinnerDrawable extends Container {
 
     private spinnerMeterMask: Sprite;
 
-    constructor(private spinner: Spinner, private renderScale: number) {
+    constructor(private spinner: Spinner, renderScale: number) {
         super();
 
         this.spinnerBackground = createSpinnerBackground(renderScale);
@@ -151,14 +143,12 @@ class SpinnerDrawable extends Container {
         this.visible = false;
     }
 
-    update(timestamp: number) {
+    draw(timestamp: number) {
         const visible = this.spinner.isVisibleAt(timestamp);
         this.visible = visible;
         if (!visible) return;
 
-        this.spinner.updateState(timestamp, false);
-
-        const { opacity, rotation, meter, rpm } = this.spinner.state;
+        const { opacity, rotation, meter, rpm } = this.spinner.drawProperty;
 
         this.alpha = opacity.value;
 

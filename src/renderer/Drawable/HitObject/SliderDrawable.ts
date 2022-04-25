@@ -21,6 +21,7 @@ function createSliderBody(path: Path, radius: number) {
     const sprite = new Sprite(texture);
 
     sprite.position.set(minPoint[0], minPoint[1]);
+    sprite.alpha = 0.8;
     return sprite;
 }
 
@@ -170,31 +171,27 @@ class SliderDrawable extends Container {
         this.visible = false;
     }
 
-    update(timestamp: number) {
+    draw(timestamp: number) {
         const visible = this.slider.isVisibleAt(timestamp);
         this.visible = visible;
         if (!visible) return;
 
-        this.slider.updateState(timestamp);
-
-        const { isSliding, slideIndex, progressPosition, opacity, headOpacity, ballOpacity, approachCircleOpacity, approachCircleScale } =
-            this.slider.state;
+        const { slideIndex, progressPosition, opacity, headOpacity, ballOpacity, approachCircleOpacity, approachCircleScale } =
+            this.slider.drawProperty;
 
         this.alpha = opacity.value;
         this.sliderApproachCircle.alpha = approachCircleOpacity.value;
         this.sliderApproachCircle.width = approachCircleScale.value * this.radius * 2;
         this.sliderApproachCircle.height = approachCircleScale.value * this.radius * 2;
 
-        if (isSliding) {
-            const ballPos = [
-                (progressPosition[0] - this.slider.getStackedStartPos()[0]) * this.renderScale,
-                (progressPosition[1] - this.slider.getStackedStartPos()[1]) * this.renderScale,
-            ];
+        const ballPos = [
+            (progressPosition[0] - this.slider.getStackedStartPos()[0]) * this.renderScale,
+            (progressPosition[1] - this.slider.getStackedStartPos()[1]) * this.renderScale,
+        ];
 
-            this.sliderBall.transform.position.set(ballPos[0], ballPos[1]);
-            this.sliderBall.alpha = ballOpacity.value;
-            this.sliderHead.alpha = headOpacity.value;
-        }
+        this.sliderBall.transform.position.set(ballPos[0], ballPos[1]);
+        this.sliderBall.alpha = ballOpacity.value;
+        this.sliderHead.alpha = headOpacity.value;
 
         const reverseIndexStart = Math.max(0, slideIndex - 1);
         const reverseIndexEnd = Math.min(this.slider.slides - 2, slideIndex + 1);
