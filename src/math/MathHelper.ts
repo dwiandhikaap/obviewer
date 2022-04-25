@@ -14,4 +14,16 @@ export class MathHelper {
     public static Lerp(t: number, from: number, to: number, targetFrom: number, targetTo: number): number {
         return (t / (to - from)) * (targetTo - targetFrom) + targetFrom;
     }
+
+    public static Sum(numbers: number[]) {
+        let result = 0;
+        for (let i = 0; i < numbers.length; i++) {
+            result += numbers[i];
+        }
+        return result;
+    }
+
+    public static Average(numbers: number[]): number {
+        return numbers.length === 0 ? 0 : this.Sum(numbers) / numbers.length;
+    }
 }
