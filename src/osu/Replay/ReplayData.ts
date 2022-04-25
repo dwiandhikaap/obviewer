@@ -6,7 +6,7 @@ class ReplayData extends Array<ReplayNode> {
     constructor(replayData: ReplayNode[]);
     constructor(replayData?: string | ReplayNode[]) {
         if (replayData === undefined) {
-            super(); // <-- is it necesarry?
+            super();
             return;
         }
 
@@ -30,7 +30,9 @@ class ReplayData extends Array<ReplayNode> {
 
             for (let i = 0; i < parsedReplayData.length; i++) {
                 if (i > 0) nodes[i].prev = nodes[i - 1];
-                else if (i < parsedReplayData.length - 1) nodes[i].next = nodes[i + 1];
+                if (i < parsedReplayData.length - 1) {
+                    nodes[i].next = nodes[i + 1];
+                }
             }
         } else if (replayData instanceof ReplayNode) {
             nodes = replayData;
