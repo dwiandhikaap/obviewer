@@ -13,6 +13,8 @@
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "strictPropertyInitialization": false,
-        "lib": ["ES6", "DOM"]
+        "lib": ["ES6", "DOM"],
+        "declaration": true,
+        "declarationDir": "dts/"
     }
 }
