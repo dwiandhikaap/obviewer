@@ -38,44 +38,77 @@ class ReplayNode {
         this.y += y;
     }
 
-    isHolding(key?: KeypressType) {
+    isHolding(key?: KeypressType, exclusive = false) {
+        if (exclusive) {
+            switch (key) {
+                case "K1": {
+                    return this.keypress === (Keypress.K1 | Keypress.M1);
+                }
+
+                case "K2": {
+                    return this.keypress === (Keypress.K2 | Keypress.M2);
+                }
+
+                case "M1": {
+                    return this.keypress === Keypress.M1;
+                }
+
+                case "M2": {
+                    return this.keypress === Keypress.M2;
+                }
+
+                default: {
+                    return this.keypress !== 0;
+                }
+            }
+        }
+
         switch (key) {
             case "K1": {
-                return this.keypress & Keypress.K1;
+                return (this.keypress & Keypress.K1) === Keypress.K1;
             }
 
             case "K2": {
-                return this.keypress & Keypress.K2;
+                return (this.keypress & Keypress.K2) === Keypress.K2;
             }
 
             case "M1": {
-                return this.keypress & Keypress.M1;
+                return (this.keypress & Keypress.M1) === Keypress.M1;
             }
 
             case "M2": {
-                return this.keypress & Keypress.M2;
+                return (this.keypress & Keypress.M2) === Keypress.M2;
+            }
+
+            case "SMOKE": {
+                return (this.keypress & Keypress.SMOKE) === Keypress.SMOKE;
             }
 
             default: {
-                return this.keypress > 0;
+                return (this.keypress & ~(this.keypress & Keypress.SMOKE)) > 0;
             }
         }
     }
 
-    isKeyPressed(key?: KeypressType) {
-        if (this.prev === null) {
-            return this.isHolding(key);
+    isPressing(key?: KeypressType, exclusive = false): boolean {
+        if (key === undefined) {
+            const KEYS: KeypressType[] = ["K1", "K2", "M1", "M2"];
+            return KEYS.some((key) => this.isPressing(key, exclusive));
         }
 
-        return !this.prev.isHolding(key) && this.isHolding(key);
+        if (this.prev === null) {
+            return this.isHolding(key, exclusive);
+        }
+
+        return !this.prev.isHolding(key, exclusive) && this.isHolding(key, exclusive);
     }
 
-    isKeyReleased(key?: KeypressType) {
+    isReleasing(key?: KeypressType, exclusive = false) {
         if (this.next === null) {
-            return this.isHolding(key);
+            return this.isHolding(key, exclusive);
         }
 
-        return !this.next.isHolding(key) && this.isHolding(key);
+        return !this.next.isHolding(key, exclusive) && this.isHolding(key, exclusive);
     }
 
     setKeypress(...keys: Keypress[]) {
@@ -90,6 +123,10 @@ class ReplayNode {
     removeKeypress(key: Keypress) {
         this.keypress = this.keypress & ~(this.keypress & key);
     }
+
+    clone() {
+        return new ReplayNode(this.timestamp, this.deltaTime, this.x, this.y, this.keypress);
+    }
 }
 
-export { ReplayNode, Keypress };
+export { ReplayNode, Keypress, KeypressType };
