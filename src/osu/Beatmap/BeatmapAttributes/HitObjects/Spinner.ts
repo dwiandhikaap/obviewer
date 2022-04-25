@@ -1,26 +1,25 @@
 import { Spannable } from "../../../../math/Spannable";
 import { HitObject, HitObjectConfig } from "./HitObject";
 
-interface SpinnerState {
+interface SpinnerDrawProperty {
     rpm: number;
     rotation: number;
 
     meter: number;
-    hit: boolean;
 
     opacity: Spannable;
 }
 
 class Spinner extends HitObject {
-    state: SpinnerState;
+    drawProperty: SpinnerDrawProperty;
 
     constructor(hitObjectConfig: HitObjectConfig) {
         super(hitObjectConfig);
 
-        this.state = this.initializeState();
+        this.drawProperty = this.initializeState();
     }
 
-    private initializeState(): SpinnerState {
+    private initializeState(): SpinnerDrawProperty {
         const opacity = new Spannable();
 
         const appearTime = this.startTime - this.difficulty.getPreempt();
@@ -34,19 +33,13 @@ class Spinner extends HitObject {
             rpm: 0,
             rotation: 0,
             meter: 0,
-            hit: false,
 
             opacity,
         };
     }
 
-    // where do i calculate the rotation and rpm bs?
-    updateState(time: number, hit?: boolean) {
-        this.state.opacity.time = time;
-
-        if (hit !== undefined) {
-            this.state.hit = hit;
-        }
+    updateDrawProperty(time: number): void {
+        this.drawProperty.opacity.time = time;
     }
 }
 

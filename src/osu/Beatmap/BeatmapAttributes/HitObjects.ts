@@ -4,7 +4,7 @@ import { Mod } from "../../Mods/Mods";
 import { Difficulty } from "./Difficulty";
 import { HitCircle } from "./HitObjects/HitCircle";
 import { HitObject, HitObjectType, Hitsample } from "./HitObjects/HitObject";
-import { Slider, SliderReverseTick, SliderTick } from "./HitObjects/Slider";
+import { Slider } from "./HitObjects/Slider";
 import { Spinner } from "./HitObjects/Spinner";
 import { TimingPoints } from "./TimingPoints";
 
@@ -231,20 +231,6 @@ class HitObjects {
             return lo;
         }
         return hi;
-    }
-
-    getNear(timestamp: number) {
-        const index = this.getIndexNear(timestamp);
-        return this.objects[index];
-    }
-
-    grab(startTime: number, endTime: number) {
-        const lastObjectTimestamp = this.objects[this.objects.length - 1].startTime;
-
-        const startIndex = this.getIndexNear(Math.max(0, startTime));
-        const endIndex = this.getIndexNear(Math.min(endTime, lastObjectTimestamp));
-
-        return this.objects.slice(startIndex, endIndex + 1);
     }
 }
 

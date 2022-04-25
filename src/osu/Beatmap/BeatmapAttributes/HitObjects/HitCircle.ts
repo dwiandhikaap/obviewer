@@ -2,9 +2,7 @@ import { Spannable } from "../../../../math/Spannable";
 import { Mod } from "../../../Mods/Mods";
 import { HitObject, HitObjectConfig } from "./HitObject";
 
-interface HitCircleState {
-    hit: boolean;
-
+interface HitCircleDrawProperty {
     opacity: Spannable;
 
     approachCircleOpacity: Spannable;
@@ -12,15 +10,15 @@ interface HitCircleState {
 }
 
 class HitCircle extends HitObject {
-    state: HitCircleState;
+    drawProperty: HitCircleDrawProperty;
 
     constructor(hitObjectConfig: HitObjectConfig) {
         super(hitObjectConfig);
 
-        this.state = this.initializeState();
+        this.drawProperty = this.initializeDrawProperty();
     }
 
-    private initializeState(): HitCircleState {
+    private initializeDrawProperty(): HitCircleDrawProperty {
         const diff = this.difficulty;
         const fadeIn = diff.fadeIn;
         const preempt = diff.getPreempt();
@@ -52,21 +50,16 @@ class HitCircle extends HitObject {
         approachCircleScale.addSpan(appearTime, this.startTime, 4, 1);
 
         return {
-            hit: false,
             opacity: opacity,
             approachCircleOpacity: approachCircleOpacity,
             approachCircleScale: approachCircleScale,
         };
     }
 
-    updateState(time: number, hit?: boolean) {
-        this.state.opacity.time = time;
-        this.state.approachCircleOpacity.time = time;
-        this.state.approachCircleScale.time = time;
-
-        if (hit !== undefined) {
-            this.state.hit = hit;
-        }
+    updateDrawProperty(time: number) {
+        this.drawProperty.opacity.time = time;
+        this.drawProperty.approachCircleOpacity.time = time;
+        this.drawProperty.approachCircleScale.time = time;
     }
 }
 

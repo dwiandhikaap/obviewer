@@ -11,13 +11,7 @@ enum HitObjectType {
 }
 
 class Hitsample {
-    constructor(
-        public normalSet: number,
-        public additionSet: number,
-        public index: number,
-        public volume: number,
-        public filename: string
-    ) {}
+    constructor(public normalSet: number, public additionSet: number, public index: number, public volume: number, public filename: string) {}
 }
 
 interface HitObjectConfig {
@@ -51,8 +45,7 @@ class HitObject {
     stackOffset: number = 0;
 
     constructor(hitObjectConfig: HitObjectConfig) {
-        const { startPos, endPos, startTime, endTime, type, hitSound, hitSample, comboCount, difficulty, objectIndex } =
-            hitObjectConfig;
+        const { startPos, endPos, startTime, endTime, type, hitSound, hitSample, comboCount, difficulty, objectIndex } = hitObjectConfig;
         this.startPos = startPos;
         this.endPos = endPos;
         this.startTime = startTime;
@@ -65,6 +58,8 @@ class HitObject {
         this.objectIndex = objectIndex;
         this.comboCount = comboCount;
     }
+
+    updateDrawProperty(time: number) {}
 
     getStackedStartPos() {
         return [this.startPos[0] - this.stackOffset, this.startPos[1] - this.stackOffset];
@@ -100,9 +95,7 @@ class HitObject {
 
     // How many colour(s) are skipped on the new combo
     getColourHax() {
-        return (
-            ((this.type & (HitObjectType.ColorSkip1 | HitObjectType.ColorSkip2 | HitObjectType.ColorSkip3)) >> 4) + 1
-        );
+        return ((this.type & (HitObjectType.ColorSkip1 | HitObjectType.ColorSkip2 | HitObjectType.ColorSkip3)) >> 4) + 1;
     }
 }
 
