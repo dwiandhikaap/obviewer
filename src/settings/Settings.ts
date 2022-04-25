@@ -5,6 +5,9 @@ interface ISettings {
     AppHeight: number;
     AudioVolume: number;
     AudioOffset: number;
+    AudioAutoSyncEnabled: boolean;
+    AudioAutoSyncThresholdMS: number;
+    AudioAutoSyncDetectIssue: boolean;
     EnableGameCheck: boolean;
 }
 type SettingsParameters = keyof ISettings;
@@ -18,6 +21,9 @@ class Settings {
         AppHeight: 720,
         AudioVolume: 60,
         AudioOffset: 0,
+        AudioAutoSyncEnabled: true,
+        AudioAutoSyncThresholdMS: 150,
+        AudioAutoSyncDetectIssue: true,
         EnableGameCheck: false,
     };
 

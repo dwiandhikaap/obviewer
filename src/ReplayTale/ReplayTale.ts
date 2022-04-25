@@ -1,5 +1,6 @@
 import { Beatmap } from "../osu/Beatmap/Beatmap";
-import { Mod, Mods } from "../osu/Mods/Mods";
+import { GameInstance } from "../osu/Gameplay/GameInstance";
+import { Mods } from "../osu/Mods/Mods";
 import { Replay } from "../osu/Replay/Replay";
 import { AudioHandler } from "../renderer/AudioHandler";
 import { Renderer } from "../renderer/Renderer";
@@ -19,6 +20,7 @@ class ReplayTale {
 
     private renderer: Renderer;
     private audioHandler: AudioHandler;
+    private gameInstance: GameInstance;
 
     public isPaused: boolean = true;
     private timestamp: number = 0;
@@ -36,6 +38,7 @@ class ReplayTale {
         const { container } = replaytaleConfig;
         this.renderer = new Renderer(container);
         this.audioHandler = new AudioHandler();
+        this.gameInstance = new GameInstance(this.renderer);
     }
 
     loadBeatmapAssets(audio?: HTMLAudioElement, background?: HTMLImageElement) {
@@ -69,6 +72,7 @@ class ReplayTale {
         }
 
         this.beatmap = beatmap;
+        this.gameInstance.loadBeatmap(beatmap);
         this.renderer.loadBeatmap(beatmap);
     }
 
@@ -84,6 +88,7 @@ class ReplayTale {
         }
 
         this.replay = replay;
+        this.gameInstance.loadReplay(replay);
         this.renderer.loadReplay(replay);
     }
 
@@ -130,6 +135,8 @@ class ReplayTale {
         }
     }
 
+    private _autoSyncCount = 0;
+    private _autoSyncLastTime = 0;
     private lastFrameTimestamp: number = 0;
     private loop = (time: number) => {
         if (this.isPaused) return;
@@ -137,15 +144,33 @@ class ReplayTale {
         let deltaTime = time - this.lastFrameTimestamp;
 
         this.timestamp += deltaTime * this.playbackRate;
-        this.renderer.timestamp += deltaTime * this.playbackRate;
+        this.renderer.timestamp = this.timestamp;
+        this.gameInstance.time = this.timestamp;
         this.lastFrameTimestamp = time;
 
-        // self-sync audio if somehow the game drifts
-        const currTime = this.audioHandler.getAudioCurrentTimeMS("beatmap");
-        const offset = this.audioHandler.getAudioOffsetMS("beatmap");
-        const timeDiff = currTime - offset - this.timestamp;
-        if (Math.abs(timeDiff) > 150) {
-            this.audioHandler.seekAudio("beatmap", this.timestamp / 1000);
+        // Sync audio automatically if somehow the game/audio drifts
+        if (Settings.get("AudioAutoSyncEnabled")) {
+            const currTime = this.audioHandler.getAudioCurrentTimeMS("beatmap");
+            const offset = this.audioHandler.getAudioOffsetMS("beatmap");
+            const timeDiff = currTime - offset - this.timestamp;
+            if (Math.abs(timeDiff) > Settings.get("AudioAutoSyncThresholdMS")) {
+                this.audioHandler.seekAudio("beatmap", this.timestamp / 1000);
+
+                // Check quick repeating autosync in short intervals
+                if (Settings.get("AudioAutoSyncDetectIssue")) {
+                    this._autoSyncCount++;
+                    if (this.timestamp - this._autoSyncLastTime > 1000) {
+                        this._autoSyncCount = 0;
+                    }
+                    this._autoSyncLastTime = time;
+                }
+            }
+        }
+
+        if (this._autoSyncCount > 10) {
+            console.warn("[Audio] Auto sync issue detected! Disabling audio auto sync!");
+            Settings.set("AudioAutoSyncEnabled", false);
+            this._autoSyncCount = 0;
         }
 
         requestAnimationFrame(this.loop);
