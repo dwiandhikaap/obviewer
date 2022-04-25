@@ -1,13 +1,12 @@
 import * as PIXI from "pixi.js";
 import { Texture } from "pixi.js";
 import { Beatmap } from "../osu/Beatmap/Beatmap";
+import { GameHUD } from "../osu/Graphics/HUD/GameHUD";
 import { Replay } from "../osu/Replay/Replay";
 import { Settings } from "../settings/Settings";
 import { AssetsLoader } from "./Assets/Assets";
 import { SliderTextureGenerator } from "./Drawable/HitObject/SliderTextureGenerator";
-import { Background } from "./Layers/Background";
-import { BeatmapField } from "./Layers/BeatmapField";
-import { ReplayField } from "./Layers/ReplayField";
+import { Background, BeatmapField, HUDOverlay, ReplayField } from "./Layers";
 
 class Renderer {
     public pixi: PIXI.Application;
@@ -21,18 +20,21 @@ class Renderer {
         return this._timestamp;
     }
 
-    set timestamp(value: number) {
-        this._timestamp = value;
-        this.ticker.update(value);
+    set timestamp(time: number) {
+        this._timestamp = time;
+        this.ticker.update(time);
 
-        this.background.update(value);
-        this.beatmapField.update(value);
-        this.replayField.update(value);
+        this.background.draw(time);
+        this.beatmapField.draw(time);
+        this.replayField.draw(time);
+
+        this.hudOverlay.draw(time);
     }
 
     private background: Background;
     private beatmapField: BeatmapField;
     private replayField: ReplayField;
+    private hudOverlay: HUDOverlay;
 
     constructor(querySelector: string) {
         // Set PIXI Application
@@ -67,6 +69,11 @@ class Renderer {
         this.replayField.interactiveChildren = false;
         this.pixi.stage.addChild(this.replayField);
 
+        // Set HUDOverlay
+        this.hudOverlay = new HUDOverlay(this.pixi);
+        this.hudOverlay.interactiveChildren = false;
+        this.pixi.stage.addChild(this.hudOverlay);
+
         const view = document.querySelector(querySelector);
         view && view.appendChild(this.pixi.view);
 
@@ -82,10 +89,15 @@ class Renderer {
 
     loadBeatmap(beatmap: Beatmap) {
         this.beatmapField.loadBeatmap(beatmap);
+        this.hudOverlay.loadBeatmap(beatmap);
     }
 
     loadReplay(replay: Replay) {
         this.replayField.loadReplay(replay);
+    }
+
+    loadHUD(gameHUD: GameHUD) {
+        this.hudOverlay.loadHUD(gameHUD);
     }
 
     setBackground(image: HTMLImageElement) {
