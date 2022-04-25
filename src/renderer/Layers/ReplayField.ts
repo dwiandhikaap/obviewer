@@ -4,7 +4,6 @@ import { getOsuPixelScale } from "../../util/osu-calculation";
 import { CursorNode, MainCursor } from "../Drawable/DrawableTypes";
 
 class ReplayField extends Container {
-    private replay: Replay;
     private playfieldResolution: [number, number];
 
     private mainCursor: MainCursor;
@@ -31,7 +30,6 @@ class ReplayField extends Container {
     }
 
     loadReplay(replay: Replay) {
-        this.replay = replay;
         const scale = getOsuPixelScale(this.playfieldResolution[0], this.playfieldResolution[1]);
 
         this.mainCursor = new MainCursor(replay, scale);
@@ -41,9 +39,9 @@ class ReplayField extends Container {
         this.addChild(this.mainCursor);
     }
 
-    update(timestamp: number) {
-        this.mainCursor.update(timestamp);
-        this.cursorNode.update(timestamp);
+    draw(timestamp: number) {
+        this.mainCursor.draw(timestamp);
+        this.cursorNode.draw(timestamp);
     }
 }
 

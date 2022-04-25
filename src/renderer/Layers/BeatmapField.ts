@@ -1,5 +1,4 @@
 import { Application, Container } from "pixi.js";
-import * as PIXI from "pixi.js";
 import { Beatmap } from "../../osu/Beatmap/Beatmap";
 import { getOsuPixelScale } from "../../util/osu-calculation";
 import { DrawableGenerator } from "../Drawable/DrawableGenerator";
@@ -36,12 +35,9 @@ class BeatmapField extends Container {
     loadBeatmap(beatmap: Beatmap) {
         this.hitObjectDrawables.forEach((obj) => obj.destroy({ texture: true, baseTexture: false, children: true }));
         this.hitObjectDrawables = [];
-
         this.beatmap = beatmap;
 
         const hitObjects = this.beatmap.hitObjects;
-        const difficulty = this.beatmap.difficulty;
-
         const scale = getOsuPixelScale(this.playfieldResolution[0], this.playfieldResolution[1]);
 
         hitObjects.objects.forEach((hitObject) => {
@@ -55,10 +51,10 @@ class BeatmapField extends Container {
         }
     }
 
-    update(timestamp: number) {
+    draw(timestamp: number) {
         for (let i = 0; i < this.hitObjectDrawables.length; i++) {
             // would it be nice just to update some instead of all of them ?
-            this.hitObjectDrawables[i].update(timestamp);
+            this.hitObjectDrawables[i].draw(timestamp);
         }
     }
 }

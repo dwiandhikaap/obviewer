@@ -79,7 +79,7 @@ class Background extends Container {
         }
     }
 
-    update(timestamp: number) {}
+    draw(timestamp: number) {}
 }
 
 export { Background };
