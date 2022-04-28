@@ -52,7 +52,7 @@ class GameInstance {
 
         const hitObjects = this.beatmap.hitObjects.objects;
         for (let i = 0; i < hitObjects.length; i++) {
-            hitObjects[i].updateDrawProperty(time);
+            hitObjects[i].update(time);
         }
     }
 }

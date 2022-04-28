@@ -1,16 +1,16 @@
 import { Container } from "pixi.js";
-import { HitCircleDrawable } from "./HitObject/HitCircleDrawable";
-import { SliderDrawable } from "./HitObject/SliderDrawable";
-import { SpinnerDrawable } from "./HitObject/SpinnerDrawable";
+import { DrawableHitCircle } from "./HitObject/DrawableHitCircle";
+import { DrawableSlider } from "./HitObject/DrawableSlider";
+import { DrawableSpinner } from "./HitObject/DrawableSpinner";
 import { CursorNode } from "./Replay/CursorNode";
 import { CursorTrail } from "./Replay/CursorTrail";
 import { MainCursor } from "./Replay/MainCursor";
 
-export { HitCircleDrawable, SliderDrawable };
+export { DrawableHitCircle, DrawableSlider };
 export { CursorNode, CursorTrail, MainCursor };
 
 export interface Drawable extends Container {
     draw(time: number): void;
 }
 
-export type HitObjectDrawable = HitCircleDrawable | SliderDrawable | SpinnerDrawable;
+export type HitObjectDrawable = DrawableHitCircle | DrawableSlider | DrawableSpinner;

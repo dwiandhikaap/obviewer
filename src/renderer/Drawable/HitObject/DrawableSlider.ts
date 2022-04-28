@@ -131,7 +131,7 @@ function createSliderTicks(slider: Slider, radius: number) {
     return sliderTicks;
 }
 
-class SliderDrawable extends Container {
+class DrawableSlider extends Container {
     private radius: number;
     private linePath: Path;
 
@@ -176,8 +176,15 @@ class SliderDrawable extends Container {
         this.visible = visible;
         if (!visible) return;
 
-        const { slideIndex, progressPosition, opacity, headOpacity, ballOpacity, approachCircleOpacity, approachCircleScale } =
-            this.slider.drawProperty;
+        const {
+            slideIndex,
+            progressPosition,
+            opacity,
+            headOpacity,
+            ballOpacity,
+            approachCircleOpacity,
+            approachCircleScale,
+        } = this.slider.drawable;
 
         this.alpha = opacity.value;
         this.sliderApproachCircle.alpha = approachCircleOpacity.value;
@@ -204,4 +211,4 @@ class SliderDrawable extends Container {
     }
 }
 
-export { SliderDrawable };
+export { DrawableSlider };

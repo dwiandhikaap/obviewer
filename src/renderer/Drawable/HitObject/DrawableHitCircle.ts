@@ -45,7 +45,7 @@ function createApproachCircle(radius: number) {
     return ac;
 }
 
-class HitCircleDrawable extends Container {
+class DrawableHitCircle extends Container {
     private radius: number;
 
     private circle: Container;
@@ -75,7 +75,7 @@ class HitCircleDrawable extends Container {
         this.visible = visible;
         if (!visible) return;
 
-        const { opacity, approachCircleScale, approachCircleOpacity } = this.hitCircle.drawProperty;
+        const { opacity, approachCircleScale, approachCircleOpacity } = this.hitCircle.drawable;
 
         this.circle.alpha = opacity.value;
 
@@ -85,4 +85,4 @@ class HitCircleDrawable extends Container {
     }
 }
 
-export { HitCircleDrawable };
+export { DrawableHitCircle };

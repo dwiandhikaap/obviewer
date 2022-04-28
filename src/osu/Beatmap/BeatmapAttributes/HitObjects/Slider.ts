@@ -4,6 +4,7 @@ import { Spannable } from "../../../../math/Spannable";
 import { Vector2 } from "../../../../math/Vector2";
 import { Mod } from "../../../Mods/Mods";
 import { TimingPoints } from "../TimingPoints";
+import { DrawableSlider } from "./Drawable/DrawableSlider";
 import { HitObject, HitObjectConfig } from "./HitObject";
 
 class SliderTick {
@@ -14,22 +15,6 @@ class SliderReverseTick extends SliderTick {
     constructor(time: number, position: [number, number], public opacity: Spannable, public isReversed: boolean) {
         super(time, position);
     }
-}
-
-interface SliderDrawProperty {
-    progress: number;
-    progressPosition: [number, number];
-    isVisible: boolean;
-    isSliding: boolean;
-    isReversed: boolean;
-    slideIndex: number;
-
-    opacity: Spannable;
-    headOpacity: Spannable;
-    ballOpacity: Spannable;
-
-    approachCircleOpacity: Spannable;
-    approachCircleScale: Spannable;
 }
 
 interface SliderConfig {
@@ -58,7 +43,7 @@ class Slider extends HitObject {
     sliderTicks: SliderTick[] = [];
     reverseTicks: SliderReverseTick[] = [];
 
-    drawProperty: SliderDrawProperty;
+    drawable: DrawableSlider;
 
     constructor(hitObjectConfig: HitObjectConfig, sliderConfig: SliderConfig, private timing: TimingPoints) {
         super(hitObjectConfig);
@@ -87,7 +72,8 @@ class Slider extends HitObject {
         this.endTime = endTime;
         this.sliderTicks = this.initializeSliderTicks();
         this.reverseTicks = this.initializeReverseTicks();
-        this.drawProperty = this.initializeDrawProperty();
+
+        this.drawable = new DrawableSlider(this);
     }
 
     private initializeTiming() {
@@ -130,7 +116,8 @@ class Slider extends HitObject {
                 }
             } else {
                 for (let j = tickCountPerSlide - 1; j >= 0; j--) {
-                    const tickTime = this.startTime + sliderSlideDuration - (j + 1) * sliderTickDuration + i * sliderSlideDuration;
+                    const tickTime =
+                        this.startTime + sliderSlideDuration - (j + 1) * sliderTickDuration + i * sliderSlideDuration;
                     const tickPos = this.getPositionAt(tickTime);
 
                     const tick = new SliderTick(tickTime, tickPos);
@@ -168,7 +155,9 @@ class Slider extends HitObject {
 
             const tickOpacity = new Spannable(0);
             const tickFadeStart =
-                i === 1 ? this.startTime - this.difficulty.getPreempt() + this.difficulty.fadeIn : this.startTime + slideDuration * (i - 2);
+                i === 1
+                    ? this.startTime - this.difficulty.getPreempt() + this.difficulty.fadeIn
+                    : this.startTime + slideDuration * (i - 2);
             tickOpacity.addSpan(tickFadeStart, tickFadeStart + 250, 0, 1);
             tickOpacity.addSpan(tickFadeStart + 250, reverseTime - 1, 1, 1);
             tickOpacity.addSpan(reverseTime - 1, reverseTime, 1, 0);
@@ -180,75 +169,10 @@ class Slider extends HitObject {
         return reverseTicks;
     }
 
-    private initializeDrawProperty(): SliderDrawProperty {
-        const diff = this.difficulty;
-        const fadeIn = diff.fadeIn;
-        const preempt = diff.getPreempt();
+    update(time: number) {
+        this.drawable.update(time);
 
-        const opacity: Spannable = new Spannable();
-        const appearTime = this.startTime - preempt;
-
-        if (diff.mods.contains(Mod.Hidden)) {
-            opacity.addSpan(appearTime, appearTime + fadeIn, 0, 1);
-            opacity.addSpan(appearTime + fadeIn, this.endTime, 1, 0);
-        } else {
-            opacity.addSpan(appearTime, appearTime + fadeIn, 0, 1);
-            opacity.addSpan(appearTime + fadeIn, this.endTime, 1, 1);
-            opacity.addSpan(this.endTime, this.endTime + 150, 1, 0);
-        }
-
-        const headOpacity: Spannable = new Spannable();
-        headOpacity.addSpan(this.startTime, this.startTime + 150, 1, 0);
-
-        const ballOpacity = new Spannable(0);
-        ballOpacity.addSpan(this.startTime, this.endTime, 1, 1);
-
-        const approachCircleOpacity: Spannable = new Spannable(0);
-
-        if (diff.mods.contains(Mod.Hidden)) {
-            if (this.objectIndex === 0) {
-                approachCircleOpacity.addSpan(0, Math.min(fadeIn * 2, preempt), 0, 1);
-                approachCircleOpacity.addSpan(Math.min(fadeIn * 2, preempt), Math.min(fadeIn * 2, preempt) * 2, 1, 0);
-            }
-        } else {
-            approachCircleOpacity.addSpan(appearTime, appearTime + Math.min(fadeIn * 2, preempt), 0, 1);
-            approachCircleOpacity.addSpan(appearTime + Math.min(fadeIn * 2, preempt), this.startTime, 1, 1);
-        }
-
-        const approachCircleScale: Spannable = new Spannable(1);
-
-        approachCircleScale.addSpan(appearTime, this.startTime, 4, 1);
-
-        return {
-            progress: 0,
-            progressPosition: this.getPositionAt(0),
-            isVisible: false,
-            isSliding: false,
-            isReversed: false,
-            slideIndex: 0,
-
-            opacity: opacity,
-            headOpacity: headOpacity,
-            ballOpacity: ballOpacity,
-            approachCircleOpacity: approachCircleOpacity,
-            approachCircleScale: approachCircleScale,
-        };
-    }
-
-    updateDrawProperty(time: number) {
-        this.drawProperty.progress = MathHelper.Clamp((time - this.startTime) / this.duration, 0, 1);
-        this.drawProperty.progressPosition = this.getStackedPositionAt(time);
-        this.drawProperty.isVisible = this.isVisibleAt(time);
-        this.drawProperty.isSliding = time >= this.startTime && time <= this.endTime;
-        this.drawProperty.slideIndex = this.getSlideIndexAt(time);
-        this.drawProperty.isReversed = this.getSlideDirectionAt(time) === -1;
-        this.drawProperty.opacity.time = time;
-        this.drawProperty.headOpacity.time = time;
-        this.drawProperty.ballOpacity.time = time;
-        this.drawProperty.approachCircleOpacity.time = time;
-        this.drawProperty.approachCircleScale.time = time;
-
-        this.reverseTicks.forEach((ticks) => (ticks.time = time));
+        //this.reverseTicks.forEach((ticks) => (ticks.opacity.time = time));
     }
 
     getPositionAt(time: number) {
@@ -297,7 +221,9 @@ class Slider extends HitObject {
     getStackedSliderTicks() {
         const ticks: SliderTick[] = [];
         for (const tick of this.sliderTicks) {
-            ticks.push(new SliderTick(tick.time, [tick.position[0] - this.stackOffset, tick.position[1] - this.stackOffset]));
+            ticks.push(
+                new SliderTick(tick.time, [tick.position[0] - this.stackOffset, tick.position[1] - this.stackOffset])
+            );
         }
         return ticks;
     }
