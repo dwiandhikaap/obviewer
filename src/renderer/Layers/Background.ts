@@ -1,4 +1,4 @@
-import { Application, Container, Graphics, Sprite, Texture, Ticker } from "pixi.js";
+import { Application, Container, Graphics, Sprite, Texture } from "pixi.js";
 
 interface BackgroundConfig {
     texture?: Texture;
@@ -25,7 +25,7 @@ class Background extends Container {
             this._brightness = brightnessValue;
         }
 
-        this.getChildAt(1).alpha = this.brightness;
+        this.backgroundSprite.alpha = this.brightness;
     }
 
     private get canvasWidth() {
@@ -55,7 +55,7 @@ class Background extends Container {
 
         const { texture, brightness, fit } = backgroundConfig;
 
-        brightness && (this._brightness = brightness);
+        this._brightness = brightness ?? 1;
         fit && (this.fit = fit);
         texture && this.setImage(texture);
     }
