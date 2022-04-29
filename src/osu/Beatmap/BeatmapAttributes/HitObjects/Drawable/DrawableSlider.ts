@@ -3,21 +3,62 @@ import { Spannable } from "../../../../../math/Spannable";
 import { Mod } from "../../../../Mods/Mods";
 import { Slider, SliderReverseTick, SliderTick } from "../Slider";
 
-// TODO: implement this
 class DrawableSliderTick {
     opacity: Spannable;
+    scale: Spannable;
 
     constructor(public sliderTick: SliderTick) {
-        this.opacity = new Spannable(1);
+        const tickOpacity = new Spannable(0);
+        const tickScale = new Spannable(0);
+
+        const fadeStart = sliderTick.time - 400;
+        const fadeEnd = sliderTick.time - 300;
+
+        tickOpacity.addSpan(fadeStart, fadeEnd, 0, 1);
+        tickOpacity.addSpan(fadeEnd, sliderTick.time, 1, 1);
+        tickScale.addSpan(fadeStart, sliderTick.time - 200, 0, 1);
+        tickScale.addSpan(sliderTick.time - 200, sliderTick.time, 1, 1);
+
+        this.opacity = tickOpacity;
+        this.scale = tickScale;
+    }
+
+    update(time: number) {
+        this.opacity.time = time;
+        this.scale.time = time;
     }
 }
 
-// TODO: implement this
 class DrawableReverseTick {
     opacity: Spannable;
+    scale: Spannable;
 
     constructor(public reverseTick: SliderReverseTick) {
-        this.opacity = new Spannable(1);
+        const slider = reverseTick.slider;
+        const slideDuration = Math.floor(slider.duration / slider.slides);
+        const reverseTime = reverseTick.time;
+
+        const tickOpacity = new Spannable(0);
+        const tickFadeStart = reverseTime - slideDuration * 2;
+        tickOpacity.addSpan(tickFadeStart, tickFadeStart + 300, 0, 1);
+        tickOpacity.addSpan(tickFadeStart + 300, reverseTime, 1, 1);
+
+        // Scale beat every 300ms
+        const tickScale = new Spannable(1);
+        const tickStart = reverseTime - slideDuration * 2;
+        const tickEnd = reverseTime;
+
+        for (let i = tickStart; i < tickEnd; i += 300) {
+            tickScale.addSpan(i, i + 300, 1, 0.6);
+        }
+
+        this.opacity = tickOpacity;
+        this.scale = tickScale;
+    }
+
+    update(time: number) {
+        this.opacity.time = time;
+        this.scale.time = time;
     }
 }
 

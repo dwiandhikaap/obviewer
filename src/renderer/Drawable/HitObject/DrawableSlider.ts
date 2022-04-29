@@ -176,17 +176,10 @@ class DrawableSlider extends Container {
         this.visible = visible;
         if (!visible) return;
 
-        const {
-            slideIndex,
-            progressPosition,
-            opacity,
-            headOpacity,
-            ballOpacity,
-            approachCircleOpacity,
-            approachCircleScale,
-        } = this.slider.drawable;
+        const { progressPosition, opacity, headOpacity, ballOpacity, approachCircleOpacity, approachCircleScale } =
+            this.slider.drawable;
 
-        this.alpha = opacity.value;
+        this.sliderBody.alpha = opacity.value;
         this.sliderApproachCircle.alpha = approachCircleOpacity.value;
         this.sliderApproachCircle.width = approachCircleScale.value * this.radius * 2;
         this.sliderApproachCircle.height = approachCircleScale.value * this.radius * 2;
@@ -200,13 +193,22 @@ class DrawableSlider extends Container {
         this.sliderBall.alpha = ballOpacity.value;
         this.sliderHead.alpha = headOpacity.value;
 
-        const reverseIndexStart = Math.max(0, slideIndex - 1);
-        const reverseIndexEnd = Math.min(this.slider.slides - 2, slideIndex + 1);
+        for (let i = 0; i < this.slider.reverseTicks.length; i++) {
+            const reverseTick = this.slider.reverseTicks[i];
+            const opacity = reverseTick.drawable.opacity.value;
+            const scale = reverseTick.drawable.scale.value;
 
-        for (let i = reverseIndexStart; i <= reverseIndexEnd; i++) {
-            const reverse = this.sliderReverses.children[i];
-            const opacity = this.slider.reverseTicks[i].opacity.getValueAt(timestamp);
-            reverse.alpha = opacity;
+            this.sliderReverses.children[i].alpha = opacity;
+            this.sliderReverses.children[i].scale.set(scale);
+        }
+
+        for (let i = 0; i < this.slider.sliderTicks.length; i++) {
+            const sliderTick = this.slider.sliderTicks[i];
+            const opacity = sliderTick.drawable.opacity.value;
+            const scale = sliderTick.drawable.scale.value;
+
+            this.sliderTicks.children[i].alpha = opacity;
+            this.sliderTicks.children[i].scale.set(scale);
         }
     }
 }

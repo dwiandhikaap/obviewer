@@ -4,16 +4,27 @@ import { Spannable } from "../../../../math/Spannable";
 import { Vector2 } from "../../../../math/Vector2";
 import { Mod } from "../../../Mods/Mods";
 import { TimingPoints } from "../TimingPoints";
-import { DrawableSlider } from "./Drawable/DrawableSlider";
+import { DrawableReverseTick, DrawableSlider, DrawableSliderTick } from "./Drawable/DrawableSlider";
 import { HitObject, HitObjectConfig } from "./HitObject";
 
 class SliderTick {
-    constructor(public time: number, public position: [number, number]) {}
+    drawable: DrawableSliderTick;
+
+    constructor(public slider: Slider, public time: number, public position: [number, number]) {
+        this.drawable = new DrawableSliderTick(this);
+    }
 }
 
-class SliderReverseTick extends SliderTick {
-    constructor(time: number, position: [number, number], public opacity: Spannable, public isReversed: boolean) {
-        super(time, position);
+class SliderReverseTick {
+    drawable: DrawableReverseTick;
+
+    constructor(
+        public slider: Slider,
+        public time: number,
+        public position: [number, number],
+        public isReversed: boolean
+    ) {
+        this.drawable = new DrawableReverseTick(this);
     }
 }
 
@@ -111,7 +122,7 @@ class Slider extends HitObject {
                     const tickTime = this.startTime + (j + 1) * sliderTickDuration + i * sliderSlideDuration;
                     const tickPos = this.getPositionAt(tickTime);
 
-                    const tick = new SliderTick(tickTime, tickPos);
+                    const tick = new SliderTick(this, tickTime, tickPos);
                     sliderTicks.push(tick);
                 }
             } else {
@@ -120,7 +131,7 @@ class Slider extends HitObject {
                         this.startTime + sliderSlideDuration - (j + 1) * sliderTickDuration + i * sliderSlideDuration;
                     const tickPos = this.getPositionAt(tickTime);
 
-                    const tick = new SliderTick(tickTime, tickPos);
+                    const tick = new SliderTick(this, tickTime, tickPos);
                     sliderTicks.push(tick);
                 }
             }
@@ -153,16 +164,7 @@ class Slider extends HitObject {
             }
             const isReversed = i % 2 === 1;
 
-            const tickOpacity = new Spannable(0);
-            const tickFadeStart =
-                i === 1
-                    ? this.startTime - this.difficulty.getPreempt() + this.difficulty.fadeIn
-                    : this.startTime + slideDuration * (i - 2);
-            tickOpacity.addSpan(tickFadeStart, tickFadeStart + 250, 0, 1);
-            tickOpacity.addSpan(tickFadeStart + 250, reverseTime - 1, 1, 1);
-            tickOpacity.addSpan(reverseTime - 1, reverseTime, 1, 0);
-
-            const reverseTick = new SliderReverseTick(reverseTime, reversePos, tickOpacity, isReversed);
+            const reverseTick = new SliderReverseTick(this, reverseTime, reversePos, isReversed);
             reverseTicks.push(reverseTick);
         }
 
@@ -171,8 +173,8 @@ class Slider extends HitObject {
 
     update(time: number) {
         this.drawable.update(time);
-
-        //this.reverseTicks.forEach((ticks) => (ticks.opacity.time = time));
+        this.sliderTicks.forEach((ticks) => ticks.drawable.update(time));
+        this.reverseTicks.forEach((ticks) => ticks.drawable.update(time));
     }
 
     getPositionAt(time: number) {
@@ -222,7 +224,10 @@ class Slider extends HitObject {
         const ticks: SliderTick[] = [];
         for (const tick of this.sliderTicks) {
             ticks.push(
-                new SliderTick(tick.time, [tick.position[0] - this.stackOffset, tick.position[1] - this.stackOffset])
+                new SliderTick(this, tick.time, [
+                    tick.position[0] - this.stackOffset,
+                    tick.position[1] - this.stackOffset,
+                ])
             );
         }
         return ticks;
@@ -237,9 +242,9 @@ class Slider extends HitObject {
         for (const tick of this.reverseTicks) {
             ticks.push(
                 new SliderReverseTick(
+                    this,
                     tick.time,
                     [tick.position[0] - this.stackOffset, tick.position[1] - this.stackOffset],
-                    tick.opacity,
                     tick.isReversed
                 )
             );
