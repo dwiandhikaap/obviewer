@@ -70,7 +70,7 @@ class DrawableSlider {
     isReversed: boolean;
     slideIndex: number;
 
-    opacity: Spannable;
+    bodyOpacity: Spannable;
     headOpacity: Spannable;
     ballOpacity: Spannable;
 
@@ -82,20 +82,25 @@ class DrawableSlider {
         const fadeIn = diff.fadeIn;
         const preempt = diff.getPreempt();
 
-        const opacity: Spannable = new Spannable();
+        const bodyOpacity: Spannable = new Spannable();
+        const headOpacity: Spannable = new Spannable();
         const appearTime = slider.startTime - preempt;
 
         if (diff.mods.contains(Mod.Hidden)) {
-            opacity.addSpan(appearTime, appearTime + fadeIn, 0, 1);
-            opacity.addSpan(appearTime + fadeIn, slider.endTime, 1, 0);
-        } else {
-            opacity.addSpan(appearTime, appearTime + fadeIn, 0, 1);
-            opacity.addSpan(appearTime + fadeIn, slider.endTime, 1, 1);
-            opacity.addSpan(slider.endTime, slider.endTime + 150, 1, 0);
-        }
+            bodyOpacity.addSpan(appearTime, appearTime + fadeIn, 0, 1);
+            bodyOpacity.addSpan(appearTime + fadeIn, slider.endTime, 1, 0);
 
-        const headOpacity: Spannable = new Spannable();
-        headOpacity.addSpan(slider.startTime, slider.startTime + 150, 1, 0);
+            headOpacity.addSpan(appearTime, appearTime + preempt * 0.4, 0, 1);
+            headOpacity.addSpan(appearTime + preempt * 0.4, appearTime + preempt * 0.7, 1, 0);
+        } else {
+            bodyOpacity.addSpan(appearTime, appearTime + fadeIn, 0, 1);
+            bodyOpacity.addSpan(appearTime + fadeIn, slider.endTime, 1, 1);
+            bodyOpacity.addSpan(slider.endTime, slider.endTime + 150, 1, 0);
+
+            headOpacity.addSpan(appearTime, appearTime + fadeIn, 0, 1);
+            headOpacity.addSpan(appearTime + fadeIn, slider.endTime, 1, 1);
+            headOpacity.addSpan(slider.endTime, slider.endTime + 150, 1, 0);
+        }
 
         const ballOpacity = new Spannable(0);
         ballOpacity.addSpan(slider.startTime, slider.endTime, 1, 1);
@@ -122,7 +127,7 @@ class DrawableSlider {
         this.isSliding = false;
         this.isReversed = false;
         this.slideIndex = 0;
-        this.opacity = opacity;
+        this.bodyOpacity = bodyOpacity;
         this.headOpacity = headOpacity;
         this.ballOpacity = ballOpacity;
         this.approachCircleOpacity = approachCircleOpacity;
@@ -136,7 +141,7 @@ class DrawableSlider {
         this.isSliding = time >= this.slider.startTime && time <= this.slider.endTime;
         this.slideIndex = this.slider.getSlideIndexAt(time);
         this.isReversed = this.slider.getSlideDirectionAt(time) === -1;
-        this.opacity.time = time;
+        this.bodyOpacity.time = time;
         this.headOpacity.time = time;
         this.ballOpacity.time = time;
         this.approachCircleOpacity.time = time;
