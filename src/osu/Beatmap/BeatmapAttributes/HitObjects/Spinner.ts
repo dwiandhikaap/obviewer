@@ -1,4 +1,4 @@
-import { Spannable } from "../../../../math/Spannable";
+import { Easer } from "../../../../math/Easer";
 import { DrawableSpinner } from "./Drawable/DrawableSpinner";
 import { HitObject, HitObjectConfig } from "./HitObject";
 

@@ -1,4 +1,4 @@
-import { Spannable } from "../../../math/Spannable";
+import { Easer } from "../../../math/Easer";
 import { UnstableRate } from "../../Gameplay/UnstableRate";
 import { HUDComponent } from "./HUDComponent";
 
@@ -8,7 +8,7 @@ interface URTick {
     offset: number;
     time: number;
     color: number;
-    opacity: Spannable;
+    opacity: Easer;
 }
 
 class URBar implements HUDComponent {
@@ -42,7 +42,7 @@ class URBar implements HUDComponent {
         for (let i = startIndex; i < endIndex; i++) {
             const hitError = unstableRate.hitErrors[i];
 
-            const tickOpacity = new Spannable().addSpan(hitError.time, hitError.time + UR_TICK_DURATION, 0.75, 0);
+            const tickOpacity = new Easer().addEasing(hitError.time, hitError.time + UR_TICK_DURATION, 0.75, 0);
 
             let color = 0xff0000;
 

@@ -1,6 +1,6 @@
 import { MathHelper } from "../../../../math/MathHelper";
 import { Path } from "../../../../math/Path";
-import { Spannable } from "../../../../math/Spannable";
+import { Easer } from "../../../../math/Easer";
 import { Vector2 } from "../../../../math/Vector2";
 import { Mod } from "../../../Mods/Mods";
 import { TimingPoints } from "../TimingPoints";
@@ -203,6 +203,10 @@ class Slider extends HitObject {
         time = MathHelper.Clamp(time, this.startTime, this.endTime);
 
         return Math.max(0, Math.ceil(((time - this.startTime) * this.slides) / this.duration) - 1);
+    }
+
+    getSlideStartTime(index: number) {
+        return this.startTime + (index * this.duration) / this.slides;
     }
 
     getCurvePath() {

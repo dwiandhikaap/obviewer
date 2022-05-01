@@ -1,13 +1,16 @@
-interface Span {
+import { EasingFunction, EasingType } from "./Easing";
+
+interface IEasing {
     startTime: number;
     endTime: number;
     targetFrom: number;
     targetTo: number;
+    easing: EasingType;
 }
 
 // Holds possibly different values depending on the given time
-class Spannable {
-    private spans: Span[] = [];
+class Easer {
+    private easings: IEasing[] = [];
     public time: number = 0;
 
     constructor(public defaultValue?: number) {}
@@ -17,23 +20,21 @@ class Spannable {
     }
 
     getValueAt(time: number): number {
-        if (this.spans.length === 0) {
+        if (this.easings.length === 0) {
             return this.defaultValue ?? NaN;
         }
 
         let result;
 
-        for (let i = this.spans.length - 1; i >= 0; i--) {
-            const transform = this.spans[i];
+        for (let i = this.easings.length - 1; i >= 0; i--) {
+            const transform = this.easings[i];
 
             if (time > transform.endTime || time < transform.startTime) {
                 continue;
             }
 
-            result =
-                ((time - transform.startTime) / (transform.endTime - transform.startTime)) * (transform.targetTo - transform.targetFrom) +
-                transform.targetFrom;
-
+            const t = (time - transform.startTime) / (transform.endTime - transform.startTime);
+            result = EasingFunction[transform.easing](t) * (transform.targetTo - transform.targetFrom) + transform.targetFrom;
             break;
         }
 
@@ -44,8 +45,8 @@ class Spannable {
 
             let minDeltaTime = Infinity;
             let closestIndex;
-            for (let i = this.spans.length - 1; i >= 0; i--) {
-                const transform = this.spans[i];
+            for (let i = this.easings.length - 1; i >= 0; i--) {
+                const transform = this.easings[i];
 
                 if (time < transform.endTime) continue;
 
@@ -57,25 +58,26 @@ class Spannable {
             }
 
             if (closestIndex === undefined) {
-                return this.spans[0].targetFrom;
+                return this.easings[0].targetFrom;
             }
 
-            return this.spans[closestIndex].targetTo;
+            return this.easings[closestIndex].targetTo;
         }
 
         return result;
     }
 
-    addSpan(startTime: number, endTime: number, targetFrom: number, targetTo: number) {
-        this.spans.push({
+    addEasing(startTime: number, endTime: number, targetFrom: number, targetTo: number, easing: EasingType = "Linear") {
+        this.easings.push({
             startTime,
             endTime,
             targetFrom,
             targetTo,
+            easing,
         });
 
         return this;
     }
 }
 
-export { Spannable };
+export { Easer };

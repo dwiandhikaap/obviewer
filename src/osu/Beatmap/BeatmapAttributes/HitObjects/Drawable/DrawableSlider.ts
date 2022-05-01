@@ -1,23 +1,32 @@
 import { MathHelper } from "../../../../../math/MathHelper";
-import { Spannable } from "../../../../../math/Spannable";
+import { Easer } from "../../../../../math/Easer";
 import { Mod } from "../../../../Mods/Mods";
 import { Slider, SliderReverseTick, SliderTick } from "../Slider";
 
 class DrawableSliderTick {
-    opacity: Spannable;
-    scale: Spannable;
+    opacity: Easer;
+    scale: Easer;
 
     constructor(public sliderTick: SliderTick) {
-        const tickOpacity = new Spannable(0);
-        const tickScale = new Spannable(0);
+        const slider = sliderTick.slider;
+        const tickOpacity = new Easer(0);
+        const tickScale = new Easer(0);
 
-        const fadeStart = sliderTick.time - 400;
-        const fadeEnd = sliderTick.time - 300;
+        const slideIndex = slider.getSlideIndexAt(sliderTick.time);
 
-        tickOpacity.addSpan(fadeStart, fadeEnd, 0, 1);
-        tickOpacity.addSpan(fadeEnd, sliderTick.time, 1, 1);
-        tickScale.addSpan(fadeStart, sliderTick.time - 200, 0, 1);
-        tickScale.addSpan(sliderTick.time - 200, sliderTick.time, 1, 1);
+        const diff = slider.difficulty;
+        const preempt = diff.getPreempt();
+        const appearTime = slider.startTime - preempt;
+
+        const firstTickAppearTime = slideIndex === 0 ? appearTime : slider.getSlideStartTime(slideIndex);
+        let fadeStart = firstTickAppearTime + (sliderTick.time - firstTickAppearTime) / 2 - 150;
+        let fadeEnd = fadeStart + 150;
+
+        tickOpacity.addEasing(fadeStart, fadeEnd, 0, 1);
+        tickOpacity.addEasing(fadeEnd, sliderTick.time, 1, 0.3, "InQuad");
+
+        tickScale.addEasing(fadeStart, fadeEnd, 0, 1, "OutElastic");
+        tickScale.addEasing(fadeEnd, sliderTick.time, 1, 1);
 
         this.opacity = tickOpacity;
         this.scale = tickScale;
@@ -30,26 +39,26 @@ class DrawableSliderTick {
 }
 
 class DrawableReverseTick {
-    opacity: Spannable;
-    scale: Spannable;
+    opacity: Easer;
+    scale: Easer;
 
     constructor(public reverseTick: SliderReverseTick) {
         const slider = reverseTick.slider;
         const slideDuration = Math.floor(slider.duration / slider.slides);
         const reverseTime = reverseTick.time;
 
-        const tickOpacity = new Spannable(0);
+        const tickOpacity = new Easer(0);
         const tickFadeStart = reverseTime - slideDuration * 2;
-        tickOpacity.addSpan(tickFadeStart, tickFadeStart + 300, 0, 1);
-        tickOpacity.addSpan(tickFadeStart + 300, reverseTime, 1, 1);
+        tickOpacity.addEasing(tickFadeStart, tickFadeStart + 300, 0, 1);
+        tickOpacity.addEasing(tickFadeStart + 300, reverseTime, 1, 1);
 
         // Scale beat every 300ms
-        const tickScale = new Spannable(1);
+        const tickScale = new Easer(1);
         const tickStart = reverseTime - slideDuration * 2;
         const tickEnd = reverseTime;
 
         for (let i = tickStart; i < tickEnd; i += 300) {
-            tickScale.addSpan(i, i + 300, 1, 0.6);
+            tickScale.addEasing(i, i + 300, 1, 0.6);
         }
 
         this.opacity = tickOpacity;
@@ -70,56 +79,56 @@ class DrawableSlider {
     isReversed: boolean;
     slideIndex: number;
 
-    bodyOpacity: Spannable;
-    headOpacity: Spannable;
-    ballOpacity: Spannable;
+    bodyOpacity: Easer;
+    headOpacity: Easer;
+    ballOpacity: Easer;
 
-    approachCircleOpacity: Spannable;
-    approachCircleScale: Spannable;
+    approachCircleOpacity: Easer;
+    approachCircleScale: Easer;
 
     constructor(public slider: Slider) {
         const diff = slider.difficulty;
         const fadeIn = diff.fadeIn;
         const preempt = diff.getPreempt();
 
-        const bodyOpacity: Spannable = new Spannable();
-        const headOpacity: Spannable = new Spannable();
+        const bodyOpacity: Easer = new Easer();
+        const headOpacity: Easer = new Easer();
         const appearTime = slider.startTime - preempt;
 
         if (diff.mods.contains(Mod.Hidden)) {
-            bodyOpacity.addSpan(appearTime, appearTime + fadeIn, 0, 1);
-            bodyOpacity.addSpan(appearTime + fadeIn, slider.endTime, 1, 0);
+            bodyOpacity.addEasing(appearTime, appearTime + fadeIn, 0, 1);
+            bodyOpacity.addEasing(appearTime + fadeIn, slider.endTime, 1, 0, "OutQuad");
 
-            headOpacity.addSpan(appearTime, appearTime + preempt * 0.4, 0, 1);
-            headOpacity.addSpan(appearTime + preempt * 0.4, appearTime + preempt * 0.7, 1, 0);
+            headOpacity.addEasing(appearTime, appearTime + preempt * 0.4, 0, 1);
+            headOpacity.addEasing(appearTime + preempt * 0.4, appearTime + preempt * 0.7, 1, 0);
         } else {
-            bodyOpacity.addSpan(appearTime, appearTime + fadeIn, 0, 1);
-            bodyOpacity.addSpan(appearTime + fadeIn, slider.endTime, 1, 1);
-            bodyOpacity.addSpan(slider.endTime, slider.endTime + 150, 1, 0);
+            bodyOpacity.addEasing(appearTime, appearTime + fadeIn, 0, 1);
+            bodyOpacity.addEasing(appearTime + fadeIn, slider.endTime, 1, 1);
+            bodyOpacity.addEasing(slider.endTime, slider.endTime + 150, 1, 0);
 
-            headOpacity.addSpan(appearTime, appearTime + fadeIn, 0, 1);
-            headOpacity.addSpan(appearTime + fadeIn, slider.endTime, 1, 1);
-            headOpacity.addSpan(slider.endTime, slider.endTime + 150, 1, 0);
+            headOpacity.addEasing(appearTime, appearTime + fadeIn, 0, 1);
+            headOpacity.addEasing(appearTime + fadeIn, slider.endTime, 1, 1);
+            headOpacity.addEasing(slider.endTime, slider.endTime + 150, 1, 0);
         }
 
-        const ballOpacity = new Spannable(0);
-        ballOpacity.addSpan(slider.startTime, slider.endTime, 1, 1);
+        const ballOpacity = new Easer(0);
+        ballOpacity.addEasing(slider.startTime, slider.endTime, 1, 1);
 
-        const approachCircleOpacity: Spannable = new Spannable(0);
+        const approachCircleOpacity: Easer = new Easer(0);
 
         if (diff.mods.contains(Mod.Hidden)) {
             if (slider.objectIndex === 0) {
-                approachCircleOpacity.addSpan(0, Math.min(fadeIn * 2, preempt), 0, 1);
-                approachCircleOpacity.addSpan(Math.min(fadeIn * 2, preempt), Math.min(fadeIn * 2, preempt) * 2, 1, 0);
+                approachCircleOpacity.addEasing(0, Math.min(fadeIn * 2, preempt), 0, 1);
+                approachCircleOpacity.addEasing(Math.min(fadeIn * 2, preempt), Math.min(fadeIn * 2, preempt) * 2, 1, 0);
             }
         } else {
-            approachCircleOpacity.addSpan(appearTime, appearTime + Math.min(fadeIn * 2, preempt), 0, 1);
-            approachCircleOpacity.addSpan(appearTime + Math.min(fadeIn * 2, preempt), slider.startTime, 1, 1);
+            approachCircleOpacity.addEasing(appearTime, appearTime + Math.min(fadeIn * 2, preempt), 0, 1);
+            approachCircleOpacity.addEasing(appearTime + Math.min(fadeIn * 2, preempt), slider.startTime, 1, 1);
         }
 
-        const approachCircleScale: Spannable = new Spannable(1);
+        const approachCircleScale: Easer = new Easer(1);
 
-        approachCircleScale.addSpan(appearTime, slider.startTime, 4, 1);
+        approachCircleScale.addEasing(appearTime, slider.startTime, 4, 1);
 
         this.progress = 0;
         this.progressPosition = slider.getPositionAt(0);
