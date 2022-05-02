@@ -25,6 +25,7 @@ export const DEFAULT_GAMESTATE: GameState = {
     },
 };
 
+// TODO: put Readonly<> on the HitObjectState instead
 export interface GameState {
     time: number;
     index: number;

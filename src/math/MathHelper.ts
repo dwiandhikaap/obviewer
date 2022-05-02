@@ -26,4 +26,11 @@ export class MathHelper {
     public static Average(numbers: number[]): number {
         return numbers.length === 0 ? 0 : this.Sum(numbers) / numbers.length;
     }
+
+    public static InsideCircle(center: number[], point: number[], radius: number) {
+        const dx = point[0] - center[0];
+        const dy = point[1] - center[1];
+
+        return dx * dx + dy * dy <= radius * radius;
+    }
 }
