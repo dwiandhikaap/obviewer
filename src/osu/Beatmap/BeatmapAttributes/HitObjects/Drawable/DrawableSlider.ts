@@ -32,7 +32,7 @@ class DrawableSliderTick {
         this.scale = tickScale;
     }
 
-    update(time: number) {
+    draw(time: number) {
         this.opacity.time = time;
         this.scale.time = time;
     }
@@ -65,7 +65,7 @@ class DrawableReverseTick {
         this.scale = tickScale;
     }
 
-    update(time: number) {
+    draw(time: number) {
         this.opacity.time = time;
         this.scale.time = time;
     }
@@ -143,7 +143,7 @@ class DrawableSlider {
         this.approachCircleScale = approachCircleScale;
     }
 
-    update(time: number) {
+    draw(time: number) {
         this.progress = MathHelper.Clamp((time - this.slider.startTime) / this.slider.duration, 0, 1);
         this.progressPosition = this.slider.getStackedPositionAt(time);
         this.isVisible = this.slider.isVisibleAt(time);

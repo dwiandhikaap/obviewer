@@ -66,6 +66,8 @@ class HitObject {
         this.comboCount = comboCount;
     }
 
+    draw(time: number) {}
+
     update(time: number) {}
 
     getStackedStartPos() {
@@ -102,9 +104,7 @@ class HitObject {
 
     // How many colour(s) are skipped on the new combo
     getColourHax() {
-        return (
-            ((this.type & (HitObjectType.ColorSkip1 | HitObjectType.ColorSkip2 | HitObjectType.ColorSkip3)) >> 4) + 1
-        );
+        return ((this.type & (HitObjectType.ColorSkip1 | HitObjectType.ColorSkip2 | HitObjectType.ColorSkip3)) >> 4) + 1;
     }
 }
 

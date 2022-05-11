@@ -23,7 +23,7 @@ export class DrawableSpinner {
         this.opacity = opacity;
     }
 
-    update(time: number) {
+    draw(time: number) {
         this.opacity.time = time;
     }
 }

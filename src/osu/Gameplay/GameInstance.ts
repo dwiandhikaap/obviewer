@@ -17,7 +17,7 @@ class GameInstance {
         this._time = time;
 
         this.gameHUD.time = time;
-        this.update(time);
+        this.draw(time);
     }
 
     private gameHUD: GameHUD;
@@ -46,13 +46,13 @@ class GameInstance {
         this.evaluator.loadReplay(replay);
     }
 
-    private update(time: number) {
+    private draw(time: number) {
         let stateIndex = this.replay.replayData.getIndexNear(time);
         this.evaluator.requestState(stateIndex);
 
         const hitObjects = this.beatmap.hitObjects.objects;
         for (let i = 0; i < hitObjects.length; i++) {
-            hitObjects[i].update(time);
+            hitObjects[i].draw(time);
         }
     }
 }

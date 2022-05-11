@@ -11,8 +11,8 @@ class Spinner extends HitObject {
         this.drawable = new DrawableSpinner(this);
     }
 
-    update(time: number): void {
-        this.drawable.update(time);
+    draw(time: number): void {
+        this.drawable.draw(time);
     }
 }
 

@@ -18,12 +18,7 @@ class SliderTick {
 class SliderReverseTick {
     drawable: DrawableReverseTick;
 
-    constructor(
-        public slider: Slider,
-        public time: number,
-        public position: [number, number],
-        public isReversed: boolean
-    ) {
+    constructor(public slider: Slider, public time: number, public position: [number, number], public isReversed: boolean) {
         this.drawable = new DrawableReverseTick(this);
     }
 }
@@ -171,10 +166,10 @@ class Slider extends HitObject {
         return reverseTicks;
     }
 
-    update(time: number) {
-        this.drawable.update(time);
-        this.sliderTicks.forEach((ticks) => ticks.drawable.update(time));
-        this.reverseTicks.forEach((ticks) => ticks.drawable.update(time));
+    draw(time: number) {
+        this.drawable.draw(time);
+        this.sliderTicks.forEach((ticks) => ticks.drawable.draw(time));
+        this.reverseTicks.forEach((ticks) => ticks.drawable.draw(time));
     }
 
     getPositionAt(time: number) {
@@ -228,10 +223,7 @@ class Slider extends HitObject {
         const ticks: SliderTick[] = [];
         for (const tick of this.sliderTicks) {
             ticks.push(
-                new SliderTick(this, tick.time, [
-                    tick.position[0] - this.stackOffset,
-                    tick.position[1] - this.stackOffset,
-                ])
+                new SliderTick(this, tick.time, [tick.position[0] - this.stackOffset, tick.position[1] - this.stackOffset])
             );
         }
         return ticks;

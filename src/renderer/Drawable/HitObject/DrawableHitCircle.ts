@@ -51,13 +51,15 @@ class DrawableHitCircle extends Container {
     private circle: Container;
     private approachCircle: Sprite;
 
+    private origin: [number, number];
+
     constructor(private hitCircle: HitCircle, renderScale: number) {
         super();
 
         const startPos = hitCircle.getStackedStartPos();
         const x = startPos[0] * renderScale;
         const y = startPos[1] * renderScale;
-
+        this.origin = [x, y];
         this.radius = hitCircle.difficulty.getObjectRadius() * renderScale;
 
         this.circle = createCircle(hitCircle, this.radius);
@@ -75,13 +77,16 @@ class DrawableHitCircle extends Container {
         this.visible = visible;
         if (!visible) return;
 
-        const { opacity, approachCircleScale, approachCircleOpacity } = this.hitCircle.drawable;
+        const { opacity, approachCircleScale, approachCircleOpacity, positionOffset } = this.hitCircle.drawable;
 
         this.circle.alpha = opacity.value;
 
         this.approachCircle.alpha = approachCircleOpacity.value;
         this.approachCircle.width = approachCircleScale.value * this.radius * 2;
         this.approachCircle.height = approachCircleScale.value * this.radius * 2;
+
+        this.position.x = this.origin[0] + positionOffset.x.value;
+        this.position.y = this.origin[1] + positionOffset.y.value;
     }
 }
 

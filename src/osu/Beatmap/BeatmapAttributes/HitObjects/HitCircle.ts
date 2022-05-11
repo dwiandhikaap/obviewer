@@ -10,7 +10,11 @@ class HitCircle extends HitObject {
         this.drawable = new DrawableHitCircle(this);
     }
 
-    update(time: number) {
+    draw(time: number) {
+        this.drawable.draw(time);
+    }
+
+    update(time: number): void {
         this.drawable.update(time);
     }
 }
