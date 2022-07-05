@@ -4,8 +4,8 @@ import { AssetsLoader } from "../../Assets/Assets";
 import { Drawable } from "../DrawableTypes";
 
 const NODE_SCALE = 0.1;
-const NODE_COUNT_AFTER = 7;
-const NODE_COUNT_BEFORE = 7;
+const NODE_COUNT_AFTER = 0;
+const NODE_COUNT_BEFORE = 0;
 
 function createCursorNodes(size: number) {
     const nodeSprites: Sprite[] = [];

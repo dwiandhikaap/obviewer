@@ -26,7 +26,7 @@ class MainCursor extends Container implements Drawable {
         this.mainCursor = createMainCursor(renderScale * CURSOR_SCALE);
         this.addChild(this.mainCursor);
 
-        this.alpha = 0.1;
+        this.alpha = 1.0;
 
         this.position.set(x, y);
     }
