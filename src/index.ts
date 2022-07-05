@@ -3,6 +3,7 @@ import { Logger } from "./logger/Logger";
 import { Beatmap } from "./osu/Beatmap/Beatmap";
 import { Mod, Mods } from "./osu/Mods/Mods";
 import { Replay, ReplayNode } from "./osu/Replay/Replay";
+import { Keypress } from "./osu/Replay/ReplayNodes";
 import { ReplayTale } from "./ReplayTale/ReplayTale";
 import { Settings } from "./settings/Settings";
 
@@ -110,19 +111,44 @@ $("body").on("keypress", async function (e) {
     }
 });
 
+async function saveReplayFile(replay: Replay, fileName: string) {
+    const blob = await replay.toBlob();
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+    link.remove();
+}
+
 $("button#replay-download").on("click", async function () {
     //console.log(replay.replayData);
     //console.log(replay.mods.list);
 
-    const replayNode = new ReplayNode(0, 300, 100, 100, 15);
-    replay.playerName = "siveroo??!";
-    replay.mods.enable(Mod.NoFail);
-    //replay.mods.enable(Mod.Relax);
-    replay.mods.enable(Mod.DoubleTime);
-
-    //replay.replayData.forEach((node) => node.translate(rand(-15, 15), rand(-15, 15)));
-    //parser.saveReplayFile(replay, "pog.osr");
+    //const replayNode = new ReplayNode(0, 300, 100, 100, 15);
+    //const clickNodes = replay.replayData.filter((node) => node.isPressing("M1"));
+    await download();
 });
+
+async function download() {
+    /* const startIndex = replay.replayData.getIndexNear(1000);
+    const endIndex = replay.replayData.getIndexNear(8000);
+    const nodes = replay.replayData;
+    for (let i = startIndex; i < endIndex; i++) {
+        const node = nodes[i];
+        node.removeKeypress(Keypress.K1);
+        node.removeKeypress(Keypress.K2);
+        node.removeKeypress(Keypress.M1);
+        node.removeKeypress(Keypress.M2);
+    }
+
+    replay.replayData.forEach((node) => node.translate(rand(-15, 15), rand(-15, 15))); */
+    const blob = await replay.toBlob();
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.download = "asdasd.osr";
+    link.click();
+    link.remove();
+}
 
 // temporary testing lol
 $("button#startTest").on("click", async function (e) {
@@ -131,17 +157,13 @@ $("button#startTest").on("click", async function (e) {
 
     this.textContent = "Parsing Replay...";
 
-    const replayBuffer = await fetch(`/dist/assets/test/replay.osr`).then(
-        (ah) => ah.arrayBuffer()
-    );
+    const replayBuffer = await fetch(`/dist/assets/test/replay.osr`).then((ah) => ah.arrayBuffer());
     replay = await Replay.FromArrayBuffer(replayBuffer);
 
     this.textContent = "Parsing Beatmap...";
 
     const music = new Audio("/dist/assets/test/audio.mp3");
-    const map = await fetch(`/dist/assets/test/map.osu`).then((ah) =>
-        ah.text()
-    );
+    const map = await fetch(`/dist/assets/test/map.osu`).then((ah) => ah.text());
 
     const mapBeatmap = new Beatmap(map);
 
@@ -184,20 +206,18 @@ $("button#startTest").on("click", async function (e) {
 
             console.log(replay);
 
-            const speed = 1;
+            const speed = 0.75;
 
             replaytale.enableModsOverride(mods);
             replaytale.disableModsOverride();
             replaytale.playbackRate = speed;
-            Settings.set("AudioVolume", 15);
+            Settings.set("AudioVolume", 10);
             //Settings.set("AudioOffset", 0);
-            replaytale.seek(0);
+            replaytale.seek(3000);
             replaytale.play();
 
-            const waitTime = 2000 / speed;
-            const seekTime = 2000;
-
-            await wait(26000);
+            const waitTime = 3000 / speed;
+            const seekTime = 0;
 
             /* await wait(waitTime);
             replaytale.seek(seekTime);
@@ -208,8 +228,8 @@ $("button#startTest").on("click", async function (e) {
             await wait(waitTime);
             replaytale.seek(seekTime);
             await wait(waitTime);
-            replaytale.seek(seekTime); */
-
+            replaytale.seek(seekTime);
+ */
             /* await wait(3000);
             // replaytale.enableModsOverride(new Mods(Mod.HardRock));
             await wait(3000);
