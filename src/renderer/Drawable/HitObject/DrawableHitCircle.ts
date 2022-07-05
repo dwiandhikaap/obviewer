@@ -77,9 +77,10 @@ class DrawableHitCircle extends Container {
         this.visible = visible;
         if (!visible) return;
 
-        const { opacity, approachCircleScale, approachCircleOpacity, positionOffset } = this.hitCircle.drawable;
+        const { opacity, scale, approachCircleScale, approachCircleOpacity, positionOffset } = this.hitCircle.drawable;
 
         this.circle.alpha = opacity.value;
+        this.circle.scale.set(scale.value);
 
         this.approachCircle.alpha = approachCircleOpacity.value;
         this.approachCircle.width = approachCircleScale.value * this.radius * 2;
