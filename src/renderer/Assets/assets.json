@@ -10,6 +10,7 @@
         ["reversearrow", "assets/osu/reversearrow.png"],
         ["sliderb0", "assets/osu/sliderb0.png"],
         ["sliderscorepoint", "assets/osu/sliderscorepoint.png"],
+        ["sliderfollowcircle", "assets/osu/sliderfollowcircle.png"],
 
         ["spinner-background", "assets/osu/spinner-background.png"],
         ["spinner-circle", "assets/osu/spinner-circle.png"],

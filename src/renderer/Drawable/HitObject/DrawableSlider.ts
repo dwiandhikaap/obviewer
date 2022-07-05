@@ -69,6 +69,17 @@ function createSliderBall(radius: number) {
     return sliderBall;
 }
 
+function createSliderFollower(radius: number) {
+    const texture = AssetsLoader.getTexture("sliderfollowcircle");
+    const sliderFollower = new Sprite(texture);
+    sliderFollower.anchor.set(0.5, 0.5);
+    sliderFollower.width = radius * 2;
+    sliderFollower.height = radius * 2;
+    sliderFollower.alpha = 0;
+
+    return sliderFollower;
+}
+
 function createApproachCircle(radius: number) {
     const texture = AssetsLoader.getTexture("approachcircle");
     const approachCircle = new Sprite(texture);
@@ -139,6 +150,7 @@ class DrawableSlider extends Container {
     private sliderBody: Sprite;
     private sliderHead: Container;
     private sliderBall: Sprite;
+    private sliderFollower: Sprite;
     private sliderReverses: Container;
     private sliderTicks: Container;
 
@@ -157,6 +169,7 @@ class DrawableSlider extends Container {
         this.sliderBody = createSliderBody(this.linePath, this.radius);
         this.sliderHead = createSliderHead(this.slider, this.radius);
         this.sliderBall = createSliderBall(this.radius);
+        this.sliderFollower = createSliderFollower(this.radius);
         this.sliderReverses = createSliderReverses(this.slider, this.radius);
         this.sliderTicks = createSliderTicks(this.slider, this.radius);
 
@@ -164,6 +177,7 @@ class DrawableSlider extends Container {
         this.addChild(this.sliderTicks);
         this.addChild(this.sliderReverses);
         this.addChild(this.sliderBall);
+        this.addChild(this.sliderFollower);
         this.addChild(this.sliderHead);
         this.addChild(this.sliderApproachCircle);
 
@@ -176,8 +190,16 @@ class DrawableSlider extends Container {
         this.visible = visible;
         if (!visible) return;
 
-        const { progressPosition, bodyOpacity, headOpacity, ballOpacity, approachCircleOpacity, approachCircleScale } =
-            this.slider.drawable;
+        const {
+            progressPosition,
+            bodyOpacity,
+            headOpacity,
+            ballOpacity,
+            approachCircleOpacity,
+            approachCircleScale,
+            followCircleOpacity,
+            followCircleScale,
+        } = this.slider.drawable;
 
         this.sliderBody.alpha = bodyOpacity.value;
         this.sliderHead.alpha = headOpacity.value;
@@ -192,6 +214,10 @@ class DrawableSlider extends Container {
 
         this.sliderBall.transform.position.set(ballPos[0], ballPos[1]);
         this.sliderBall.alpha = ballOpacity.value;
+
+        this.sliderFollower.transform.position.set(ballPos[0], ballPos[1]);
+        this.sliderFollower.alpha = followCircleOpacity.value;
+        this.sliderFollower.scale.set(followCircleScale.value);
 
         for (let i = 0; i < this.slider.reverseTicks.length; i++) {
             const reverseTick = this.slider.reverseTicks[i];
