@@ -1,7 +1,7 @@
 {
-    "name": "replaytale-core",
+    "name": "obviewer",
     "version": "1.0.0",
-    "description": "Replay Editor for osu!standard",
+    "description": "osu!standard Beatmap Viewer",
     "main": "index.js",
     "scripts": {
         "test": "jest",
