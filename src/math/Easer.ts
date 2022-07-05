@@ -13,7 +13,7 @@ class Easer {
     easings: Easing[] = [];
     public time: number = 0;
 
-    constructor(public defaultValue: number | undefined = 0) {}
+    constructor(public fallbackValue: number = 0) {}
 
     static CreateEasing(
         startTime: number,
@@ -31,7 +31,7 @@ class Easer {
 
     getValueAt(time: number): number {
         if (this.easings.length === 0) {
-            return this.defaultValue ?? NaN;
+            return this.fallbackValue;
         }
 
         let result: number | undefined = undefined;
@@ -52,30 +52,29 @@ class Easer {
         }
 
         if (result === undefined) {
-            if (this.defaultValue !== undefined) {
-                result = this.defaultValue;
+            let minDeltaTime = Infinity;
+            let closestIndexBefore: number = 0;
+
+            // edge case, time is before the first easing
+            if (time < this.easings[0].startTime) {
+                result = this.easings[0].targetFrom;
             } else {
-                let minDeltaTime = Infinity;
-                let closestIndex;
-                for (let i = this.easings.length - 1; i >= 0; i--) {
-                    const transform = this.easings[i];
+                for (let i = 0; i < this.easings.length; i++) {
+                    const easing = this.easings[i];
+                    const deltaTime = time - easing.endTime;
 
-                    if (time < transform.endTime) continue;
+                    if (deltaTime < 0) {
+                        break;
+                    }
 
-                    const delta = time - transform.endTime;
-                    if (delta < minDeltaTime) {
-                        minDeltaTime = delta;
-                        closestIndex = i;
+                    if (minDeltaTime > deltaTime) {
+                        minDeltaTime = deltaTime;
+                        closestIndexBefore = i;
                     }
                 }
 
-                if (closestIndex === undefined) {
-                    selectedEasing = this.easings[0];
-                    result = selectedEasing.targetFrom;
-                } else {
-                    selectedEasing = this.easings[closestIndex];
-                    result = selectedEasing.targetTo;
-                }
+                const closestEasing = this.easings[closestIndexBefore];
+                result = closestEasing.targetTo;
             }
         }
 
