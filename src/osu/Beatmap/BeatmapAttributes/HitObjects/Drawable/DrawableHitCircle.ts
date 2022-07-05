@@ -1,4 +1,3 @@
-import { Animation } from "../../../../../math/Animation";
 import { Easer } from "../../../../../math/Easer";
 import { Mod } from "../../../../Mods/Mods";
 import { HitCircle } from "../HitCircle";
@@ -10,12 +9,11 @@ export class DrawableHitCircle extends DrawableHitObject<HitCircleAnimation> {
     opacity: Easer;
     approachCircleOpacity: Easer;
     approachCircleScale: Easer;
-
-    // Easer for event-based animation/transformation, triggered by class method `animate(...)`
     positionOffset = {
         x: new Easer(0),
         y: new Easer(0),
     };
+    scale = new Easer(1);
 
     constructor(public hitObject: HitCircle) {
         super();
@@ -30,8 +28,7 @@ export class DrawableHitCircle extends DrawableHitObject<HitCircleAnimation> {
             opacity.addEasing(appearTime + preempt * 0.4, appearTime + preempt * 0.7, 1, 0);
         } else {
             opacity.addEasing(appearTime, appearTime + fadeIn, 0, 1);
-            opacity.addEasing(appearTime + fadeIn, hitObject.endTime, 1, 1);
-            opacity.addEasing(hitObject.startTime, hitObject.startTime + 150, 1, 0);
+            opacity.addEasing(hitObject.endTime, hitObject.endTime + 150, 1, 0);
         }
 
         const approachCircleOpacity: Easer = new Easer(0);
@@ -42,7 +39,7 @@ export class DrawableHitCircle extends DrawableHitObject<HitCircleAnimation> {
             }
         } else {
             approachCircleOpacity.addEasing(appearTime, appearTime + Math.min(fadeIn * 2, preempt), 0, 1);
-            approachCircleOpacity.addEasing(appearTime + Math.min(fadeIn * 2, preempt), hitObject.startTime, 1, 1);
+            approachCircleOpacity.addEasing(hitObject.startTime, hitObject.startTime + 150, 1, 0);
         }
 
         const approachCircleScale: Easer = new Easer(1);
@@ -51,15 +48,11 @@ export class DrawableHitCircle extends DrawableHitObject<HitCircleAnimation> {
         this.opacity = opacity;
         this.approachCircleOpacity = approachCircleOpacity;
         this.approachCircleScale = approachCircleScale;
-
-        const shakeAnim = new Animation("SHAKE" as HitCircleAnimation);
-        const missAnim = new Animation("MISS" as HitCircleAnimation);
-
-        this.animations.push(shakeAnim, missAnim);
     }
 
     draw(time: number) {
         this.opacity.time = time;
+        this.scale.time = time;
         this.approachCircleOpacity.time = time;
         this.approachCircleScale.time = time;
         this.positionOffset.x.time = time;
@@ -74,8 +67,22 @@ export class DrawableHitCircle extends DrawableHitObject<HitCircleAnimation> {
             }
 
             case "MISS": {
+                if (this.hitObject.difficulty.mods.contains(Mod.Hidden)) {
+                    break;
+                }
+
                 this.playAnimation("MISS", this.opacity, miss(time));
                 this.playAnimation("MISS", this.approachCircleOpacity, miss(time));
+                break;
+            }
+
+            case "HIT": {
+                if (this.hitObject.difficulty.mods.contains(Mod.Hidden)) {
+                    break;
+                }
+
+                this.playAnimation("HIT", this.opacity, opacityAfterHit(time));
+                this.playAnimation("HIT", this.scale, scaleAfterHit(time));
                 break;
             }
         }
@@ -96,6 +103,19 @@ function shake(time: number) {
 function miss(time: number) {
     const fadeOutTime = 80;
     const fadeOut = Easer.CreateEasing(time, time + fadeOutTime, 1, 0);
-    const invisible = Easer.CreateEasing(time + fadeOutTime, time + 1000, 0, 0);
-    return [fadeOut, invisible];
+    return [fadeOut];
+}
+
+function opacityAfterHit(time: number) {
+    const fadeOutTime = 150;
+    const fadeOut = Easer.CreateEasing(time, time + fadeOutTime, 1, 0, "OutQuad");
+
+    return [fadeOut];
+}
+
+function scaleAfterHit(time: number) {
+    const scaleOutTime = 150;
+    const scaleOut = Easer.CreateEasing(time, time + scaleOutTime, 1, 1.25);
+
+    return [scaleOut];
 }

@@ -2,6 +2,7 @@ import { MathHelper } from "../../../../../math/MathHelper";
 import { Easer } from "../../../../../math/Easer";
 import { Mod } from "../../../../Mods/Mods";
 import { Slider, SliderReverseTick, SliderTick } from "../Slider";
+import { DrawableHitObject } from "./DrawableHitObject";
 
 class DrawableSliderTick {
     opacity: Easer;
@@ -23,7 +24,7 @@ class DrawableSliderTick {
         let fadeEnd = fadeStart + 150;
 
         tickOpacity.addEasing(fadeStart, fadeEnd, 0, 1);
-        tickOpacity.addEasing(fadeEnd, sliderTick.time, 1, 0.3, "InQuad");
+        tickOpacity.addEasing(fadeEnd, sliderTick.time, 1, 1);
 
         tickScale.addEasing(fadeStart, fadeEnd, 0, 1, "OutElastic");
         tickScale.addEasing(fadeEnd, sliderTick.time, 1, 1);
@@ -71,7 +72,9 @@ class DrawableReverseTick {
     }
 }
 
-class DrawableSlider {
+type SliderAnimation = "FOLLOW_START" | "UNFOLLOW" | "FOLLOW_END";
+
+class DrawableSlider extends DrawableHitObject<SliderAnimation> {
     progress: number;
     progressPosition: [number, number];
     isVisible: boolean;
@@ -83,10 +86,14 @@ class DrawableSlider {
     headOpacity: Easer;
     ballOpacity: Easer;
 
+    followCircleOpacity: Easer;
+    followCircleScale: Easer;
+
     approachCircleOpacity: Easer;
     approachCircleScale: Easer;
 
     constructor(public slider: Slider) {
+        super();
         const diff = slider.difficulty;
         const fadeIn = diff.fadeIn;
         const preempt = diff.getPreempt();
@@ -96,23 +103,25 @@ class DrawableSlider {
         const appearTime = slider.startTime - preempt;
 
         if (diff.mods.contains(Mod.Hidden)) {
-            bodyOpacity.addEasing(appearTime, appearTime + fadeIn, 0, 1);
-            bodyOpacity.addEasing(appearTime + fadeIn, slider.endTime, 1, 0, "OutQuad");
+            bodyOpacity.addEasing(appearTime, appearTime + fadeIn, 0, 0.7);
+            bodyOpacity.addEasing(appearTime + fadeIn, slider.endTime, 0.7, 0, "OutQuad");
 
             headOpacity.addEasing(appearTime, appearTime + preempt * 0.4, 0, 1);
             headOpacity.addEasing(appearTime + preempt * 0.4, appearTime + preempt * 0.7, 1, 0);
         } else {
-            bodyOpacity.addEasing(appearTime, appearTime + fadeIn, 0, 1);
-            bodyOpacity.addEasing(appearTime + fadeIn, slider.endTime, 1, 1);
-            bodyOpacity.addEasing(slider.endTime, slider.endTime + 150, 1, 0);
+            bodyOpacity.addEasing(appearTime, appearTime + fadeIn, 0, 0.7);
+            bodyOpacity.addEasing(slider.endTime, slider.endTime + 150, 0.7, 0);
 
             headOpacity.addEasing(appearTime, appearTime + fadeIn, 0, 1);
-            headOpacity.addEasing(appearTime + fadeIn, slider.endTime, 1, 1);
-            headOpacity.addEasing(slider.endTime, slider.endTime + 150, 1, 0);
+            headOpacity.addEasing(slider.startTime, slider.startTime + 150, 1, 0);
         }
 
         const ballOpacity = new Easer(0);
-        ballOpacity.addEasing(slider.startTime, slider.endTime, 1, 1);
+        ballOpacity.addEasing(slider.startTime, slider.startTime + 1, 0, 1);
+        ballOpacity.addEasing(slider.endTime, slider.endTime + 1, 1, 0);
+
+        const followCircleOpacity = new Easer(0);
+        const followCircleScale = new Easer(1);
 
         const approachCircleOpacity: Easer = new Easer(0);
 
@@ -124,11 +133,12 @@ class DrawableSlider {
         } else {
             approachCircleOpacity.addEasing(appearTime, appearTime + Math.min(fadeIn * 2, preempt), 0, 1);
             approachCircleOpacity.addEasing(appearTime + Math.min(fadeIn * 2, preempt), slider.startTime, 1, 1);
+            approachCircleOpacity.addEasing(slider.startTime, slider.startTime + 150, 1, 0);
         }
 
         const approachCircleScale: Easer = new Easer(1);
-
         approachCircleScale.addEasing(appearTime, slider.startTime, 4, 1);
+        approachCircleScale.addEasing(slider.startTime, slider.startTime + 100, 1, 1.05);
 
         this.progress = 0;
         this.progressPosition = slider.getPositionAt(0);
@@ -139,6 +149,8 @@ class DrawableSlider {
         this.bodyOpacity = bodyOpacity;
         this.headOpacity = headOpacity;
         this.ballOpacity = ballOpacity;
+        this.followCircleOpacity = followCircleOpacity;
+        this.followCircleScale = followCircleScale;
         this.approachCircleOpacity = approachCircleOpacity;
         this.approachCircleScale = approachCircleScale;
     }
@@ -153,9 +165,61 @@ class DrawableSlider {
         this.bodyOpacity.time = time;
         this.headOpacity.time = time;
         this.ballOpacity.time = time;
+        this.followCircleOpacity.time = time;
+        this.followCircleScale.time = time;
         this.approachCircleOpacity.time = time;
         this.approachCircleScale.time = time;
     }
+
+    animate(animationType: SliderAnimation, time: number): void {
+        switch (animationType) {
+            case "FOLLOW_START": {
+                this.playAnimation("FOLLOW_START", this.followCircleOpacity, followStartOpacityAnim(time));
+                this.playAnimation("FOLLOW_START", this.followCircleScale, followStartScaleAnim(time));
+                break;
+            }
+
+            case "UNFOLLOW": {
+                this.playAnimation("UNFOLLOW", this.followCircleOpacity, unfollowOpacityAnim(time));
+                this.playAnimation("UNFOLLOW", this.followCircleScale, unfollowScaleAnim(time));
+                break;
+            }
+
+            case "FOLLOW_END": {
+                const opacity = this.followCircleOpacity;
+                const scale = this.followCircleScale;
+                this.playAnimation("FOLLOW_END", opacity, followerEndOpacityAnim(opacity.value, time));
+                this.playAnimation("FOLLOW_END", scale, followerEndScaleAnim(scale.value, time));
+                break;
+            }
+        }
+    }
+}
+
+const followerStartSize = 1 / 1.4;
+
+function followStartOpacityAnim(time: number) {
+    return [Easer.CreateEasing(time, time + 450, 0, 1, "OutQuad")];
+}
+
+function followStartScaleAnim(time: number) {
+    return [Easer.CreateEasing(time, time + 450, followerStartSize, 1, "OutQuad")];
+}
+
+function unfollowOpacityAnim(time: number) {
+    return [Easer.CreateEasing(time, time + 250, 1, 0, "OutQuad")];
+}
+
+function unfollowScaleAnim(time: number) {
+    return [Easer.CreateEasing(time, time + 450, 1, 2, "OutQuad")];
+}
+
+function followerEndOpacityAnim(currentOpacity: number, time: number) {
+    return [Easer.CreateEasing(time, time + 150, currentOpacity, 0, "OutQuad")];
+}
+
+function followerEndScaleAnim(currentScale: number, time: number) {
+    return [Easer.CreateEasing(time, time + 150, currentScale, followerStartSize, "OutQuad")];
 }
 
 export { DrawableReverseTick, DrawableSlider, DrawableSliderTick };

@@ -2,7 +2,7 @@ import { Animation } from "../../../../../math/Animation";
 import { Easer, Easing } from "../../../../../math/Easer";
 
 abstract class DrawableHitObject<T> {
-    animations: Animation<T>[] = [];
+    private animations: Animation<T>[] = [];
 
     // Called every game tick, depends on the replay node density and playback rate
     update(time: number) {
@@ -13,7 +13,16 @@ abstract class DrawableHitObject<T> {
     draw(time: number) {}
 
     protected playAnimation(animationType: T, easer: Easer, easings: Easing[]) {
-        this.animations.find((anim) => anim.animationType === animationType)?.addSequence(easer, easings);
+        const animationIndex = this.animations.findIndex((anim) => anim.animationType === animationType);
+
+        if (animationIndex === -1) {
+            const animation = new Animation(animationType);
+            this.animations.push(animation);
+            animation.addSequence(easer, easings);
+            return;
+        }
+
+        this.animations[animationIndex].addSequence(easer, easings);
     }
 
     protected removeFutureAnimation(time: number) {
