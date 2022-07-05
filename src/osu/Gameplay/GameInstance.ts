@@ -33,6 +33,8 @@ class GameInstance {
             this.gameHUD.updateKeypressOverlay(state.keypressInfo);
             this.gameHUD.updateHitResultOverlay(state.hitResultInfo);
             this.gameHUD.updateUnstableRate(state.unstableRate);
+
+            // console.log(state.combo);
         });
     }
 

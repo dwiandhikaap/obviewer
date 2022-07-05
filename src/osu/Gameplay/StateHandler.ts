@@ -1,4 +1,4 @@
-import { cloneGameState, DEFAULT_GAMESTATE, GameState } from "./types/GameState";
+import { cloneGameState, DEFAULT_GAMESTATE, GameState } from "./GameState";
 
 var CACHE_STRIDE = 20;
 
