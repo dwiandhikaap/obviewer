@@ -48,6 +48,8 @@ export class DrawableHitCircle extends DrawableHitObject<HitCircleAnimation> {
         this.opacity = opacity;
         this.approachCircleOpacity = approachCircleOpacity;
         this.approachCircleScale = approachCircleScale;
+
+        this.animate("HIT", hitObject.endTime);
     }
 
     draw(time: number) {
