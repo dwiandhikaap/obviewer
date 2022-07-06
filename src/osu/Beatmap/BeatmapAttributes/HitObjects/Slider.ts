@@ -3,7 +3,7 @@ import { Path } from "../../../../math/Path";
 import { Vector2 } from "../../../../math/Vector2";
 import { TimingPoints } from "../TimingPoints";
 import { DrawableReverseTick, DrawableSlider, DrawableSliderTick } from "./Drawable/DrawableSlider";
-import { HitObject, HitObjectConfig, HitObjectState } from "./HitObject";
+import { HitObject, HitObjectConfig } from "./HitObject";
 
 class SliderTick {
     drawable: DrawableSliderTick;
@@ -31,34 +31,6 @@ interface SliderConfig {
     edgeSets: string[][];
 }
 
-interface SliderState extends HitObjectState {
-    sliderHeadFinished: boolean;
-    notelock: boolean;
-    accuracy: number;
-
-    sliderBreak: boolean;
-    isFollowed: boolean;
-    droppedSliderEnd: boolean;
-
-    lockNextObject: boolean;
-}
-
-const DEFAULT_STATE: SliderState = {
-    sliderHeadFinished: false,
-    notelock: false,
-    accuracy: 0,
-
-    hitResult: null,
-
-    sliderBreak: false,
-    isFollowed: false,
-    droppedSliderEnd: false,
-
-    lockNextObject: true,
-    started: false,
-    finished: false,
-};
-
 class Slider extends HitObject {
     curveType: string;
     curvePoints: number[][];
@@ -77,7 +49,6 @@ class Slider extends HitObject {
     reverseTicks: SliderReverseTick[] = [];
 
     drawable: DrawableSlider;
-    state = DEFAULT_STATE;
 
     constructor(hitObjectConfig: HitObjectConfig, sliderConfig: SliderConfig, private timing: TimingPoints) {
         super(hitObjectConfig);
@@ -277,4 +248,4 @@ class Slider extends HitObject {
     }
 }
 
-export { Slider, SliderState, SliderTick, SliderReverseTick, SliderConfig };
+export { Slider, SliderTick, SliderReverseTick, SliderConfig };

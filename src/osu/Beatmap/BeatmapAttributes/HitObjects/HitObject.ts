@@ -1,4 +1,3 @@
-import { HitResult } from "../../../Gameplay/rulesets/hitResult";
 import { Difficulty } from "../Difficulty";
 
 enum HitObjectType {
@@ -34,13 +33,6 @@ interface HitObjectConfig {
     difficulty: Difficulty;
 }
 
-interface HitObjectState {
-    hitResult: HitResult | null;
-
-    started: boolean;
-    finished: boolean;
-}
-
 class HitObject {
     startPos: [number, number];
     endPos: [number, number];
@@ -57,8 +49,6 @@ class HitObject {
 
     stackCount: number = 0;
     stackOffset: number = 0;
-
-    state: HitObjectState;
 
     constructor(hitObjectConfig: HitObjectConfig) {
         const { startPos, endPos, startTime, endTime, type, hitSound, hitSample, comboCount, difficulty, objectIndex } =
@@ -118,4 +108,4 @@ class HitObject {
     }
 }
 
-export { HitObject, HitObjectState, Hitsample, HitObjectConfig, HitObjectType };
+export { HitObject, Hitsample, HitObjectConfig, HitObjectType };
