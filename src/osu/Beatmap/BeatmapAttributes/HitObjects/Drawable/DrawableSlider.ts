@@ -153,6 +153,9 @@ class DrawableSlider extends DrawableHitObject<SliderAnimation> {
         this.followCircleScale = followCircleScale;
         this.approachCircleOpacity = approachCircleOpacity;
         this.approachCircleScale = approachCircleScale;
+
+        this.animate("FOLLOW_START", slider.startTime);
+        this.animate("FOLLOW_END", slider.endTime);
     }
 
     draw(time: number) {
@@ -171,6 +174,7 @@ class DrawableSlider extends DrawableHitObject<SliderAnimation> {
         this.approachCircleScale.time = time;
     }
 
+    // TODO: create a proper "fadeTo" type of animation
     animate(animationType: SliderAnimation, time: number): void {
         switch (animationType) {
             case "FOLLOW_START": {
@@ -188,8 +192,8 @@ class DrawableSlider extends DrawableHitObject<SliderAnimation> {
             case "FOLLOW_END": {
                 const opacity = this.followCircleOpacity;
                 const scale = this.followCircleScale;
-                this.playAnimation("FOLLOW_END", opacity, followerEndOpacityAnim(opacity.value, time));
-                this.playAnimation("FOLLOW_END", scale, followerEndScaleAnim(scale.value, time));
+                this.playAnimation("FOLLOW_END", opacity, followerEndOpacityAnim(opacity.getValueAt(time), time));
+                this.playAnimation("FOLLOW_END", scale, followerEndScaleAnim(scale.getValueAt(time), time));
                 break;
             }
         }
@@ -219,7 +223,7 @@ function followerEndOpacityAnim(currentOpacity: number, time: number) {
 }
 
 function followerEndScaleAnim(currentScale: number, time: number) {
-    return [Easer.CreateEasing(time, time + 150, currentScale, followerStartSize, "OutQuad")];
+    return [Easer.CreateEasing(time, time + 250, currentScale, followerStartSize, "OutQuad")];
 }
 
 export { DrawableReverseTick, DrawableSlider, DrawableSliderTick };
