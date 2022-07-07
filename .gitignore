@@ -1,3 +1,10 @@
 node_modules
-/dist/
+
+# Build folder/file
+/build
 /dts
+
+# Assets stuff for demo
+/demo/assets/*
+!/demo/assets/osu/
+!/demo/assets/replay-tale
