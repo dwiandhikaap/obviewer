@@ -3,8 +3,8 @@ import { Mods } from "../Mods/Mods";
 import { ReplayData } from "./ReplayData";
 import { ReplayNode } from "./ReplayNodes";
 
-const lzma = require("../../lib/lzma/lzma_worker.js").LZMA;
-const leb = require("leb");
+import leb from "leb";
+import LZMA from "../../lib/lzma_worker.js";
 
 const EPOCH = 621355968000000000;
 class Replay {
@@ -119,7 +119,7 @@ function read(buff: Buffer) {
     function readString(buffer: Buffer) {
         if (buffer.readInt8(offset) == 0x0b) {
             offset++;
-            let ulebString = leb.decodeUInt64(buffer.slice(offset, offset + 8));
+            let ulebString = leb.decodeUInt64(buffer.slice(offset, offset + 8), 0);
             let strLength = ulebString.value;
             offset += strLength + ulebString.nextIndex;
             return buffer.slice(offset - strLength, offset).toString();
@@ -131,7 +131,7 @@ function read(buff: Buffer) {
 
     function readCompressed(buffer: Buffer, length: number, callback: Function) {
         offset += length;
-        return length != 0 ? lzma.decompress(buffer.slice(offset - length, offset), callback) : callback(null, null);
+        return length != 0 ? LZMA.decompress(buffer.slice(offset - length, offset), callback) : callback(null, null);
     }
 
     function readCompressedPromise(buffer: Buffer, length: number) {
@@ -174,7 +174,7 @@ function write(replay: Replay) {
 
             let timestamp = writeLong((replay.timestamp || new Date()).getTime() * 10000 + EPOCH);
 
-            lzma.compress(replay.replayData.toString() || "", 1, (res: any, err: any) => {
+            LZMA.compress(replay.replayData.toString() || "", 1, (res: any, err: any) => {
                 let replayData = Buffer.from(res);
                 let replayLength = writeInteger(replayData.length);
                 let unknown = writeLong(replay.unknown || 0);
