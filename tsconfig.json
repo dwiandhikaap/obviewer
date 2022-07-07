@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "outDir": "./dist/",
+        "outDir": "./build/",
         "sourceMap": true,
         "noImplicitAny": true,
         "module": "es6",
@@ -14,7 +14,6 @@
         "allowSyntheticDefaultImports": true,
         "strictPropertyInitialization": false,
         "lib": ["ES6", "DOM"],
-        "declaration": true,
-        "declarationDir": "dts/"
+        "declaration": true
     }
 }
