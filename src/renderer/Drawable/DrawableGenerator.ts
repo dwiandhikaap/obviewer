@@ -1,5 +1,5 @@
-import { Difficulty } from "../../osu/Beatmap/BeatmapAttributes/Difficulty";
-import { HitCircle, HitObject, Slider, Spinner } from "../../osu/Beatmap/BeatmapAttributes/HitObjects";
+import { HitCircle, HitObject, Slider, Spinner } from "../../osu//Beatmap/BeatmapAttributes/HitObjects";
+import { Difficulty } from "../../osu//Beatmap/BeatmapAttributes/Difficulty";
 import { DrawableHitCircle, HitObjectDrawable, DrawableSlider } from "./DrawableTypes";
 import { Grid, GridSize } from "./Graphics/Grid";
 import { DrawableSpinner } from "./HitObject/DrawableSpinner";

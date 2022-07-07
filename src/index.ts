@@ -1,281 +1,204 @@
-import * as $ from "jQuery";
-import { Logger } from "./logger/Logger";
 import { Beatmap } from "./osu/Beatmap/Beatmap";
-import { Mod, Mods } from "./osu/Mods/Mods";
-import { Replay, ReplayNode } from "./osu/Replay/Replay";
-import { Keypress } from "./osu/Replay/ReplayNodes";
-import { ReplayTale } from "./ReplayTale/ReplayTale";
+import { GameInstance } from "./osu/Gameplay/GameInstance";
+import { Mods } from "./osu/Mods/Mods";
+import { Replay } from "./osu/Replay/Replay";
+import { AudioHandler } from "./renderer/AudioHandler";
+import { Renderer } from "./renderer/Renderer";
 import { Settings } from "./settings/Settings";
 
-let replay: Replay;
+interface ReplayTaleConfig {
+    container: string;
+}
 
-const replaytale = new ReplayTale({
-    container: "#main-canvas",
-});
+class ReplayTale {
+    beatmap: Beatmap | null = null;
+    replay: Replay | null = null;
 
-$("input#replayFile:file").on("change", function () {
-    let reader = new FileReader();
-    reader.onload = async function () {
-        let arrayBuffer = this.result as ArrayBuffer;
-        replay = await Replay.FromArrayBuffer(arrayBuffer);
-        //console.log(replay);
+    public isModsOverriden: Boolean = false;
+    private _replayModsNumeric: number | null;
+    private mods: Mods | null = null;
+
+    private renderer: Renderer;
+    private audioHandler: AudioHandler;
+    private gameInstance: GameInstance;
+
+    public isPaused: boolean = true;
+    private timestamp: number = 0;
+
+    private _playbackRate: number = 1;
+    public get playbackRate(): number {
+        return this._playbackRate;
+    }
+    public set playbackRate(value: number) {
+        this._playbackRate = value;
+        this.audioHandler.setAudioOptions("beatmap", { playbackRate: value });
+    }
+
+    constructor(replaytaleConfig: ReplayTaleConfig) {
+        const { container } = replaytaleConfig;
+        this.renderer = new Renderer(container);
+        this.audioHandler = new AudioHandler();
+        this.gameInstance = new GameInstance(this.renderer);
+    }
+
+    loadBeatmapAssets(audio?: HTMLAudioElement, background?: HTMLImageElement) {
+        if (audio !== undefined) {
+            const volume = Settings.get("AudioVolume");
+            const offset = Settings.get("AudioOffset");
+            this.audioHandler.loadAudio("beatmap", audio, { volume: volume / 100, offsetMS: offset });
+
+            Settings.addUpdateListener("AudioVolume", (volume: number) => {
+                this.audioHandler.setAudioOptions("beatmap", { volume: volume / 100 });
+            });
+
+            Settings.addUpdateListener("AudioOffset", (offset: number) => {
+                this.audioHandler.setAudioOptions("beatmap", { offsetMS: offset });
+            });
+        }
+
+        if (background !== undefined) {
+            this.renderer.setBackground(background);
+        }
+    }
+
+    loadBeatmap(beatmap: Beatmap) {
+        if (this.mods !== null) {
+            beatmap.setMods(this.mods);
+        }
+
+        if (this.mods === null && this.replay && this.replay.mods.numeric !== beatmap.getMods().numeric) {
+            const mods = this.replay.mods;
+            beatmap.setMods(mods);
+        }
+
+        this.beatmap = beatmap;
+        this.gameInstance.loadBeatmap(beatmap);
+        this.renderer.loadBeatmap(beatmap);
+    }
+
+    loadReplay(replay: Replay) {
+        this._replayModsNumeric = replay.mods.numeric;
+
+        if (this.mods !== null) {
+            replay.mods = this.mods;
+        }
+
+        if (this.beatmap && this.beatmap.getMods().numeric !== replay.mods.numeric) {
+            this.beatmap.setMods(replay.mods);
+        }
+
+        this.replay = replay;
+        this.gameInstance.loadReplay(replay);
+        this.renderer.loadReplay(replay);
+    }
+
+    enableModsOverride(mods: Mods) {
+        //console.log(`Enabling Overrides : ${mods.list}`);
+
+        this.isModsOverriden = true;
+
+        if (mods.numeric === this.mods?.numeric) {
+            return;
+        }
+
+        this.mods = mods;
+        this.replay && (this.replay.mods = mods);
+        if (this.beatmap) {
+            const oldMods = this.beatmap.getMods().numeric;
+            this.beatmap.setMods(mods);
+
+            if (oldMods !== mods.numeric) {
+                this.renderer.loadBeatmap(this.beatmap);
+            }
+        }
+    }
+
+    disableModsOverride() {
+        //console.log(`Disabling Overrides! Previous Beatmap Mods : ${this.beatmap?.getMods().list}`);
+
+        this.mods = null;
+        if (this._replayModsNumeric === null) {
+            return;
+        }
+
+        const oldReplayMods = new Mods(this._replayModsNumeric);
+
+        this.replay && (this.replay.mods = oldReplayMods);
+
+        if (this.beatmap) {
+            const oldMapMods = this.beatmap.getMods().numeric;
+            this.beatmap.setMods(oldReplayMods);
+
+            if (oldMapMods !== oldReplayMods.numeric) {
+                this.renderer.loadBeatmap(this.beatmap);
+            }
+        }
+    }
+
+    private _autoSyncCount = 0;
+    private _autoSyncLastTime = 0;
+    private lastFrameTimestamp: number = 0;
+    private loop = (time: number) => {
+        if (this.isPaused) return;
+
+        let deltaTime = time - this.lastFrameTimestamp;
+
+        this.timestamp += deltaTime * this.playbackRate;
+        this.renderer.timestamp = this.timestamp;
+        this.gameInstance.time = this.timestamp;
+        this.lastFrameTimestamp = time;
+
+        // Sync audio automatically if somehow the game/audio drifts
+        if (Settings.get("AudioAutoSyncEnabled")) {
+            const currTime = this.audioHandler.getAudioCurrentTimeMS("beatmap");
+            const offset = this.audioHandler.getAudioOffsetMS("beatmap");
+            const timeDiff = currTime - offset - this.timestamp;
+            if (Math.abs(timeDiff) > Settings.get("AudioAutoSyncThresholdMS")) {
+                this.audioHandler.seekAudio("beatmap", this.timestamp / 1000);
+
+                // Check quick repeating autosync in short intervals
+                if (Settings.get("AudioAutoSyncDetectIssue")) {
+                    this._autoSyncCount++;
+                    if (this.timestamp - this._autoSyncLastTime > 1000) {
+                        this._autoSyncCount = 0;
+                    }
+                    this._autoSyncLastTime = time;
+                }
+            }
+        }
+
+        if (this._autoSyncCount > 10) {
+            console.warn("[Audio] Auto sync issue detected! Disabling audio auto sync!");
+            Settings.set("AudioAutoSyncEnabled", false);
+            this._autoSyncCount = 0;
+        }
+
+        requestAnimationFrame(this.loop);
     };
 
-    reader.readAsArrayBuffer($(this).prop("files")[0]);
-});
+    play() {
+        this.isPaused = false;
+        this.lastFrameTimestamp = performance.now();
+        this.audioHandler.playAudio("beatmap");
+        this.audioHandler.seekAudio("beatmap", this.timestamp / 1000);
 
-let direction = 1;
-
-$("input#mapsFile:file").on("change", async function () {
-    let reader = new FileReader();
-    reader.onload = async function () {
-        let resultString = this.result as string;
-        const map = new Beatmap(resultString);
-        //(map);
-
-        return map;
-    };
-
-    const files = $(this).prop("files");
-
-    let audioFileName: string = "";
-    let backgroundFile: string = "";
-
-    let audioFile: HTMLAudioElement | undefined = undefined;
-    let backgroundImage: HTMLImageElement | undefined = undefined;
-    let beatmap: Beatmap | undefined = undefined;
-
-    for (const file of files) {
-        if (file.name.endsWith(".osu")) {
-            const text = await file.text();
-            beatmap = new Beatmap(text);
-            //console.log(beatmap);
-
-            audioFileName = beatmap.getAudioFilename();
-            backgroundFile = beatmap.getBackgroundFileNames()[0];
-
-            break;
-        }
+        this.loop(this.lastFrameTimestamp);
     }
 
-    for (const file of files) {
-        if (file.name === audioFileName) {
-            const audioFileBuffer = await file.arrayBuffer();
-            const audioFileBlob = new Blob([audioFileBuffer], {
-                type: "audio/mp3",
-            });
-            const audioFileUrl = URL.createObjectURL(audioFileBlob);
-
-            // create audio file
-            audioFile = new Audio(audioFileUrl);
-        } else if (file.name === backgroundFile) {
-            const backgroundFileBuffer = await file.arrayBuffer();
-            const fileExt = backgroundFile.split(".").pop();
-            const backgroundFileBlob = new Blob([backgroundFileBuffer], {
-                type: `image/${fileExt}`,
-            });
-            const backgroundFileUrl = URL.createObjectURL(backgroundFileBlob);
-
-            // create background image
-            backgroundImage = new Image();
-            backgroundImage.src = backgroundFileUrl;
-
-            const backgroundImageLoaded = new Promise((resolve) => {
-                backgroundImage!.onload = resolve;
-            });
-
-            await backgroundImageLoaded;
-        }
+    pause() {
+        this.isPaused = true;
+        this.audioHandler.pauseAudio("beatmap");
     }
 
-    console.log(replay);
-
-    replaytale.loadReplay(replay);
-    replaytale.loadBeatmapAssets(audioFile, backgroundImage);
-    beatmap && replaytale.loadBeatmap(beatmap);
-    if (replay === undefined) {
-        throw new Error("replay is undefined");
+    seek(timestamp: number) {
+        this.timestamp = timestamp;
+        this.renderer.timestamp = timestamp;
+        this.audioHandler.seekAudio("beatmap", timestamp / 1000);
     }
-    replaytale.playbackRate = 1;
-    replaytale.play();
-});
-
-$("body").on("keypress", async function (e) {
-    // check spacebar
-    if (e.key === " ") {
-        if (replaytale.isPaused) {
-            replaytale.play();
-        } else {
-            replaytale.pause();
-        }
-    }
-});
-
-async function saveReplayFile(replay: Replay, fileName: string) {
-    const blob = await replay.toBlob();
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.download = fileName;
-    link.click();
-    link.remove();
 }
 
-$("button#replay-download").on("click", async function () {
-    //console.log(replay.replayData);
-    //console.log(replay.mods.list);
-
-    //const replayNode = new ReplayNode(0, 300, 100, 100, 15);
-    //const clickNodes = replay.replayData.filter((node) => node.isPressing("M1"));
-    await download();
-});
-
-async function download() {
-    /* const startIndex = replay.replayData.getIndexNear(1000);
-    const endIndex = replay.replayData.getIndexNear(8000);
-    const nodes = replay.replayData;
-    for (let i = startIndex; i < endIndex; i++) {
-        const node = nodes[i];
-        node.removeKeypress(Keypress.K1);
-        node.removeKeypress(Keypress.K2);
-        node.removeKeypress(Keypress.M1);
-        node.removeKeypress(Keypress.M2);
-    }
-
-    replay.replayData.forEach((node) => node.translate(rand(-15, 15), rand(-15, 15))); */
-    const blob = await replay.toBlob();
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.download = "asdasd.osr";
-    link.click();
-    link.remove();
-}
-
-// temporary testing lol
-$("button#startTest").on("click", async function (e) {
-    e.preventDefault();
-    this.style.backgroundColor = "lightgreen";
-
-    this.textContent = "Parsing Replay...";
-
-    const replayBuffer = await fetch(`/dist/assets/test/replay.osr`).then((ah) => ah.arrayBuffer());
-    replay = await Replay.FromArrayBuffer(replayBuffer);
-
-    this.textContent = "Parsing Beatmap...";
-
-    const music = new Audio("/dist/assets/test/audio.mp3");
-    const map = await fetch(`/dist/assets/test/map.osu`).then((ah) => ah.text());
-
-    const mapBeatmap = new Beatmap(map);
-
-    this.textContent = "Loading Image...";
-
-    const background = new Image();
-    background.src = `/dist/assets/test/bg.jpg`;
-
-    const backgroundImageLoaded = new Promise((resolve) => {
-        background!.onload = resolve;
-    });
-
-    await backgroundImageLoaded;
-
-    try {
-        if (replay && mapBeatmap && music) {
-            this.textContent = "Loading Replay";
-            //console.log(replay);
-
-            replaytale.loadReplay(replay);
-
-            this.textContent = "Loading Beatmap";
-
-            replaytale.loadBeatmapAssets(music, background);
-            replaytale.loadBeatmap(mapBeatmap);
-            //console.log(mapBeatmap.difficulty.mods.contains([Mod.HardRock, Mod.Hidden]));
-
-            this.textContent = "Starting Replay";
-            const mods = new Mods();
-
-            //mods.enable(Mod.HardRock);
-            // mods.enable(Mod.Hidden);
-            mods.enable(Mod.Hidden);
-            console.log("Contains Hidden : ", mods.contains(Mod.Hidden));
-            mods.disable(Mod.Hidden);
-            console.log("Contains Hidden : ", mods.contains(Mod.Hidden));
-            mods.enable(Mod.Hidden);
-
-            console.log("Contains Hidden : ", mods.contains(Mod.Hidden));
-
-            console.log(replay);
-
-            const speed = 0.75;
-
-            replaytale.enableModsOverride(mods);
-            replaytale.disableModsOverride();
-            replaytale.playbackRate = speed;
-            Settings.set("AudioVolume", 10);
-            //Settings.set("AudioOffset", 0);
-            replaytale.seek(3000);
-            replaytale.play();
-
-            const waitTime = 3000 / speed;
-            const seekTime = 0;
-
-            /* await wait(waitTime);
-            replaytale.seek(seekTime);
-            await wait(waitTime);
-            replaytale.seek(seekTime);
-            await wait(waitTime);
-            replaytale.seek(seekTime);
-            await wait(waitTime);
-            replaytale.seek(seekTime);
-            await wait(waitTime);
-            replaytale.seek(seekTime);
- */
-            /* await wait(3000);
-            // replaytale.enableModsOverride(new Mods(Mod.HardRock));
-            await wait(3000);
-            //replaytale.disableModsOverride();
-            replaytale.enableModsOverride(new Mods(Mod.Hidden));
-            await wait(3000);
-            replaytale.disableModsOverride();
-            // replaytale.enableModsOverride(new Mods(Mod.Easy));
-            await wait(3000);
-            replaytale.enableModsOverride(new Mods(Mod.HardRock));
-            await wait(3000);
-            replaytale.disableModsOverride();
-            await wait(3000);
-            replaytale.enableModsOverride(new Mods(Mod.None));
-            await wait(3000);
-            replaytale.enableModsOverride(new Mods(Mod.Easy));
-            await wait(3000);
-            replaytale.enableModsOverride(new Mods(Mod.HardRock));
-            await wait(3000);
-            replaytale.enableModsOverride(new Mods(Mod.None));
-            await wait(3000);
-            replaytale.disableModsOverride(); */
-        } else {
-            this.textContent = "Failed Loading Game";
-
-            //console.log(replay, mapBeatmap, music);
-        }
-    } catch (error) {
-        this.textContent = error as string;
-        console.error(error);
-    }
-});
-
-function rand(min: number, max: number) {
-    // min and max included
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-async function wait(time: number = 1000) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve("adsasd");
-        }, time);
-    });
-}
-
-const logger = Logger.view;
-const loggerContainer = document.getElementById("logger") as HTMLDivElement;
-loggerContainer.appendChild(logger);
+export default ReplayTale;
+export * from "./osu/Mods/Mods";
+export * from "./osu/Replay/Replay";
+export * from "./osu/Beatmap/Beatmap";
+export * from "./settings/Settings";

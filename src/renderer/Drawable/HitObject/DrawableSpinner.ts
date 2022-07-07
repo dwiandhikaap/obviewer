@@ -16,8 +16,7 @@ function createSpinnerBackground(renderScale: number) {
     const playfieldHeight = 384 * renderScale;
 
     const ratio =
-        SPINNER_BACKGROUND_SCALE *
-        (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+        SPINNER_BACKGROUND_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
 
     const sprite = new Sprite(texture);
     sprite.scale.set(ratio);
@@ -33,8 +32,7 @@ function createSpinnerMeter(renderScale: number) {
     const playfieldHeight = 384 * renderScale;
 
     const ratio =
-        SPINNER_BACKGROUND_SCALE *
-        (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+        SPINNER_BACKGROUND_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
 
     const sprite = new Sprite(texture);
     sprite.scale.set(ratio);
@@ -51,8 +49,7 @@ function createSpinnerMeterMask(renderScale: number) {
     const playfieldHeight = 384 * renderScale;
 
     const ratio =
-        SPINNER_BACKGROUND_SCALE *
-        (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+        SPINNER_BACKGROUND_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
 
     const mask = new Sprite(Texture.WHITE);
     mask.y = 0;
@@ -109,8 +106,7 @@ function createSpinnerSpin(renderScale: number) {
     const playfieldWidth = 512 * renderScale;
     const playfieldHeight = 384 * renderScale;
 
-    const ratio =
-        SPINNER_SPIN_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
+    const ratio = SPINNER_SPIN_SCALE * (1 / calculateFitRatio(texture.width, texture.height, playfieldWidth, playfieldHeight));
 
     const sprite = new Sprite(texture);
     sprite.scale.set(ratio);
