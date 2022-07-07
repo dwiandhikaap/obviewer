@@ -1,29 +1,29 @@
-import typescript from "@rollup/plugin-typescript";
+import ts from "rollup-plugin-ts";
 import json from "@rollup/plugin-json";
-import dts from "rollup-plugin-dts";
 
 export default [
     {
         external: ["pixi.js", "buffer"],
-        input: "./src/module.ts",
+        input: "./src/index.ts",
         output: [
             {
-                name: "replaytale",
+                name: "obviewer",
                 sourcemap: true,
-                file: "./dist/module.js",
+                file: "./demo/lib/obviewer/obviewer.js",
+                format: "es",
+            },
+            {
+                name: "obviewer",
+                sourcemap: true,
+                file: "./dist/obviewer.js",
                 format: "es",
             },
         ],
         plugins: [
-            typescript({
+            ts({
                 tsconfig: "./tsconfig.json",
             }),
             json(),
         ],
-    },
-    {
-        input: "./dist/dts/module.d.ts",
-        output: [{ file: "dist/index.d.ts", format: "es" }],
-        plugins: [dts()],
     },
 ];
