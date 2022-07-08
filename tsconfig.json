@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-        "outDir": "./build/",
         "sourceMap": true,
         "noImplicitAny": true,
         "module": "es6",
@@ -13,7 +12,7 @@
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "strictPropertyInitialization": false,
-        "lib": ["ES6", "DOM"],
-        "declaration": true
-    }
+        "lib": ["ES6", "DOM"]
+    },
+    "exclude": ["./demo/**/*"]
 }
