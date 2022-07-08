@@ -6,5 +6,7 @@ node_modules
 
 # Assets stuff for demo
 /demo/assets/*
+/demo/lib/obviewer
+
 !/demo/assets/osu/
 !/demo/assets/replay-tale

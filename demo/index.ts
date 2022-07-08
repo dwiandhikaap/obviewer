@@ -1,5 +1,5 @@
-import * as $ from "jQuery";
-import ReplayTale, { Beatmap, Replay, Mod, Mods, ReplayData, ReplayNode, Settings } from "./lib/obviewer/obviewer";
+import $ from "jQuery";
+import ReplayTale, { Beatmap, Replay, Mod, Mods, ReplayData, ReplayNode, Settings } from "./lib/obviewer/";
 
 let replay: Replay;
 
@@ -151,20 +151,20 @@ $("button#startTest").on("click", async function (e) {
 
     this.textContent = "Parsing Replay...";
 
-    const replayBuffer = await fetch(`/dist/assets/test/replay.osr`).then((ah) => ah.arrayBuffer());
+    const replayBuffer = await fetch(`/assets/test/replay.osr`).then((ah) => ah.arrayBuffer());
     replay = await Replay.FromArrayBuffer(replayBuffer);
 
     this.textContent = "Parsing Beatmap...";
 
-    const music = new Audio("/dist/assets/test/audio.mp3");
-    const map = await fetch(`/dist/assets/test/map.osu`).then((ah) => ah.text());
+    const music = new Audio("/assets/test/audio.mp3");
+    const map = await fetch(`/assets/test/map.osu`).then((ah) => ah.text());
 
     const mapBeatmap = new Beatmap(map);
 
     this.textContent = "Loading Image...";
 
     const background = new Image();
-    background.src = `/dist/assets/test/bg.jpg`;
+    background.src = `/assets/test/bg.jpg`;
 
     const backgroundImageLoaded = new Promise((resolve) => {
         background!.onload = resolve;
@@ -175,7 +175,7 @@ $("button#startTest").on("click", async function (e) {
     try {
         if (replay && mapBeatmap && music) {
             this.textContent = "Loading Replay";
-            //console.log(replay);
+            console.log(replay);
 
             replaytale.loadReplay(replay);
 
@@ -249,7 +249,7 @@ $("button#startTest").on("click", async function (e) {
         } else {
             this.textContent = "Failed Loading Game";
 
-            //console.log(replay, mapBeatmap, music);
+            console.log(replay, mapBeatmap, music);
         }
     } catch (error) {
         this.textContent = error as string;
