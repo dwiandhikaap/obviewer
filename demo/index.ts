@@ -1,4 +1,4 @@
-import Obviewer, { BlobReader } from "./lib/obviewer";
+import Obviewer, { utils } from "./lib/obviewer";
 import $ from "jquery";
 import { wait } from "./util";
 
@@ -40,10 +40,10 @@ function addListeners(obviewer: Obviewer) {
         const replay = await downloadReplay().then((map) => BlobReader.extractOsr(map)); */
 
         console.log("Extracting Skin");
-        const skin = await BlobReader.extractOsk(skinBlob);
+        const skin = await utils.extractOsk(skinBlob);
 
         console.log("Extracting Beatmap");
-        const beatmap = await BlobReader.extractOsz(beatmapBlob);
+        const beatmap = await utils.extractOsz(beatmapBlob);
 
         console.log("Loading Skin");
         obviewer.addSkin(skin);

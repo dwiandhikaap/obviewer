@@ -6,9 +6,6 @@ import { Renderer } from "./renderer/Renderer";
 import { AssetsReference, getBeatmapDependencies, AssetsLoader, getSkinDependencies } from "./assets/Assets";
 import { AudioHandler } from "./audio/AudioHandler";
 import { audioMiddleware } from "./audio/audioMiddleware";
-import { getExtensionType, getFileExtension } from "./util/filename";
-import { wait } from "./util/wait";
-import { BlobReader } from "./util/blobReader";
 
 interface ObviewerConfig {
     container: string;
@@ -193,4 +190,4 @@ export * from "./osu/Mods/Mods";
 export * from "./osu/Replay/Replay";
 export * from "./osu/Beatmap/Beatmap";
 export * from "./settings/Settings";
-export * from "./util/blobReader";
+export * as utils from "./util/";
