@@ -13,7 +13,7 @@ export default defineConfig([
             {
                 name: "obviewer",
                 sourcemap: true,
-                file: "./demo/lib/obviewer/index.js",
+                dir: "./demo/lib/obviewer/",
                 format: "es",
             },
         ],
@@ -22,9 +22,9 @@ export default defineConfig([
             inject({ Buffer: ["buffer", "Buffer"] }),
             typescript({
                 tsconfig: "./tsconfig.json",
-                outDir: "./build/",
+                outDir: "./demo/lib/obviewer/",
                 declaration: true,
-                declarationDir: "./",
+                declarationDir: "./demo/lib/obviewer/",
             }),
             json(),
         ],
