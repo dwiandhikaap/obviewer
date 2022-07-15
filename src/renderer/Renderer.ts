@@ -4,7 +4,6 @@ import { Beatmap } from "../osu/Beatmap/Beatmap";
 import { GameHUD } from "../osu/Graphics/HUD/GameHUD";
 import { Replay } from "../osu/Replay/Replay";
 import { Settings } from "../settings/Settings";
-import { AssetsLoader } from "./Assets/Assets";
 import { SliderTextureGenerator } from "./Drawable/HitObject/SliderTextureGenerator";
 import { Background, BeatmapField, HUDOverlay, ReplayField } from "./Layers";
 
@@ -27,7 +26,6 @@ class Renderer {
         this.background.draw(time);
         this.beatmapField.draw(time);
         this.replayField.draw(time);
-
         this.hudOverlay.draw(time);
     }
 
@@ -76,19 +74,11 @@ class Renderer {
 
         const view = document.querySelector(querySelector);
         view && view.appendChild(this.pixi.view);
-
-        // Initialize App
-        this.init();
-    }
-
-    async init() {
-        // Load Assets
-        await AssetsLoader.load();
-        this.assets = AssetsLoader.assets;
     }
 
     loadBeatmap(beatmap: Beatmap) {
         this.beatmapField.loadBeatmap(beatmap);
+        this.background.loadBeatmap(beatmap);
         this.hudOverlay.loadBeatmap(beatmap);
     }
 
@@ -98,11 +88,6 @@ class Renderer {
 
     loadHUD(gameHUD: GameHUD) {
         this.hudOverlay.loadHUD(gameHUD);
-    }
-
-    setBackground(image: HTMLImageElement) {
-        const texture = Texture.from(image);
-        this.background.setImage(texture);
     }
 }
 

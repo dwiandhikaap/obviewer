@@ -32,6 +32,9 @@ class ReplayField extends Container {
     loadReplay(replay: Replay) {
         const scale = getOsuPixelScale(this.playfieldResolution[0], this.playfieldResolution[1]);
 
+        this.mainCursor?.destroy();
+        this.cursorNode?.destroy();
+
         this.mainCursor = new MainCursor(replay, scale);
         this.cursorNode = new CursorNode(replay, scale);
 
@@ -40,8 +43,8 @@ class ReplayField extends Container {
     }
 
     draw(timestamp: number) {
-        this.mainCursor.draw(timestamp);
-        this.cursorNode.draw(timestamp);
+        this.mainCursor?.draw(timestamp);
+        this.cursorNode?.draw(timestamp);
     }
 }
 

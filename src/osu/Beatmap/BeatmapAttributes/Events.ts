@@ -63,14 +63,15 @@ class Events {
         this.events = eventStringArray
             .map((eventString) => {
                 const [eventType, startTime, ...eventParams] = eventString.split(",");
-                switch (+eventType) {
-                    case 0: {
+                switch (eventType.toLowerCase()) {
+                    case "0": {
                         return new BackgroundEvent(+startTime, eventParams);
                     }
-                    case 1: {
+                    case "video":
+                    case "1": {
                         return new VideoEvent(+startTime, eventParams);
                     }
-                    case 2: {
+                    case "2": {
                         return new BreakEvent(+startTime, eventParams);
                     }
                 }

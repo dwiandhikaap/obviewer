@@ -10,12 +10,16 @@
 
         <input type="file" id="mapsFile" name="mapsFile" multiple />
         <br />
+        OSZ FILE : <input type="file" name="oszFile" id="oszFile" accept=".osz" />
         <button id="replay-download">Download Replay</button>
         <button id="startTest" style="width: 160px; height: 80px">Start Test</button>
+        <button id="startTest2" style="width: 160px; height: 80px">Start Test 2</button>
         <div id="main-canvas"></div>
         <span id="combo" style="font-size: 48px; font-weight: bold"></span>
         <div id="logger"></div>
-        <script type="module" src="/lib/obviewer/obviewer.js"></script>
+        <button id="togglePause">Toggle Pause</button>
+
+        <script type="module" src="/lib/obviewer/index.js"></script>
         <script type="module" src="/index.ts"></script>
     </body>
 </html>
