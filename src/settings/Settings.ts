@@ -1,31 +1,14 @@
-// fuck generics
+import DEFAULT_SETTINGS from "./settings.json";
 
-interface ISettings {
-    AppWidth: number;
-    AppHeight: number;
-    AudioVolume: number;
-    AudioOffset: number;
-    AudioAutoSyncEnabled: boolean;
-    AudioAutoSyncThresholdMS: number;
-    AudioAutoSyncDetectIssue: boolean;
-    EnableGameCheck: boolean;
-}
+// fuck generics
+type ISettings = typeof DEFAULT_SETTINGS;
 type SettingsParameters = keyof ISettings;
 type SettingsValue<T extends SettingsParameters> = ISettings[keyof Pick<ISettings, T>];
 type SettingsListener<T extends SettingsParameters> = (value: SettingsValue<T>) => void;
 type SettingsListenerDict = { [T in SettingsParameters]: SettingsListener<T>[] };
 
 class Settings {
-    private static _settings: ISettings = {
-        AppWidth: 1280,
-        AppHeight: 720,
-        AudioVolume: 60,
-        AudioOffset: 0,
-        AudioAutoSyncEnabled: true,
-        AudioAutoSyncThresholdMS: 150,
-        AudioAutoSyncDetectIssue: true,
-        EnableGameCheck: false,
-    };
+    private static _settings: ISettings = DEFAULT_SETTINGS;
 
     private static listeners: SettingsListenerDict = {} as SettingsListenerDict; // hack mode
 
