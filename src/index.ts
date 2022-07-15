@@ -2,17 +2,24 @@ import { Beatmap } from "./osu/Beatmap/Beatmap";
 import { GameInstance } from "./osu/Gameplay/GameInstance";
 import { Mods } from "./osu/Mods/Mods";
 import { Replay } from "./osu/Replay/Replay";
-import { AudioHandler } from "./renderer/AudioHandler";
 import { Renderer } from "./renderer/Renderer";
-import { Settings } from "./settings/Settings";
+import { AssetsReference, getBeatmapDependencies, AssetsLoader, getSkinDependencies } from "./assets/Assets";
+import { AudioHandler } from "./audio/AudioHandler";
+import { audioMiddleware } from "./audio/audioMiddleware";
+import { getExtensionType, getFileExtension } from "./util/filename";
+import { wait } from "./util/wait";
+import { BlobReader } from "./util/blobReader";
 
-interface ReplayTaleConfig {
+interface ObviewerConfig {
     container: string;
 }
 
-class ReplayTale {
-    beatmap: Beatmap | null = null;
+class Obviewer {
+    private beatmapAssets: AssetsReference = [];
+    private skinAssets: AssetsReference = [];
+
     replay: Replay | null = null;
+    beatmap: Beatmap | null = null;
 
     public isModsOverriden: Boolean = false;
     private _replayModsNumeric: number | null;
@@ -21,6 +28,7 @@ class ReplayTale {
     private renderer: Renderer;
     private audioHandler: AudioHandler;
     private gameInstance: GameInstance;
+    private assetsLoader: AssetsLoader;
 
     public isPaused: boolean = true;
     private timestamp: number = 0;
@@ -31,50 +39,65 @@ class ReplayTale {
     }
     public set playbackRate(value: number) {
         this._playbackRate = value;
-        this.audioHandler.setAudioOptions("beatmap", { playbackRate: value });
+        this.gameInstance.playbackRate = value;
     }
 
-    constructor(replaytaleConfig: ReplayTaleConfig) {
-        const { container } = replaytaleConfig;
+    constructor(obviewerConfig: ObviewerConfig) {
+        const { container } = obviewerConfig;
         this.renderer = new Renderer(container);
         this.audioHandler = new AudioHandler();
-        this.gameInstance = new GameInstance(this.renderer);
+        this.gameInstance = new GameInstance(this.renderer, this.audioHandler);
+        this.assetsLoader = AssetsLoader.instance;
+
+        const middleware = audioMiddleware(this.audioHandler);
+        this.assetsLoader.use(middleware);
     }
 
-    loadBeatmapAssets(audio?: HTMLAudioElement, background?: HTMLImageElement) {
-        if (audio !== undefined) {
-            const volume = Settings.get("AudioVolume");
-            const offset = Settings.get("AudioOffset");
-            this.audioHandler.loadAudio("beatmap", audio, { volume: volume / 100, offsetMS: offset });
-
-            Settings.addUpdateListener("AudioVolume", (volume: number) => {
-                this.audioHandler.setAudioOptions("beatmap", { volume: volume / 100 });
-            });
-
-            Settings.addUpdateListener("AudioOffset", (offset: number) => {
-                this.audioHandler.setAudioOptions("beatmap", { offsetMS: offset });
-            });
-        }
-
-        if (background !== undefined) {
-            this.renderer.setBackground(background);
-        }
+    addSkin(skinAssets: AssetsReference) {
+        this.assetsLoader.resetSkin();
+        this.skinAssets = skinAssets;
     }
 
-    loadBeatmap(beatmap: Beatmap) {
-        if (this.mods !== null) {
-            beatmap.setMods(this.mods);
+    addBeatmap(beatmapAssets: AssetsReference) {
+        this.beatmapAssets = beatmapAssets;
+
+        //  Debug only
+        //const osuFiles = beatmapAssets.filter((asset) => getFileExtension(asset.name) === "osu");
+        //console.log(osuFiles);
+    }
+
+    async loadBeatmap(filename: string) {
+        const difficultyFile = this.beatmapAssets.find((asset) => asset.name === filename);
+        if (!difficultyFile) {
+            console.error(`Beatmap '${filename}' not found`);
+            return;
         }
 
-        if (this.mods === null && this.replay && this.replay.mods.numeric !== beatmap.getMods().numeric) {
-            const mods = this.replay.mods;
-            beatmap.setMods(mods);
-        }
+        const beatmapString = await fetch(difficultyFile.url).then((response) => response.text());
+
+        const isPlaying = !this.isPaused;
+        this.pause();
+
+        const beatmap = new Beatmap(beatmapString);
+        const beatmapDeps = getBeatmapDependencies(this.beatmapAssets, beatmap);
+        const skinDeps = getSkinDependencies(this.skinAssets);
+
+        this.assetsLoader.resetSkin();
+        this.assetsLoader.resetBeatmap();
+
+        await this.assetsLoader.loadSkin(skinDeps);
+        await this.assetsLoader.loadBeatmap(beatmapDeps);
 
         this.beatmap = beatmap;
         this.gameInstance.loadBeatmap(beatmap);
         this.renderer.loadBeatmap(beatmap);
+
+        if (isPlaying) {
+            this.play();
+        }
     }
+
+    checkResources() {}
 
     loadReplay(replay: Replay) {
         this._replayModsNumeric = replay.mods.numeric;
@@ -93,28 +116,24 @@ class ReplayTale {
     }
 
     enableModsOverride(mods: Mods) {
-        //console.log(`Enabling Overrides : ${mods.list}`);
+        // console.log(`Enabling Overrides : ${mods.list}`);
 
         this.isModsOverriden = true;
-
         if (mods.numeric === this.mods?.numeric) {
             return;
         }
 
         this.mods = mods;
         this.replay && (this.replay.mods = mods);
-        if (this.beatmap) {
-            const oldMods = this.beatmap.getMods().numeric;
+        const oldMods = this.beatmap?.getMods().numeric;
+        if (this.beatmap && oldMods !== mods.numeric) {
             this.beatmap.setMods(mods);
-
-            if (oldMods !== mods.numeric) {
-                this.renderer.loadBeatmap(this.beatmap);
-            }
+            this.renderer.loadBeatmap(this.beatmap);
         }
     }
 
     disableModsOverride() {
-        //console.log(`Disabling Overrides! Previous Beatmap Mods : ${this.beatmap?.getMods().list}`);
+        // console.log(`Disabling Overrides! Previous Beatmap Mods : ${this.beatmap?.getMods().list}`);
 
         this.mods = null;
         if (this._replayModsNumeric === null) {
@@ -122,22 +141,17 @@ class ReplayTale {
         }
 
         const oldReplayMods = new Mods(this._replayModsNumeric);
+        const oldMapMods = this.beatmap?.getMods().numeric;
 
         this.replay && (this.replay.mods = oldReplayMods);
-
-        if (this.beatmap) {
-            const oldMapMods = this.beatmap.getMods().numeric;
+        if (this.beatmap && oldMapMods !== oldReplayMods.numeric) {
             this.beatmap.setMods(oldReplayMods);
-
-            if (oldMapMods !== oldReplayMods.numeric) {
-                this.renderer.loadBeatmap(this.beatmap);
-            }
+            this.renderer.loadBeatmap(this.beatmap);
         }
     }
 
-    private _autoSyncCount = 0;
-    private _autoSyncLastTime = 0;
     private lastFrameTimestamp: number = 0;
+    private _rafID?: number;
     private loop = (time: number) => {
         if (this.isPaused) return;
 
@@ -148,57 +162,35 @@ class ReplayTale {
         this.gameInstance.time = this.timestamp;
         this.lastFrameTimestamp = time;
 
-        // Sync audio automatically if somehow the game/audio drifts
-        if (Settings.get("AudioAutoSyncEnabled")) {
-            const currTime = this.audioHandler.getAudioCurrentTimeMS("beatmap");
-            const offset = this.audioHandler.getAudioOffsetMS("beatmap");
-            const timeDiff = currTime - offset - this.timestamp;
-            if (Math.abs(timeDiff) > Settings.get("AudioAutoSyncThresholdMS")) {
-                this.audioHandler.seekAudio("beatmap", this.timestamp / 1000);
-
-                // Check quick repeating autosync in short intervals
-                if (Settings.get("AudioAutoSyncDetectIssue")) {
-                    this._autoSyncCount++;
-                    if (this.timestamp - this._autoSyncLastTime > 1000) {
-                        this._autoSyncCount = 0;
-                    }
-                    this._autoSyncLastTime = time;
-                }
-            }
-        }
-
-        if (this._autoSyncCount > 10) {
-            console.warn("[Audio] Auto sync issue detected! Disabling audio auto sync!");
-            Settings.set("AudioAutoSyncEnabled", false);
-            this._autoSyncCount = 0;
-        }
-
-        requestAnimationFrame(this.loop);
+        this._rafID = requestAnimationFrame(this.loop);
     };
 
     play() {
+        if (!this.isPaused) return;
         this.isPaused = false;
+        this.gameInstance.play();
         this.lastFrameTimestamp = performance.now();
-        this.audioHandler.playAudio("beatmap");
-        this.audioHandler.seekAudio("beatmap", this.timestamp / 1000);
-
         this.loop(this.lastFrameTimestamp);
     }
 
     pause() {
         this.isPaused = true;
-        this.audioHandler.pauseAudio("beatmap");
+        this.gameInstance.pause();
+
+        if (this._rafID !== undefined) {
+            cancelAnimationFrame(this._rafID);
+        }
     }
 
     seek(timestamp: number) {
         this.timestamp = timestamp;
         this.renderer.timestamp = timestamp;
-        this.audioHandler.seekAudio("beatmap", timestamp / 1000);
     }
 }
 
-export default ReplayTale;
+export default Obviewer;
 export * from "./osu/Mods/Mods";
 export * from "./osu/Replay/Replay";
 export * from "./osu/Beatmap/Beatmap";
 export * from "./settings/Settings";
+export * from "./util/blobReader";
