@@ -2,7 +2,7 @@ import { Container, Sprite, Text, TextStyle } from "pixi.js";
 import { Path } from "../../../math/Path";
 import { Slider } from "../../../osu/Beatmap/BeatmapAttributes/HitObjects";
 import { hexToInt } from "../../../util/color";
-import { AssetsLoader } from "../../Assets/Assets";
+import { AssetsLoader } from "../../../assets/Assets";
 import { SliderTextureGenerator } from "./SliderTextureGenerator";
 
 function createSliderBody(path: Path, radius: number) {
@@ -29,14 +29,14 @@ function createSliderHead(slider: Slider, radius: number) {
     const color = hexToInt(slider.colour);
     const count = slider.comboCount;
 
-    const hitTexture = AssetsLoader.getTexture("hitcircle");
+    const hitTexture = AssetsLoader.instance.getTexture("hitcircle");
     const hitSprite = new Sprite(hitTexture);
     hitSprite.tint = color;
     hitSprite.width = Math.ceil(radius * 2);
     hitSprite.height = Math.ceil(radius * 2);
     hitSprite.anchor.set(0.5);
 
-    const overlayTexture = AssetsLoader.getTexture("hitcircleoverlay");
+    const overlayTexture = AssetsLoader.instance.getTexture("hitcircleoverlay");
     const overlaySprite = new Sprite(overlayTexture);
     overlaySprite.width = Math.ceil(radius * 2);
     overlaySprite.height = Math.ceil(radius * 2);
@@ -59,7 +59,7 @@ function createSliderHead(slider: Slider, radius: number) {
 }
 
 function createSliderBall(radius: number) {
-    const texture = AssetsLoader.getTexture("sliderb0");
+    const texture = AssetsLoader.instance.getTexture("sliderb0");
     const sliderBall = new Sprite(texture);
     sliderBall.anchor.set(0.5, 0.5);
     sliderBall.width = radius * 2;
@@ -70,7 +70,7 @@ function createSliderBall(radius: number) {
 }
 
 function createSliderFollower(radius: number) {
-    const texture = AssetsLoader.getTexture("sliderfollowcircle");
+    const texture = AssetsLoader.instance.getTexture("sliderfollowcircle");
     const sliderFollower = new Sprite(texture);
     sliderFollower.anchor.set(0.5, 0.5);
     sliderFollower.width = radius * 2;
@@ -81,7 +81,7 @@ function createSliderFollower(radius: number) {
 }
 
 function createApproachCircle(radius: number) {
-    const texture = AssetsLoader.getTexture("approachcircle");
+    const texture = AssetsLoader.instance.getTexture("approachcircle");
     const approachCircle = new Sprite(texture);
     approachCircle.width = radius * 2;
     approachCircle.height = radius * 2;
@@ -97,7 +97,7 @@ function createSliderReverses(slider: Slider, radius: number) {
     const renderScale = radius / slider.difficulty.getObjectRadius();
 
     for (const sliderReverse of stackedSliderReverses) {
-        const reverseTexture = AssetsLoader.getTexture("reversearrow");
+        const reverseTexture = AssetsLoader.instance.getTexture("reversearrow");
         const reverse = new Sprite(reverseTexture);
         reverse.width = radius * 2;
         reverse.height = radius * 2;
@@ -120,7 +120,7 @@ function createSliderReverses(slider: Slider, radius: number) {
 function createSliderTicks(slider: Slider, radius: number) {
     const stackedSliderTicks = slider.getStackedSliderTicks();
 
-    const tickTexture = AssetsLoader.getTexture("sliderscorepoint");
+    const tickTexture = AssetsLoader.instance.getTexture("sliderscorepoint");
     const renderScale = radius / slider.difficulty.getObjectRadius();
 
     const sliderTicks = new Container();

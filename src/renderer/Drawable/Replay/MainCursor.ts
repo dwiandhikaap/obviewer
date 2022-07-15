@@ -1,12 +1,12 @@
 import { Container, Sprite } from "pixi.js";
 import { Replay } from "../../../osu/Replay/Replay";
-import { AssetsLoader } from "../../Assets/Assets";
+import { AssetsLoader } from "../../../assets/Assets";
 import { Drawable } from "../DrawableTypes";
 
 const CURSOR_SCALE = 70;
 
 function createMainCursor(size: number) {
-    const texture = AssetsLoader.getTexture("main-cursor");
+    const texture = AssetsLoader.instance.getTexture("cursor");
     const mainCursor = new Sprite(texture);
     mainCursor.width = size;
     mainCursor.height = size;
