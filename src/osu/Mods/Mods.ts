@@ -26,7 +26,7 @@ class Mods {
     private _list = new Array<Mod>();
 
     constructor(value: number = 0) {
-        this._numeric = value;
+        this.numeric = value;
     }
 
     public get reducedListString() {
@@ -124,22 +124,8 @@ class Mods {
             this._disable(Mod.Easy, Mod.HardRock);
         }
 
-        if (
-            [
-                Mod.NoFail,
-                Mod.Relax,
-                Mod.Relax2,
-                Mod.SuddenDeath,
-                Mod.Perfect,
-            ].includes(mod)
-        ) {
-            this._disable(
-                Mod.NoFail,
-                Mod.Relax,
-                Mod.Relax2,
-                Mod.SuddenDeath,
-                Mod.Perfect
-            );
+        if ([Mod.NoFail, Mod.Relax, Mod.Relax2, Mod.SuddenDeath, Mod.Perfect].includes(mod)) {
+            this._disable(Mod.NoFail, Mod.Relax, Mod.Relax2, Mod.SuddenDeath, Mod.Perfect);
             this._disable(Mod.Autoplay);
         }
 
@@ -148,13 +134,7 @@ class Mods {
         }
 
         if ([Mod.Autoplay].includes(mod)) {
-            this._disable(
-                Mod.NoFail,
-                Mod.Relax,
-                Mod.Relax2,
-                Mod.SuddenDeath,
-                Mod.Perfect
-            );
+            this._disable(Mod.NoFail, Mod.Relax, Mod.Relax2, Mod.SuddenDeath, Mod.Perfect);
         }
 
         if (mod === Mod.Nightcore) {
