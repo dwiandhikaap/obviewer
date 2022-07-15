@@ -30,10 +30,15 @@
     },
     "dependencies": {
         "@types/bytebuffer": "^5.0.42",
+        "@types/howler": "^2.2.7",
+        "@types/mime": "^2.0.3",
         "@types/pixi.js": "^5.0.0",
+        "@zip.js/zip.js": "^2.5.9",
         "buffer": "^6.0.3",
         "bytebuffer": "^5.0.1",
+        "howler": "^2.2.3",
         "leb": "^0.3.0",
+        "mime": "^3.0.0",
         "patch-package": "^6.4.7",
         "pixi-filters": "^4.1.5",
         "pixi.js": "^6.2.2"
