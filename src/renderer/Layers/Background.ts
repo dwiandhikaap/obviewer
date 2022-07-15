@@ -1,4 +1,7 @@
 import { Application, Container, Graphics, Sprite, Texture } from "pixi.js";
+import { AssetsLoader } from "../../assets/Assets";
+import { Beatmap } from "../../osu/Beatmap/Beatmap";
+import { omitFileExtension } from "../../util/filename";
 
 interface BackgroundConfig {
     texture?: Texture;
@@ -77,6 +80,14 @@ class Background extends Container {
                 break;
             }
         }
+    }
+
+    loadBeatmap(beatmap: Beatmap) {
+        const fullFileName = beatmap.getBackgroundFileNames()[0] || "";
+        const fileName = omitFileExtension(fullFileName);
+        const texture = AssetsLoader.instance.getTexture(fileName);
+
+        this.setImage(texture);
     }
 
     draw(timestamp: number) {}

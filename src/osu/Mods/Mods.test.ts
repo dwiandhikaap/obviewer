@@ -5,10 +5,10 @@ describe("Mods Tests", () => {
         const mods = new Mods();
 
         expect(mods.numeric).toStrictEqual(0);
-        expect(mods.list.length).toStrictEqual(0);
-        expect(mods.listString.length).toStrictEqual(0);
-        expect(mods.reducedList.length).toStrictEqual(0);
-        expect(mods.reducedListString.length).toStrictEqual(0);
+        expect(mods.list.length).toStrictEqual(1);
+        expect(mods.listString.length).toStrictEqual(1);
+        expect(mods.reducedList.length).toStrictEqual(1);
+        expect(mods.reducedListString.length).toStrictEqual(1);
         expect(mods.constrain === true);
     });
 
@@ -39,6 +39,12 @@ describe("Mods Tests", () => {
         mods.set(Mod.Hidden, false);
         expect(mods.listString).toStrictEqual(["None"]);
         expect(mods.contains(Mod.Hidden)).toStrictEqual(false);
+    });
+
+    test("Default Mods() instance should have Mod.None on it's list", () => {
+        const mods = new Mods();
+
+        expect(mods.list.includes(Mod.None)).toStrictEqual(true);
     });
 
     test("Enabling +NC also enables +DT", () => {

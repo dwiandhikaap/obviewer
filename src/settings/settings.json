@@ -1,0 +1,9 @@
+{
+    "AppWidth": 1280,
+    "AppHeight": 720,
+    "AudioVolume": 60,
+    "AudioOffset": 0,
+    "AudioAutoSyncEnabled": true,
+    "AudioAutoSyncThresholdMS": 150,
+    "AudioAutoSyncDetectIssue": true
+}

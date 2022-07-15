@@ -2,7 +2,7 @@ import { Mods } from "../Mods/Mods";
 import { Colours } from "./BeatmapAttributes/Colours";
 import { Difficulty } from "./BeatmapAttributes/Difficulty";
 import { Editor } from "./BeatmapAttributes/Editor";
-import { BackgroundEvent, Events } from "./BeatmapAttributes/Events";
+import { BackgroundEvent, Events, VideoEvent } from "./BeatmapAttributes/Events";
 import { General } from "./BeatmapAttributes/General";
 import { HitObjects } from "./BeatmapAttributes/HitObjects";
 import { Metadata } from "./BeatmapAttributes/Metadata";
@@ -19,8 +19,7 @@ class Beatmap {
     hitObjects: HitObjects;
 
     constructor(private mapData: string = "", mods?: Mods) {
-        const { general, editor, metadata, difficulty, events, timingPoints, colours, hitObjects } =
-            this.parseBeatmap(mods);
+        const { general, editor, metadata, difficulty, events, timingPoints, colours, hitObjects } = this.parseBeatmap(mods);
         this.general = general;
         this.editor = editor;
         this.metadata = metadata;
@@ -92,8 +91,7 @@ class Beatmap {
     }
 
     setMods(mods: Mods) {
-        const { general, editor, metadata, difficulty, events, timingPoints, colours, hitObjects } =
-            this.parseBeatmap(mods);
+        const { general, editor, metadata, difficulty, events, timingPoints, colours, hitObjects } = this.parseBeatmap(mods);
 
         this.difficulty = difficulty;
         this.hitObjects = hitObjects;
@@ -111,6 +109,31 @@ class Beatmap {
 
     getAudioFilename(): string {
         return this.general.audioFilename;
+    }
+
+    // TODO: include storyboards assets
+    getAssetsFilename(): string[] {
+        const assets: string[] = [];
+
+        // General - Audio
+        assets.push(this.general.audioFilename);
+
+        // Beatmap custom hitsample - Audio
+        const customHitSamples = this.hitObjects.objects
+            .filter((hitObject) => hitObject.hitSample?.filename)
+            .map((hitObject) => hitObject.hitSample!.filename);
+        assets.push(...customHitSamples);
+
+        // Events (without storyboard)
+        this.events.events.forEach((event) => {
+            if (event.eventType === "background") {
+                assets.push((event as BackgroundEvent).filename);
+            } else if (event.eventType === "video") {
+                assets.push((event as VideoEvent).filename);
+            }
+        });
+
+        return assets;
     }
 }
 

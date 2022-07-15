@@ -1,6 +1,6 @@
 import { Container, Graphics, Sprite } from "pixi.js";
 import { Replay } from "../../../osu/Replay/Replay";
-import { AssetsLoader } from "../../Assets/Assets";
+import { AssetsLoader } from "../../../assets/Assets";
 import { Drawable } from "../DrawableTypes";
 
 const NODE_SCALE = 0.1;
@@ -10,7 +10,7 @@ const NODE_COUNT_BEFORE = 0;
 function createCursorNodes(size: number) {
     const nodeSprites: Sprite[] = [];
     for (let i = 0; i < NODE_COUNT_BEFORE + NODE_COUNT_AFTER + 1; i++) {
-        const texture = AssetsLoader.getTexture("cursornode");
+        const texture = AssetsLoader.instance.getTexture("cursornode");
 
         const sprite = new Sprite(texture);
         sprite.anchor.set(0.5);

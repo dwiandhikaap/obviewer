@@ -1,7 +1,7 @@
 import { Container, Sprite, Text, TextStyle, Texture } from "pixi.js";
 import { Spinner } from "../../../osu/Beatmap/BeatmapAttributes/HitObjects";
 import { calculateFitRatio } from "../../../util/osu-calculation";
-import { AssetsLoader } from "../../Assets/Assets";
+import { AssetsLoader } from "../../../assets/Assets";
 import { Drawable } from "../DrawableTypes";
 
 // the ultimate hack of all time
@@ -10,7 +10,7 @@ const SPINNER_CIRCLE_SCALE = 0.8;
 const SPINNER_SPIN_SCALE = 0.175;
 
 function createSpinnerBackground(renderScale: number) {
-    const texture = AssetsLoader.getTexture("spinner-background");
+    const texture = AssetsLoader.instance.getTexture("spinner-background");
 
     const playfieldWidth = 512 * renderScale;
     const playfieldHeight = 384 * renderScale;
@@ -26,7 +26,7 @@ function createSpinnerBackground(renderScale: number) {
 }
 
 function createSpinnerMeter(renderScale: number) {
-    const texture = AssetsLoader.getTexture("spinner-metre");
+    const texture = AssetsLoader.instance.getTexture("spinner-metre");
 
     const playfieldWidth = 512 * renderScale;
     const playfieldHeight = 384 * renderScale;
@@ -43,7 +43,7 @@ function createSpinnerMeter(renderScale: number) {
 }
 
 function createSpinnerMeterMask(renderScale: number) {
-    const texture = AssetsLoader.getTexture("spinner-metre");
+    const texture = AssetsLoader.instance.getTexture("spinner-metre");
 
     const playfieldWidth = 512 * renderScale;
     const playfieldHeight = 384 * renderScale;
@@ -63,7 +63,7 @@ function createSpinnerMeterMask(renderScale: number) {
 }
 
 function createSpinnerCircle(renderScale: number) {
-    const texture = AssetsLoader.getTexture("spinner-circle");
+    const texture = AssetsLoader.instance.getTexture("spinner-circle");
 
     const playfieldWidth = 512 * renderScale;
     const playfieldHeight = 384 * renderScale;
@@ -101,7 +101,7 @@ function createSpinnerCounter(renderScale: number) {
 }
 
 function createSpinnerSpin(renderScale: number) {
-    const texture = AssetsLoader.getTexture("spinner-spin");
+    const texture = AssetsLoader.instance.getTexture("spinner-spin");
 
     const playfieldWidth = 512 * renderScale;
     const playfieldHeight = 384 * renderScale;

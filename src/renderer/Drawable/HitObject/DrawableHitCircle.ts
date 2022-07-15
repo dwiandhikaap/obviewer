@@ -1,11 +1,11 @@
 import { Container, Sprite, Text, TextStyle } from "pixi.js";
 import { HitCircle } from "../../../osu/Beatmap/BeatmapAttributes/HitObjects/HitCircle";
 import { hexToInt } from "../../../util/color";
-import { AssetsLoader } from "../../Assets/Assets";
+import { AssetsLoader } from "../../../assets/Assets";
 
 function createCircle(hitCircle: HitCircle, radius: number) {
     const { comboCount, colour } = hitCircle;
-    const texture = AssetsLoader.getTexture("hitcircle");
+    const texture = AssetsLoader.instance.getTexture("hitcircle");
 
     const hitCircleSprite = new Sprite(texture);
     hitCircleSprite.width = radius * 2;
@@ -13,7 +13,7 @@ function createCircle(hitCircle: HitCircle, radius: number) {
     hitCircleSprite.tint = hexToInt(colour);
     hitCircleSprite.anchor.set(0.5, 0.5);
 
-    const hcOverlayTexture = AssetsLoader.getTexture("hitcircleoverlay");
+    const hcOverlayTexture = AssetsLoader.instance.getTexture("hitcircleoverlay");
     const sHCOverlay = new Sprite(hcOverlayTexture);
     sHCOverlay.width = radius * 2;
     sHCOverlay.height = radius * 2;
@@ -36,7 +36,7 @@ function createCircle(hitCircle: HitCircle, radius: number) {
 }
 
 function createApproachCircle(radius: number) {
-    const texture = AssetsLoader.getTexture("approachcircle");
+    const texture = AssetsLoader.instance.getTexture("approachcircle");
     const ac = new Sprite(texture);
     ac.width = radius * 2;
     ac.height = radius * 2;
