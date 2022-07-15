@@ -133,8 +133,6 @@ class Beatmap {
             }
         });
 
-        console.log("Beatmap Assets Deps : ", assets);
-
         return assets;
     }
 }

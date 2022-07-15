@@ -56,9 +56,6 @@ function addListeners(obviewer: Obviewer) {
 
         await obviewer.loadBeatmap("Reol - No title (VINXIS) [Celsius' Extra].osu");
         obviewer.play();
-
-        const resources = obviewer.checkResources();
-        console.log(resources);
     });
 }
 
