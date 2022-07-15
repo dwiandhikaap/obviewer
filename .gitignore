@@ -8,5 +8,4 @@ node_modules
 /demo/assets/*
 /demo/lib/obviewer
 
-!/demo/assets/osu/
-!/demo/assets/replay-tale
+!/demo/assets/skin.osk
