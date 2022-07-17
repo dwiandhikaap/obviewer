@@ -7,6 +7,10 @@ export class DrawableSpinner {
     meter: number;
     opacity: Easer;
 
+    // Fake spinning progress
+    fakeMeter: Easer;
+    fakeRotation: Easer;
+
     constructor(public spinner: Spinner) {
         const opacity = new Easer();
 
@@ -21,9 +25,29 @@ export class DrawableSpinner {
         this.rotation = 0;
         this.meter = 0;
         this.opacity = opacity;
+
+        // Fake Spin progress
+        const spinDuration = spinner.endTime - spinner.startTime;
+        const rotation = (spinDuration / 60) * 220; // 220 rpm
+        const progressStep = 10;
+
+        this.fakeMeter = new Easer();
+        for (let i = 1; i <= progressStep; i++) {
+            this.fakeMeter.addEasing(
+                spinner.startTime + ((i - 0.55) / progressStep) * spinDuration,
+                spinner.startTime + ((i - 0.5) / progressStep) * spinDuration,
+                (i - 1) / progressStep,
+                i / progressStep
+            );
+        }
+
+        this.fakeRotation = new Easer();
+        this.fakeRotation.addEasing(spinner.startTime, spinner.endTime, 0, rotation);
     }
 
     draw(time: number) {
         this.opacity.time = time;
+        this.fakeMeter.time = time;
+        this.fakeRotation.time = time;
     }
 }
