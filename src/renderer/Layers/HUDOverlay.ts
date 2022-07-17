@@ -1,7 +1,7 @@
 import { Application, Container } from "pixi.js";
 import { Beatmap } from "../../osu/Beatmap/Beatmap";
 import { GameHUD } from "../../osu/Graphics/HUD/GameHUD";
-import { getOsuPixelScale } from "../../util/osu-calculation";
+import { getPlayfieldScale } from "../../util/osu-calculation";
 
 interface HUDDrawProperty {
     resolution: [number, number];
@@ -15,7 +15,7 @@ class HUDOverlay extends Container {
         super();
         this.drawProperty = {
             resolution: [this.application.view.width, this.application.view.height],
-            scale: getOsuPixelScale(this.application.view.width, this.application.view.height),
+            scale: getPlayfieldScale(this.application.view.width, this.application.view.height),
         };
     }
 

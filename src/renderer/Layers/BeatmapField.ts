@@ -1,6 +1,6 @@
 import { Application, Container } from "pixi.js";
 import { Beatmap } from "../../osu/Beatmap/Beatmap";
-import { getOsuPixelScale } from "../../util/osu-calculation";
+import { getPlayfieldScale } from "../../util/osu-calculation";
 import { DrawableGenerator } from "../Drawable/DrawableGenerator";
 import { HitObjectDrawable } from "../Drawable/DrawableTypes";
 
@@ -14,9 +14,10 @@ class BeatmapField extends Container {
         const canvasWidth = this.application.view.width;
         const canvasHeight = this.application.view.height;
 
+        // Playfield height is 80% of the screen height
         const playfieldScale = 4 / 5;
 
-        // create full 4:3 out of canvas playfieldResolution above
+        // create full 4:3 area for the playfield
         if (canvasHeight > (canvasWidth / 4) * 3) {
             this.playfieldResolution = [canvasWidth * playfieldScale, (canvasWidth / 4) * 3 * playfieldScale];
         } else {
@@ -34,6 +35,7 @@ class BeatmapField extends Container {
             0xffffff,
             0.25
         );
+
         this.addChild(grid);
         this.position.set(translateX, translateY);
     }
@@ -44,7 +46,7 @@ class BeatmapField extends Container {
         this.beatmap = beatmap;
 
         const hitObjects = this.beatmap.hitObjects;
-        const scale = getOsuPixelScale(this.playfieldResolution[0], this.playfieldResolution[1]);
+        const scale = getPlayfieldScale(this.playfieldResolution[0], this.playfieldResolution[1]);
 
         hitObjects.objects.forEach((hitObject) => {
             const drawable = DrawableGenerator.CreateHitObject(hitObject, scale);

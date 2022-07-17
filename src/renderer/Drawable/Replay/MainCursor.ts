@@ -17,13 +17,13 @@ function createMainCursor(size: number) {
 class MainCursor extends Container implements Drawable {
     private mainCursor: Sprite;
 
-    constructor(private replay: Replay, private renderScale: number) {
+    constructor(private replay: Replay, private fieldScale: number) {
         super();
 
-        const x = replay.replayData[0].x * renderScale;
-        const y = replay.replayData[0].y * renderScale;
+        const x = replay.replayData[0].x * fieldScale;
+        const y = replay.replayData[0].y * fieldScale;
 
-        this.mainCursor = createMainCursor(renderScale * CURSOR_SCALE);
+        this.mainCursor = createMainCursor(fieldScale * CURSOR_SCALE);
         this.addChild(this.mainCursor);
 
         this.alpha = 1.0;
@@ -34,7 +34,7 @@ class MainCursor extends Container implements Drawable {
     draw(timestamp: number) {
         const [x, y] = this.replay.replayData.getPositionAt(timestamp, true);
 
-        this.position.set(x * this.renderScale, y * this.renderScale);
+        this.position.set(x * this.fieldScale, y * this.fieldScale);
     }
 }
 

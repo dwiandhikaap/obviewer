@@ -25,10 +25,10 @@ class CursorNode extends Container implements Drawable {
     private nodeSprites: Sprite[];
     private nodeLine: Graphics;
 
-    constructor(private replay: Replay, private renderScale: number) {
+    constructor(private replay: Replay, private fieldScale: number) {
         super();
 
-        this.nodeSprites = createCursorNodes(renderScale * NODE_SCALE);
+        this.nodeSprites = createCursorNodes(fieldScale * NODE_SCALE);
         this.nodeLine = new Graphics();
 
         this.addChild(this.nodeLine);
@@ -54,16 +54,16 @@ class CursorNode extends Container implements Drawable {
                 nodeSprite.tint = 0xff00ff;
             } else {
                 nodeSprite.tint = 0xffffff;
-                nodeSprite.scale.set(this.renderScale * NODE_SCALE);
+                nodeSprite.scale.set(this.fieldScale * NODE_SCALE);
             }
 
             nodeSprite.alpha = alpha;
-            nodeSprite.position.set(node.x * this.renderScale, node.y * this.renderScale);
+            nodeSprite.position.set(node.x * this.fieldScale, node.y * this.fieldScale);
         }
 
         const line = this.nodeLine;
         line.clear();
-        line.lineStyle({ color: 0xffffff, width: 2 * this.renderScale });
+        line.lineStyle({ color: 0xffffff, width: 2 * this.fieldScale });
         for (let i = 0; i < count - 1; i++) {
             const curr = this.nodeSprites[i];
             const next = this.nodeSprites[i + 1];
@@ -73,7 +73,7 @@ class CursorNode extends Container implements Drawable {
 
             line.lineStyle({
                 color: 0xffffff,
-                width: 2 * this.renderScale,
+                width: 2 * this.fieldScale,
                 alpha: 1 - (Math.abs(i - count / 2) / count) * 2,
             });
 

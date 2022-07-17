@@ -1,6 +1,6 @@
 import { Application, Container } from "pixi.js";
 import { Replay } from "../../osu/Replay/Replay";
-import { getOsuPixelScale } from "../../util/osu-calculation";
+import { getPlayfieldScale } from "../../util/osu-calculation";
 import { CursorNode, MainCursor } from "../Drawable/DrawableTypes";
 
 class ReplayField extends Container {
@@ -30,7 +30,7 @@ class ReplayField extends Container {
     }
 
     loadReplay(replay: Replay) {
-        const scale = getOsuPixelScale(this.playfieldResolution[0], this.playfieldResolution[1]);
+        const scale = getPlayfieldScale(this.playfieldResolution[0], this.playfieldResolution[1]);
 
         this.mainCursor?.destroy();
         this.cursorNode?.destroy();

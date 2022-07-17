@@ -1,4 +1,4 @@
-function getOsuPixelScale(screenWidth: number, screenHeight: number): number {
+function getPlayfieldScale(screenWidth: number, screenHeight: number): number {
     const widthRatio = screenWidth / 512;
     const heightRatio = screenHeight / 384;
 
@@ -12,4 +12,4 @@ function calculateFitRatio(fromWidth: number, fromHeight: number, toWidth: numbe
     return Math.min(widthRatio, heightRatio);
 }
 
-export { getOsuPixelScale, calculateFitRatio };
+export { getPlayfieldScale, calculateFitRatio };
