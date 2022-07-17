@@ -203,7 +203,7 @@ class DrawableSlider extends DrawableHitObject<SliderAnimation> {
 const followerStartSize = 1 / 1.4;
 
 function followStartOpacityAnim(time: number) {
-    return [Easer.CreateEasing(time, time + 450, 0, 1, "OutQuad")];
+    return [Easer.CreateEasing(time, time + 75, 0, 1, "OutQuad")];
 }
 
 function followStartScaleAnim(time: number) {
