@@ -32,3 +32,7 @@ export function getExtensionType(extension: string): FileType {
 
     return "unknown";
 }
+
+export function isRetinaFile(filename: string): boolean {
+    return filename.includes("@2x");
+}
