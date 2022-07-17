@@ -3,25 +3,26 @@ import { HitCircle } from "../../../osu/Beatmap/BeatmapAttributes/HitObjects/Hit
 import { hexToInt } from "../../../util/color";
 import { AssetsLoader } from "../../../assets/Assets";
 
-function createCircle(hitCircle: HitCircle, radius: number) {
+function createCircle(hitCircle: HitCircle, scale: number) {
     const { comboCount, colour } = hitCircle;
     const texture = AssetsLoader.instance.getTexture("hitcircle");
 
     const hitCircleSprite = new Sprite(texture);
-    hitCircleSprite.width = radius * 2;
-    hitCircleSprite.height = radius * 2;
+
+    hitCircleSprite.scale.set(scale);
     hitCircleSprite.tint = hexToInt(colour);
     hitCircleSprite.anchor.set(0.5, 0.5);
 
     const hcOverlayTexture = AssetsLoader.instance.getTexture("hitcircleoverlay");
     const sHCOverlay = new Sprite(hcOverlayTexture);
-    sHCOverlay.width = radius * 2;
-    sHCOverlay.height = radius * 2;
+
+    sHCOverlay.scale.set(scale);
     sHCOverlay.anchor.set(0.5, 0.5);
 
+    // TODO: use font from skin instead
     const style = new TextStyle({
         fill: "white",
-        fontSize: (radius * 4) / 5,
+        fontSize: scale * 56,
         strokeThickness: 3,
     });
     const circleNumber = new Text(comboCount.toString(), style);
@@ -35,35 +36,47 @@ function createCircle(hitCircle: HitCircle, radius: number) {
     return circle;
 }
 
-function createApproachCircle(radius: number) {
+function createApproachCircle(scale: number) {
     const texture = AssetsLoader.instance.getTexture("approachcircle");
     const ac = new Sprite(texture);
-    ac.width = radius * 2;
-    ac.height = radius * 2;
+
+    ac.scale.set(scale);
     ac.anchor.set(0.5, 0.5);
 
-    return ac;
+    const acContainer = new Container();
+    acContainer.addChild(ac);
+    return acContainer;
 }
 
+// `textureScale`
+// Ratio between the canvas pixel dimension of the circle that needs to be RENDERED
+// (also accounts for circleSize property of the beatmap)
+// and the "Suggested SD Size" of a hitcircle which is 128
+// see https://osu.ppy.sh/wiki/en/Skinning/osu%21#hit-circles
+
+// `fieldScale`
+// Ratio between current playfield dimension and the dimension of standard osu playfield size which is 512/384
 class DrawableHitCircle extends Container {
-    private radius: number;
+    private textureScale: number;
 
     private circle: Container;
-    private approachCircle: Sprite;
+    private approachCircle: Container;
 
     private origin: [number, number];
 
-    constructor(private hitCircle: HitCircle, renderScale: number) {
+    constructor(private hitCircle: HitCircle, fieldScale: number) {
         super();
 
         const startPos = hitCircle.getStackedStartPos();
-        const x = startPos[0] * renderScale;
-        const y = startPos[1] * renderScale;
+        const x = startPos[0] * fieldScale;
+        const y = startPos[1] * fieldScale;
         this.origin = [x, y];
-        this.radius = hitCircle.difficulty.getObjectRadius() * renderScale;
 
-        this.circle = createCircle(hitCircle, this.radius);
-        this.approachCircle = createApproachCircle(this.radius);
+        const hitCirclePixelRadius = hitCircle.difficulty.getObjectRadius() * fieldScale;
+        this.textureScale = hitCirclePixelRadius / 64;
+
+        this.circle = createCircle(hitCircle, this.textureScale);
+        this.approachCircle = createApproachCircle(this.textureScale);
 
         this.addChild(this.circle);
         this.addChild(this.approachCircle);
@@ -83,8 +96,7 @@ class DrawableHitCircle extends Container {
         this.circle.scale.set(scale.value);
 
         this.approachCircle.alpha = approachCircleOpacity.value;
-        this.approachCircle.width = approachCircleScale.value * this.radius * 2;
-        this.approachCircle.height = approachCircleScale.value * this.radius * 2;
+        this.approachCircle.scale.set(approachCircleScale.value);
 
         this.position.x = this.origin[0] + positionOffset.x.value;
         this.position.y = this.origin[1] + positionOffset.y.value;
