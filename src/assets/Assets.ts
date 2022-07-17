@@ -1,6 +1,6 @@
 import { ILoaderMiddleware, IResourceMetadata, Loader, LoaderResource, Texture, utils } from "pixi.js";
 import { Beatmap } from "../osu/Beatmap/Beatmap";
-import { compareNameOnly, omitFileExtension } from "../util/filename";
+import { compareNameOnly, getFileType, isRetinaFile, omitFileExtension } from "../util/filename";
 import assetsDeps from "./assets.json";
 
 type OnCompleteCallback = (resources: utils.Dict<LoaderResource>) => void;
@@ -76,24 +76,30 @@ class AssetsLoader {
     // utils.TextureCache is kinda fucky
     public getTexture(name: string, withExtension = false): Texture {
         const cached = this._getCachedTexture(name);
+        let nameWithExtension = "";
 
         if (!cached || !cached.valid) {
             if (!withExtension) {
-                name = this.findAssetFullName(name, this.resources);
+                nameWithExtension = this.findAssetFullName(name + "@2x", this.resources);
+                if (!nameWithExtension) {
+                    nameWithExtension = this.findAssetFullName(name, this.resources);
+                }
             }
 
-            const texture = (this.resources[name].texture || Texture.EMPTY).clone();
+            const texture = (this.resources[nameWithExtension]?.texture || Texture.EMPTY).clone();
 
-            this._setCachedTexture(name, texture);
+            this._setCachedTexture(nameWithExtension, texture);
         }
 
-        return this._getCachedTexture(name);
+        return this._getCachedTexture(nameWithExtension);
     }
 
     private findAssetFullName(name: string, resource: utils.Dict<LoaderResource>) {
         const filesWithExtension = Object.keys(resource);
         const filesWithoutExtension = filesWithExtension.map(omitFileExtension);
-        const index = filesWithoutExtension.indexOf(name);
+
+        let index = filesWithoutExtension.indexOf(name);
+
         return filesWithExtension[index];
     }
 }
@@ -114,7 +120,11 @@ function load(loader: Loader, assets: AssetsReference) {
     return new Promise<void>((resolve, reject) => {
         assets.forEach((element) => {
             const { name, url, mimeType } = element;
-            const metadata: IResourceMetadata = { mimeType: mimeType };
+            let metadata: IResourceMetadata = { mimeType: mimeType };
+
+            if (getFileType(name) === "image") {
+                metadata = { ...metadata, resolution: isRetinaFile(name) ? 2 : 1 };
+            }
 
             loader.add(name, url, { xhrType: LoaderResource.XHR_RESPONSE_TYPE.BLOB, metadata: metadata });
         });
@@ -132,7 +142,8 @@ function getBeatmapDependencies(beatmapAssets: AssetsReference, beatmap: Beatmap
     const beatmapDeps = beatmap.getAssetsFilename();
 
     beatmapDeps.forEach((depFilename) => {
-        const assetReference = beatmapAssets.find((asset) => compareNameOnly(asset.name, depFilename));
+        let assetReference = beatmapAssets.find((asset) => compareNameOnly(asset.name, depFilename + "@2x"));
+        assetReference = assetReference ?? beatmapAssets.find((asset) => compareNameOnly(asset.name, depFilename));
         if (assetReference) {
             dependencies.push(assetReference);
         }
@@ -149,7 +160,8 @@ function getSkinDependencies(skinAssets: AssetsReference) {
     (Object.keys(skinDeps) as (keyof typeof skinDeps)[]).forEach((fileType) => {
         const deps = skinDeps[fileType];
         deps.forEach((depFilename) => {
-            const assetReference = skinAssets.find((asset) => compareNameOnly(asset.name, depFilename));
+            let assetReference = skinAssets.find((asset) => compareNameOnly(asset.name, depFilename + "@2x"));
+            assetReference = assetReference ?? skinAssets.find((asset) => compareNameOnly(asset.name, depFilename));
             if (assetReference) {
                 dependencies.push(assetReference);
             } else {
@@ -159,7 +171,7 @@ function getSkinDependencies(skinAssets: AssetsReference) {
     });
 
     if (missingAssets.length > 0) {
-        throw new Error(`Missing required assets: ${missingAssets.join(", ")}`);
+        console.warn(`Missing assets: ${missingAssets.join(", ")}`);
     }
 
     return dependencies;
