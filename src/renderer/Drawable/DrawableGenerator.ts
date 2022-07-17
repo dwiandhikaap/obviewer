@@ -9,13 +9,13 @@ export class DrawableGenerator {
         return new Grid(width, height, gridSize, color, alpha);
     }
 
-    public static CreateHitObject(hitObject: HitObject, renderScale: number): HitObjectDrawable {
+    public static CreateHitObject(hitObject: HitObject, fieldScale: number): HitObjectDrawable {
         if (hitObject.isHitCircle()) {
-            return new DrawableHitCircle(hitObject as HitCircle, renderScale);
+            return new DrawableHitCircle(hitObject as HitCircle, fieldScale);
         } else if (hitObject.isSlider()) {
-            return new DrawableSlider(hitObject as Slider, renderScale);
+            return new DrawableSlider(hitObject as Slider, fieldScale);
         } else {
-            return new DrawableSpinner(hitObject as Spinner, renderScale);
+            return new DrawableSpinner(hitObject as Spinner, fieldScale);
         }
     }
 }
