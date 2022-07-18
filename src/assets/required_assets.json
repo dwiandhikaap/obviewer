@@ -1,0 +1,42 @@
+{
+    "image": [
+        { "name": "approachcircle", "animatable": false },
+        { "name": "hitcircle", "animatable": false },
+        { "name": "hitcircleoverlay", "animatable": false },
+        { "name": "followpoint", "animatable": true },
+        { "name": "reversearrow", "animatable": false },
+        { "name": "sliderfollowcircle", "animatable": true },
+        { "name": "sliderb", "animatable": true, "nohyphen": true },
+        { "name": "sliderscorepoint", "animatable": false },
+        { "name": "spinner-background", "animatable": false },
+        { "name": "spinner-circle", "animatable": false },
+        { "name": "spinner-clear", "animatable": false },
+        { "name": "spinner-metre", "animatable": false },
+        { "name": "spinner-middle", "animatable": false },
+        { "name": "spinner-spin", "animatable": false },
+        { "name": "cursor", "animatable": false }
+    ],
+    "audio": [
+        { "name": "drum-hitnormal", "indexable": true },
+        { "name": "drum-hitclap", "indexable": true },
+        { "name": "drum-hitfinish", "indexable": true },
+        { "name": "drum-hitwhistle", "indexable": true },
+        { "name": "drum-slidertick", "indexable": true },
+        { "name": "drum-sliderslide", "indexable": true },
+        { "name": "drum-sliderwhistle", "indexable": true },
+        { "name": "normal-hitnormal", "indexable": true },
+        { "name": "normal-hitclap", "indexable": true },
+        { "name": "normal-hitfinish", "indexable": true },
+        { "name": "normal-hitwhistle", "indexable": true },
+        { "name": "normal-slidertick", "indexable": true },
+        { "name": "normal-sliderslide", "indexable": true },
+        { "name": "normal-sliderwhistle", "indexable": true },
+        { "name": "soft-hitnormal", "indexable": true },
+        { "name": "soft-hitclap", "indexable": true },
+        { "name": "soft-hitfinish", "indexable": true },
+        { "name": "soft-hitwhistle", "indexable": true },
+        { "name": "soft-slidertick", "indexable": true },
+        { "name": "soft-sliderslide", "indexable": true },
+        { "name": "soft-sliderwhistle", "indexable": true }
+    ]
+}
