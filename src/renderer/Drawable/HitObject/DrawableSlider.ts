@@ -110,10 +110,12 @@ function createSliderReverses(slider: Slider, textureScale: number, fieldScale: 
             (sliderReverse.position[1] - slider.startPos[1]) * fieldScale,
         ];
 
-        reverse.position.set(relativePos[0], relativePos[1]);
-        reverse.rotation = sliderReverse.isReversed ? slider.endAngle : slider.startAngle;
+        const reverseContainer = new Container();
+        reverseContainer.addChild(reverse);
+        reverseContainer.position.set(relativePos[0], relativePos[1]);
+        reverseContainer.rotation = sliderReverse.isReversed ? slider.endAngle : slider.startAngle;
 
-        sliderReverses.addChild(reverse);
+        sliderReverses.addChild(reverseContainer);
     }
 
     return sliderReverses;

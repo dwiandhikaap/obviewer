@@ -24,7 +24,8 @@ class DrawableSliderTick {
         let fadeEnd = fadeStart + 150;
 
         tickOpacity.addEasing(fadeStart, fadeEnd, 0, 1);
-        tickOpacity.addEasing(fadeEnd, sliderTick.time, 1, 1);
+        tickOpacity.addEasing(fadeEnd, sliderTick.time - 1, 1, 1);
+        tickOpacity.addEasing(sliderTick.time - 1, sliderTick.time, 1, 0);
 
         tickScale.addEasing(fadeStart, fadeEnd, 0, 1, "OutElastic");
         tickScale.addEasing(fadeEnd, sliderTick.time, 1, 1);
@@ -51,7 +52,8 @@ class DrawableReverseTick {
         const tickOpacity = new Easer(0);
         const tickFadeStart = reverseTime - slideDuration * 2;
         tickOpacity.addEasing(tickFadeStart, tickFadeStart + 300, 0, 1);
-        tickOpacity.addEasing(tickFadeStart + 300, reverseTime, 1, 1);
+        tickOpacity.addEasing(tickFadeStart + 300, reverseTime - 1, 1, 1);
+        tickOpacity.addEasing(reverseTime - 1, reverseTime, 1, 0);
 
         // Scale beat every 300ms
         const tickScale = new Easer(1);
@@ -59,7 +61,7 @@ class DrawableReverseTick {
         const tickEnd = reverseTime;
 
         for (let i = tickStart; i < tickEnd; i += 300) {
-            tickScale.addEasing(i, i + 300, 1, 0.6);
+            tickScale.addEasing(i, i + 300, 1.25, 1);
         }
 
         this.opacity = tickOpacity;
