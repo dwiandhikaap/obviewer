@@ -19,7 +19,7 @@ export function audioMiddleware(audioHandler: AudioHandler) {
                 const audio = await new Promise<Howl>((resolve) => {
                     const howl = new Howl({
                         src: resource.url,
-                        format: ["mp3", "wv", "mpga", "ogg"],
+                        format: ["mp3", "wav", "mpga", "ogg"],
                         onload: () => {
                             resolve(howl);
                         },
