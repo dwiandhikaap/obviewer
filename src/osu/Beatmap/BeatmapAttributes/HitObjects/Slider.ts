@@ -193,6 +193,22 @@ class Slider extends HitObject {
         return this.getSlideIndexAt(time) % 2 === 0 ? 1 : -1;
     }
 
+    getBallRotationAt(time: number) {
+        time = MathHelper.Clamp(time, this.startTime, this.endTime);
+        const slideIndex = this.getSlideIndexAt(time);
+
+        const t1 = (time - this.startTime) / (this.duration / this.slides) - slideIndex;
+        const t2 = slideIndex % 2 === 0 ? t1 : 1 - t1;
+
+        let angle = this.curvePath.getAngleAt(t2);
+
+        if (slideIndex % 2 === 1) {
+            angle = Math.PI - angle;
+        }
+
+        return angle;
+    }
+
     getSlideIndexAt(time: number) {
         time = MathHelper.Clamp(time, this.startTime, this.endTime);
 
