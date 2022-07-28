@@ -80,6 +80,12 @@ export class Path {
         return PathHelper.GetPointAt(this.points, t);
     }
 
+    public getAngleAt(t: number): number {
+        const angle = PathHelper.GetAngleAt(this.points, t);
+
+        return angle;
+    }
+
     public getTranslatedPoints(vector: [number, number]): Vector2[];
     public getTranslatedPoints(vector: Vector2): Vector2[];
     public getTranslatedPoints(translation: number): Vector2[];
