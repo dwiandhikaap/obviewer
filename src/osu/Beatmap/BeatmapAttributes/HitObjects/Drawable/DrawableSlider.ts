@@ -21,10 +21,10 @@ class DrawableSliderTick {
 
         const firstTickAppearTime = slideIndex === 0 ? appearTime : slider.getSlideStartTime(slideIndex);
         let fadeStart = firstTickAppearTime + (sliderTick.time - firstTickAppearTime) / 2 - 150;
-        let fadeEnd = fadeStart + 150;
+        let fadeEnd = Math.min(fadeStart + 150, sliderTick.time - 1);
 
         tickOpacity.addEasing(fadeStart, fadeEnd, 0, 1);
-        tickOpacity.addEasing(fadeEnd, sliderTick.time, 1, 1);
+        tickOpacity.addEasing(sliderTick.time - 1, sliderTick.time, 1, 0);
 
         tickScale.addEasing(fadeStart, fadeEnd, 0, 1, "OutElastic");
         tickScale.addEasing(fadeEnd, sliderTick.time, 1, 1);
@@ -50,8 +50,9 @@ class DrawableReverseTick {
 
         const tickOpacity = new Easer(0);
         const tickFadeStart = reverseTime - slideDuration * 2;
-        tickOpacity.addEasing(tickFadeStart, tickFadeStart + 300, 0, 1);
-        tickOpacity.addEasing(tickFadeStart + 300, reverseTime, 1, 1);
+        const tickFadeEnd = Math.min(tickFadeStart + 300, reverseTime - 1);
+        tickOpacity.addEasing(tickFadeStart, tickFadeEnd, 0, 1);
+        tickOpacity.addEasing(reverseTime - 1, reverseTime, 1, 0);
 
         // Scale beat every 300ms
         const tickScale = new Easer(1);
@@ -59,7 +60,7 @@ class DrawableReverseTick {
         const tickEnd = reverseTime;
 
         for (let i = tickStart; i < tickEnd; i += 300) {
-            tickScale.addEasing(i, i + 300, 1, 0.6);
+            tickScale.addEasing(i, i + 300, 1.25, 1);
         }
 
         this.opacity = tickOpacity;
@@ -85,6 +86,7 @@ class DrawableSlider extends DrawableHitObject<SliderAnimation> {
     bodyOpacity: Easer;
     headOpacity: Easer;
     ballOpacity: Easer;
+    ballRotation: number;
 
     followCircleOpacity: Easer;
     followCircleScale: Easer;
@@ -146,9 +148,10 @@ class DrawableSlider extends DrawableHitObject<SliderAnimation> {
         this.isSliding = false;
         this.isReversed = false;
         this.slideIndex = 0;
+        this.ballRotation = slider.getBallRotationAt(0);
+        this.ballOpacity = ballOpacity;
         this.bodyOpacity = bodyOpacity;
         this.headOpacity = headOpacity;
-        this.ballOpacity = ballOpacity;
         this.followCircleOpacity = followCircleOpacity;
         this.followCircleScale = followCircleScale;
         this.approachCircleOpacity = approachCircleOpacity;
@@ -165,9 +168,10 @@ class DrawableSlider extends DrawableHitObject<SliderAnimation> {
         this.isSliding = time >= this.slider.startTime && time <= this.slider.endTime;
         this.slideIndex = this.slider.getSlideIndexAt(time);
         this.isReversed = this.slider.getSlideDirectionAt(time) === -1;
+        this.ballRotation = this.slider.getBallRotationAt(time);
+        this.ballOpacity.time = time;
         this.bodyOpacity.time = time;
         this.headOpacity.time = time;
-        this.ballOpacity.time = time;
         this.followCircleOpacity.time = time;
         this.followCircleScale.time = time;
         this.approachCircleOpacity.time = time;

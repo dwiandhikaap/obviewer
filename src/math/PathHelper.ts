@@ -48,7 +48,7 @@ export class PathHelper {
         return result;
     }
 
-    public static GetPointAt(pathPoints: readonly Vector2[], time: number) {
+    public static GetPointAt(pathPoints: readonly Vector2[], time: number, interpolate = true) {
         time = MathHelper.Clamp(time, 0, 1);
         let result: Vector2 | null = null;
 
@@ -58,15 +58,19 @@ export class PathHelper {
         let length = 0;
 
         for (let i = 1; i < pathPoints.length; i++) {
-            const prev = pathPoints[i - 1];
-            const current = pathPoints[i];
+            const current = pathPoints[i - 1];
+            const next = pathPoints[i];
 
-            const dist = Vector2.Distance(prev, current);
+            const dist = Vector2.Distance(current, next);
 
             if (length + dist > expectedLength) {
                 const t = (expectedLength - length) / dist;
 
-                result = Vector2.LinearInterpolation(prev, current, t);
+                if (interpolate) {
+                    result = Vector2.LinearInterpolation(current, next, t);
+                } else {
+                    result = current;
+                }
 
                 break;
             }
@@ -80,6 +84,48 @@ export class PathHelper {
         }
 
         return result;
+    }
+
+    public static GetAngleAt(path: readonly Vector2[], time: number) {
+        time = MathHelper.Clamp(time, 0, 1);
+        let currPointIndex: number = 0;
+
+        const totalLength = PathHelper.CalculateLength(path);
+        const expectedLength = totalLength * time;
+
+        let length = 0;
+
+        for (let i = 1; i < path.length; i++) {
+            const current = path[i - 1];
+            const next = path[i];
+
+            const dist = Vector2.Distance(current, next);
+
+            if (length + dist > expectedLength) {
+                currPointIndex = i - 1;
+                break;
+            }
+
+            length += dist;
+        }
+
+        // Just in case something weird happened related to float precision bullshit
+        if (!currPointIndex) {
+            currPointIndex = path.length - 1;
+        }
+
+        const curr = path[currPointIndex];
+        const next = path[currPointIndex + 1];
+        if (next) {
+            return Vector2.Angle(curr, next);
+        }
+
+        const prev = path[currPointIndex - 1];
+        if (prev) {
+            return Vector2.Angle(prev, curr);
+        }
+
+        return 0;
     }
 
     public static Interpolate(path: readonly Vector2[], maxSegmentLength: number) {
@@ -233,13 +279,7 @@ export class PathHelper {
         return simplified;
     }
 
-    private static simplifyDPStep(
-        path: Vector2[],
-        first: number,
-        last: number,
-        sqTolerance: number,
-        simplified: Vector2[]
-    ) {
+    private static simplifyDPStep(path: Vector2[], first: number, last: number, sqTolerance: number, simplified: Vector2[]) {
         let maxSqDist = sqTolerance;
         let index: number = 0;
 

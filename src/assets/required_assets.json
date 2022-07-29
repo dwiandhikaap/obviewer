@@ -1,0 +1,42 @@
+{
+    "image": [
+        { "name": "approachcircle", "animatable": false },
+        { "name": "hitcircle", "animatable": false },
+        { "name": "hitcircleoverlay", "animatable": false },
+        { "name": "followpoint", "animatable": true },
+        { "name": "reversearrow", "animatable": false },
+        { "name": "sliderfollowcircle", "animatable": true },
+        { "name": "sliderb", "animatable": true, "nohyphen": true },
+        { "name": "sliderscorepoint", "animatable": false },
+        { "name": "spinner-background", "animatable": false },
+        { "name": "spinner-circle", "animatable": false },
+        { "name": "spinner-clear", "animatable": false },
+        { "name": "spinner-metre", "animatable": false },
+        { "name": "spinner-middle", "animatable": false },
+        { "name": "spinner-spin", "animatable": false },
+        { "name": "cursor", "animatable": false }
+    ],
+    "audio": [
+        { "name": "drum-hitnormal", "type": "hitsound" },
+        { "name": "drum-hitclap", "type": "hitsound" },
+        { "name": "drum-hitfinish", "type": "hitsound" },
+        { "name": "drum-hitwhistle", "type": "hitsound" },
+        { "name": "drum-slidertick", "type": "hitsound" },
+        { "name": "drum-sliderslide", "type": "hitsound" },
+        { "name": "drum-sliderwhistle", "type": "hitsound" },
+        { "name": "normal-hitnormal", "type": "hitsound" },
+        { "name": "normal-hitclap", "type": "hitsound" },
+        { "name": "normal-hitfinish", "type": "hitsound" },
+        { "name": "normal-hitwhistle", "type": "hitsound" },
+        { "name": "normal-slidertick", "type": "hitsound" },
+        { "name": "normal-sliderslide", "type": "hitsound" },
+        { "name": "normal-sliderwhistle", "type": "hitsound" },
+        { "name": "soft-hitnormal", "type": "hitsound" },
+        { "name": "soft-hitclap", "type": "hitsound" },
+        { "name": "soft-hitfinish", "type": "hitsound" },
+        { "name": "soft-hitwhistle", "type": "hitsound" },
+        { "name": "soft-slidertick", "type": "hitsound" },
+        { "name": "soft-sliderslide", "type": "hitsound" },
+        { "name": "soft-sliderwhistle", "type": "hitsound" }
+    ]
+}

@@ -6,6 +6,7 @@ import { Renderer } from "./renderer/Renderer";
 import { AssetsReference, getBeatmapDependencies, AssetsLoader, getSkinDependencies } from "./assets/Assets";
 import { AudioHandler } from "./audio/AudioHandler";
 import { audioMiddleware } from "./audio/audioMiddleware";
+import { Settings } from "./settings/Settings";
 
 interface ObviewerConfig {
     container: string;
@@ -48,6 +49,8 @@ class Obviewer {
 
         const middleware = audioMiddleware(this.audioHandler);
         this.assetsLoader.use(middleware);
+
+        Howler.volume(Settings.get("AudioVolume"));
     }
 
     addSkin(skinAssets: AssetsReference) {
@@ -94,7 +97,9 @@ class Obviewer {
         }
     }
 
-    checkResources() {}
+    checkResources() {
+        console.log(AssetsLoader.instance.resources);
+    }
 
     loadReplay(replay: Replay) {
         this._replayModsNumeric = replay.mods.numeric;

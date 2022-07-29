@@ -1,7 +1,7 @@
-import { ILoaderMiddleware, IResourceMetadata, Loader, LoaderResource, Texture, utils } from "pixi.js";
+import { AnimatedSprite, ILoaderMiddleware, IResourceMetadata, Loader, LoaderResource, Texture, utils } from "pixi.js";
 import { Beatmap } from "../osu/Beatmap/Beatmap";
-import { compareNameOnly, getFileType, isRetinaFile, omitFileExtension } from "../util/filename";
-import assetsDeps from "./assets.json";
+import { compareNameOnly, isRetinaFile, omitFileExtension } from "../util/filename";
+import { addAudioDependencies, addImageDependencies, createAnimatable } from "./skin";
 
 type OnCompleteCallback = (resources: utils.Dict<LoaderResource>) => void;
 
@@ -9,6 +9,8 @@ type AssetsReference = {
     name: string;
     url: string;
     mimeType: string;
+
+    sequenceIndex?: number;
 }[];
 
 class AssetsLoader {
@@ -74,16 +76,14 @@ class AssetsLoader {
     }
 
     // utils.TextureCache is kinda fucky
-    public getTexture(name: string, withExtension = false): Texture {
+    public getTexture(name: string): Texture {
         const cached = this._getCachedTexture(name);
         let nameWithExtension = "";
 
         if (!cached || !cached.valid) {
-            if (!withExtension) {
-                nameWithExtension = this.findAssetFullName(name + "@2x", this.resources);
-                if (!nameWithExtension) {
-                    nameWithExtension = this.findAssetFullName(name, this.resources);
-                }
+            nameWithExtension = this.findAssetFullName(name + "@2x", this.resources);
+            if (!nameWithExtension) {
+                nameWithExtension = this.findAssetFullName(name, this.resources);
             }
 
             const texture = (this.resources[nameWithExtension]?.texture || Texture.EMPTY).clone();
@@ -92,6 +92,10 @@ class AssetsLoader {
         }
 
         return this._getCachedTexture(nameWithExtension);
+    }
+
+    public getAnimation(name: string): AnimatedSprite {
+        return createAnimatable(name, this.resources);
     }
 
     private findAssetFullName(name: string, resource: utils.Dict<LoaderResource>) {
@@ -119,12 +123,14 @@ function promisifyLoader(loader: Loader) {
 function load(loader: Loader, assets: AssetsReference) {
     return new Promise<void>((resolve, reject) => {
         assets.forEach((element) => {
-            const { name, url, mimeType } = element;
+            const { name, url, mimeType, sequenceIndex } = element;
             let metadata: IResourceMetadata = { mimeType: mimeType };
 
-            if (getFileType(name) === "image") {
-                metadata = { ...metadata, resolution: isRetinaFile(name) ? 2 : 1 };
-            }
+            metadata = {
+                ...metadata,
+                resolution: isRetinaFile(name) ? 2 : 1,
+                resourceOptions: { sequenceIndex },
+            };
 
             loader.add(name, url, { xhrType: LoaderResource.XHR_RESPONSE_TYPE.BLOB, metadata: metadata });
         });
@@ -132,7 +138,10 @@ function load(loader: Loader, assets: AssetsReference) {
         loader.onError.add((error) => {
             reject(error.message);
         });
-        loader.load(() => resolve());
+
+        loader.load(() => {
+            resolve();
+        });
     });
 }
 
@@ -155,20 +164,9 @@ function getBeatmapDependencies(beatmapAssets: AssetsReference, beatmap: Beatmap
 function getSkinDependencies(skinAssets: AssetsReference) {
     const dependencies: AssetsReference = [];
     const missingAssets: string[] = [];
-    const skinDeps = assetsDeps;
 
-    (Object.keys(skinDeps) as (keyof typeof skinDeps)[]).forEach((fileType) => {
-        const deps = skinDeps[fileType];
-        deps.forEach((depFilename) => {
-            let assetReference = skinAssets.find((asset) => compareNameOnly(asset.name, depFilename + "@2x"));
-            assetReference = assetReference ?? skinAssets.find((asset) => compareNameOnly(asset.name, depFilename));
-            if (assetReference) {
-                dependencies.push(assetReference);
-            } else {
-                missingAssets.push(depFilename);
-            }
-        });
-    });
+    addImageDependencies(skinAssets, dependencies, missingAssets);
+    addAudioDependencies(skinAssets, dependencies, missingAssets);
 
     if (missingAssets.length > 0) {
         console.warn(`Missing assets: ${missingAssets.join(", ")}`);

@@ -57,22 +57,20 @@ function createSliderHead(slider: Slider, textureScale: number) {
 }
 
 function createSliderBall(textureScale: number) {
-    const texture = AssetsLoader.instance.getTexture("sliderb0");
-    const sliderBall = new Sprite(texture);
+    const sliderBall = AssetsLoader.instance.getAnimation("sliderb");
     sliderBall.anchor.set(0.5, 0.5);
-
     sliderBall.scale.set(textureScale);
     sliderBall.alpha = 0;
+    sliderBall.play();
 
     return sliderBall;
 }
 
 function createSliderFollower(textureScale: number) {
-    const texture = AssetsLoader.instance.getTexture("sliderfollowcircle");
-    const sliderFollower = new Sprite(texture);
-
+    const sliderFollower = AssetsLoader.instance.getAnimation("sliderfollowcircle");
     sliderFollower.anchor.set(0.5, 0.5);
     sliderFollower.scale.set(textureScale);
+    sliderFollower.play();
 
     const sliderFollowerContainer = new Container();
     sliderFollowerContainer.alpha = 0;
@@ -110,10 +108,12 @@ function createSliderReverses(slider: Slider, textureScale: number, fieldScale: 
             (sliderReverse.position[1] - slider.startPos[1]) * fieldScale,
         ];
 
-        reverse.position.set(relativePos[0], relativePos[1]);
-        reverse.rotation = sliderReverse.isReversed ? slider.endAngle : slider.startAngle;
+        const reverseContainer = new Container();
+        reverseContainer.addChild(reverse);
+        reverseContainer.position.set(relativePos[0], relativePos[1]);
+        reverseContainer.rotation = sliderReverse.isReversed ? slider.endAngle : slider.startAngle;
 
-        sliderReverses.addChild(reverse);
+        sliderReverses.addChild(reverseContainer);
     }
 
     return sliderReverses;
@@ -201,6 +201,7 @@ class DrawableSlider extends Container {
             bodyOpacity,
             headOpacity,
             ballOpacity,
+            ballRotation,
             approachCircleOpacity,
             approachCircleScale,
             followCircleOpacity,
@@ -219,6 +220,7 @@ class DrawableSlider extends Container {
 
         this.sliderBall.transform.position.set(ballPos[0], ballPos[1]);
         this.sliderBall.alpha = ballOpacity.value;
+        this.sliderBall.rotation = ballRotation;
 
         this.sliderFollower.transform.position.set(ballPos[0], ballPos[1]);
         this.sliderFollower.alpha = followCircleOpacity.value;
