@@ -3,7 +3,8 @@ import { Vector2 } from "./Vector2";
 
 export class Path {
     private controlPoints: Vector2[];
-    private cumulativeLength: number[];
+    private _cachedPointsTime: number[];
+    private _cachedPointsAngle: number[];
 
     public points: Vector2[];
 
@@ -24,7 +25,8 @@ export class Path {
             this.points = PathHelper.TrimPath(this.points, maxLength);
         }
 
-        this.cumulativeLength = calcCumulativeLength(this.points);
+        this._cachedPointsTime = calcPointsTime(this.points);
+        this._cachedPointsAngle = calcPointsAngle(this.points);
     }
 
     public move(startX: number, startY: number, endX: number, endY: number) {
@@ -65,19 +67,28 @@ export class Path {
         return PathHelper.CalculateLength(this.points);
     }
 
-    public getPointAt(t: number) {
-        let i1 = 0;
-        let i2 = 0;
-        let weight = 0;
+    public getIndexAt(t: number): number {
+        const maxLength = this._cachedPointsTime.length;
+        let result = 0;
 
-        for (let i = 1; i < this.cumulativeLength.length; i++) {
-            if (this.cumulativeLength[i] >= t) {
-                i1 = i - 1;
-                i2 = i;
-                weight = (t - this.cumulativeLength[i - 1]) / (this.cumulativeLength[i] - this.cumulativeLength[i - 1]);
-                break;
+        if (t === this._cachedPointsTime[maxLength - 1]) {
+            result = maxLength - 1;
+        } else {
+            for (let i = 1; i < this._cachedPointsTime.length; i++) {
+                if (this._cachedPointsTime[i] > t) {
+                    result = i - 1;
+                    break;
+                }
             }
         }
+
+        return result;
+    }
+
+    public getPointAt(t: number) {
+        let i1 = this.getIndexAt(t);
+        let i2 = i1 + 1;
+        let weight = (t - this._cachedPointsTime[i1]) / (this._cachedPointsTime[i2] - this._cachedPointsTime[i1]);
 
         const x = this.points[i1][0] * (1 - weight) + this.points[i2][0] * weight;
         const y = this.points[i1][1] * (1 - weight) + this.points[i2][1] * weight;
@@ -85,8 +96,20 @@ export class Path {
         return new Vector2(x, y);
     }
 
+    public getPointTupleAt(t: number): [number, number] {
+        let i1 = this.getIndexAt(t);
+        let i2 = i1 + 1;
+        let weight = (t - this._cachedPointsTime[i1]) / (this._cachedPointsTime[i2] - this._cachedPointsTime[i1]);
+
+        const x = this.points[i1][0] * (1 - weight) + this.points[i2][0] * weight;
+        const y = this.points[i1][1] * (1 - weight) + this.points[i2][1] * weight;
+
+        return [x, y];
+    }
+
     public getAngleAt(t: number): number {
-        const angle = PathHelper.GetAngleAt(this.points, t);
+        let i1 = this.getIndexAt(t);
+        const angle = this._cachedPointsAngle[i1];
 
         return angle;
     }
@@ -128,14 +151,22 @@ export class Path {
     }
 }
 
-function calcCumulativeLength(points: Vector2[]) {
+function calcPointsTime(points: Vector2[]) {
     const result: number[] = [0];
     const totalLength = PathHelper.CalculateLength(points);
     let length = 0;
     for (let i = 0; i < points.length - 1; i++) {
-        length += Vector2.Distance(points[i], points[i + 1]) / totalLength; // can still optimize by using distance squared
+        length += Vector2.Distance(points[i], points[i + 1]) / totalLength;
         result.push(length);
     }
 
+    return result;
+}
+
+function calcPointsAngle(points: Vector2[]) {
+    const result: number[] = [];
+    for (let i = 0; i < points.length - 1; i++) {
+        result.push(Vector2.Angle(points[i], points[i + 1]));
+    }
     return result;
 }

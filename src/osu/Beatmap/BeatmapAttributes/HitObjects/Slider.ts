@@ -178,7 +178,7 @@ class Slider extends HitObject {
         const t1 = (time - this.startTime) / (this.duration / this.slides) - slideIndex;
         const t2 = slideIndex % 2 === 0 ? t1 : 1 - t1;
 
-        return this.curvePath.getPointAt(t2).toTuple();
+        return this.curvePath.getPointTupleAt(t2);
     }
 
     getStackedPositionAt(time: number): [number, number] {
@@ -203,7 +203,7 @@ class Slider extends HitObject {
         let angle = this.curvePath.getAngleAt(t2);
 
         if (slideIndex % 2 === 1) {
-            angle = Math.PI - angle;
+            angle = Math.PI + angle;
         }
 
         return angle;

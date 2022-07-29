@@ -70,7 +70,9 @@ class GameInstance {
 
         const hitObjects = this.beatmap.hitObjects.objects;
         for (let i = 0; i < hitObjects.length; i++) {
-            hitObjects[i].draw(time);
+            if (hitObjects[i].isVisibleAt(time)) {
+                hitObjects[i].draw(time);
+            }
         }
 
         this._autoSync(time);
