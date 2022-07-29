@@ -60,6 +60,7 @@ class DrawableReverseTick {
 
         tickOpacity.addEasing(tickFadeStart, tickFadeEnd, 0, 1);
         tickOpacity.addEasing(reverseTime - 1, reverseTime, 1, 0);
+        tickOpacity.addEasing(reverseTime, Infinity, 0, 0);
 
         // Scale beat every 300ms
         const tickScale = new Easer(1);
