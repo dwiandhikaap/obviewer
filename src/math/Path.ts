@@ -71,7 +71,7 @@ export class Path {
         const maxLength = this._cachedPointsTime.length;
         let result = 0;
 
-        if (t === this._cachedPointsTime[maxLength - 1]) {
+        if (t > this._cachedPointsTime[maxLength - 1]) {
             result = maxLength - 1;
         } else {
             for (let i = 1; i < this._cachedPointsTime.length; i++) {
@@ -87,6 +87,11 @@ export class Path {
 
     public getPointAt(t: number) {
         let i1 = this.getIndexAt(t);
+
+        if (i1 === this._cachedPointsTime.length - 1) {
+            return this.points[i1];
+        }
+
         let i2 = i1 + 1;
         let weight = (t - this._cachedPointsTime[i1]) / (this._cachedPointsTime[i2] - this._cachedPointsTime[i1]);
 
@@ -98,6 +103,11 @@ export class Path {
 
     public getPointTupleAt(t: number): [number, number] {
         let i1 = this.getIndexAt(t);
+
+        if (i1 === this._cachedPointsTime.length - 1) {
+            return this.points[i1].toTuple();
+        }
+
         let i2 = i1 + 1;
         let weight = (t - this._cachedPointsTime[i1]) / (this._cachedPointsTime[i2] - this._cachedPointsTime[i1]);
 
