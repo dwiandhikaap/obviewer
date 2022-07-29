@@ -39,6 +39,9 @@ class DrawableSliderTick {
     }
 }
 
+// manual calculation, i'm not sure if this is correct
+const SNAKING_DURATION = 200;
+
 class DrawableReverseTick {
     opacity: Easer;
     scale: Easer;
@@ -47,10 +50,14 @@ class DrawableReverseTick {
         const slider = reverseTick.slider;
         const slideDuration = Math.floor(slider.duration / slider.slides);
         const reverseTime = reverseTick.time;
+        const sliderAppearTime = slider.startTime - slider.difficulty.getPreempt();
+
+        const isFirstTick = Math.abs(reverseTime - slideDuration - slider.startTime) < 1;
 
         const tickOpacity = new Easer(0);
-        const tickFadeStart = reverseTime - slideDuration * 2;
-        const tickFadeEnd = Math.min(tickFadeStart + 300, reverseTime - 1);
+        const tickFadeStart = isFirstTick ? sliderAppearTime + SNAKING_DURATION : reverseTime - slideDuration * 2;
+        const tickFadeEnd = tickFadeStart + 300;
+
         tickOpacity.addEasing(tickFadeStart, tickFadeEnd, 0, 1);
         tickOpacity.addEasing(reverseTime - 1, reverseTime, 1, 0);
 
