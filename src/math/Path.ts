@@ -1,19 +1,11 @@
 import { PathHelper } from "./PathHelper";
 import { Vector2 } from "./Vector2";
 
-type TPath = {
-    (path: Vector2[]): Path;
-    (path: number[][]): Path;
-};
-
-// kinda buggy dont touch pls
 export class Path {
     private controlPoints: Vector2[];
+    private cumulativeLength: number[];
 
     public points: Vector2[];
-
-    // Maximum length of each path segment
-    private PATH_DETAIL = 10;
 
     constructor(pathType: string, controlPoints: readonly number[][], maxLength?: number);
     constructor(pathType: string, controlPoints: readonly Vector2[], maxLength?: number);
@@ -32,9 +24,7 @@ export class Path {
             this.points = PathHelper.TrimPath(this.points, maxLength);
         }
 
-        // Equal-ish distance between points no matter where it is, useful for reducing the amount of points
-        // this.points = PathHelper.Simplify(this.points, 1, true);
-        // this.points = PathHelper.Interpolate(this.points, this.PATH_DETAIL);
+        this.cumulativeLength = calcCumulativeLength(this.points);
     }
 
     public move(startX: number, startY: number, endX: number, endY: number) {
@@ -75,9 +65,24 @@ export class Path {
         return PathHelper.CalculateLength(this.points);
     }
 
-    // TODO: optimize this , should be easy
     public getPointAt(t: number) {
-        return PathHelper.GetPointAt(this.points, t);
+        let i1 = 0;
+        let i2 = 0;
+        let weight = 0;
+
+        for (let i = 1; i < this.cumulativeLength.length; i++) {
+            if (this.cumulativeLength[i] >= t) {
+                i1 = i - 1;
+                i2 = i;
+                weight = (t - this.cumulativeLength[i - 1]) / (this.cumulativeLength[i] - this.cumulativeLength[i - 1]);
+                break;
+            }
+        }
+
+        const x = this.points[i1][0] * (1 - weight) + this.points[i2][0] * weight;
+        const y = this.points[i1][1] * (1 - weight) + this.points[i2][1] * weight;
+
+        return new Vector2(x, y);
     }
 
     public getTranslatedPoints(vector: [number, number]): Vector2[];
@@ -115,4 +120,16 @@ export class Path {
         const controlPoints = this.controlPoints.map((point) => point.clone());
         return new Path(this.pathType, controlPoints, this.maxLength);
     }
+}
+
+function calcCumulativeLength(points: Vector2[]) {
+    const result: number[] = [0];
+    const totalLength = PathHelper.CalculateLength(points);
+    let length = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+        length += Vector2.Distance(points[i], points[i + 1]) / totalLength; // can still optimize by using distance squared
+        result.push(length);
+    }
+
+    return result;
 }
