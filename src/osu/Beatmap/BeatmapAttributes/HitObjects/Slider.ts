@@ -35,6 +35,7 @@ class Slider extends HitObject {
     curveType: string;
     curvePoints: number[][];
     curvePath: Path;
+    stackedCurvePath: Path;
     slides: number;
     length: number;
     edgeSounds: number[];
@@ -62,6 +63,10 @@ class Slider extends HitObject {
         this.length = length;
         this.edgeSounds = edgeSounds;
         this.edgeSets = edgeSets;
+
+        const stackedCurvePath = this.curvePath.clone();
+        stackedCurvePath.translate(-this.stackOffset, -this.stackOffset);
+        this.stackedCurvePath = stackedCurvePath;
 
         const points = this.curvePath.points;
         const s1 = points[1];
@@ -224,10 +229,7 @@ class Slider extends HitObject {
     }
 
     getStackedCurvePath() {
-        const path = this.curvePath.clone();
-        path.translate(-this.stackOffset, -this.stackOffset);
-
-        return path;
+        return this.stackedCurvePath;
     }
 
     getSliderTicks() {
