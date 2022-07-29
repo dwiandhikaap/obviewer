@@ -66,7 +66,14 @@ class Obviewer {
         //console.log(osuFiles);
     }
 
-    async loadBeatmap(filename: string) {
+    async load(filename: string, replay?: Replay) {
+        await this.loadBeatmap(filename);
+        if (replay) {
+            this.loadReplay(replay);
+        }
+    }
+
+    private async loadBeatmap(filename: string) {
         const difficultyFile = this.beatmapAssets.find((asset) => asset.name === filename);
         if (!difficultyFile) {
             console.error(`Beatmap '${filename}' not found`);
@@ -101,7 +108,7 @@ class Obviewer {
         console.log(AssetsLoader.instance.resources);
     }
 
-    loadReplay(replay: Replay) {
+    private loadReplay(replay: Replay) {
         this._replayModsNumeric = replay.mods.numeric;
 
         if (this.mods !== null) {
