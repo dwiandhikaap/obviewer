@@ -41,7 +41,7 @@ class BeatmapField extends Container {
     }
 
     loadBeatmap(beatmap: Beatmap) {
-        this.hitObjectDrawables.forEach((obj) => obj.destroy({ texture: true, baseTexture: false, children: true }));
+        this.hitObjectDrawables.forEach((obj) => obj.destroy({ texture: false, baseTexture: false, children: true }));
         this.hitObjectDrawables = [];
         this.beatmap = beatmap;
 
