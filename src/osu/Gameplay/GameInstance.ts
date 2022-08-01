@@ -3,7 +3,7 @@ import { AudioHandler } from "../../audio/AudioHandler";
 import { Renderer } from "../../renderer/Renderer";
 import { Settings } from "../../settings/Settings";
 import { Beatmap } from "../Beatmap/Beatmap";
-import { GameHUD } from "../Graphics/HUD/GameHUD";
+import { Overlay } from "../Graphics/Overlay";
 import { Replay } from "../Replay/Replay";
 
 class GameInstance {
@@ -31,18 +31,18 @@ class GameInstance {
     public set time(time: number) {
         this._time = time;
 
-        this.gameHUD.time = time;
+        this.overlay.time = time;
         this.draw(time);
     }
-    public isPlaying = false;
 
-    private gameHUD: GameHUD;
+    public isPlaying = false;
+    private overlay: Overlay;
 
     constructor(renderer: Renderer, audioHandler: AudioHandler) {
         this.renderer = renderer;
         this.audioHandler = audioHandler;
 
-        this.gameHUD = new GameHUD(this.renderer);
+        this.overlay = new Overlay(this.renderer);
     }
 
     public loadBeatmap(beatmap: Beatmap) {
@@ -52,6 +52,10 @@ class GameInstance {
 
     public loadReplay(replay: Replay) {
         this.replay = replay;
+
+        if (this.beatmap && this.replay) {
+            this.overlay.init(this.beatmap, this.replay);
+        }
     }
 
     public play() {
