@@ -1,11 +1,9 @@
 import * as PIXI from "pixi.js";
 import { Beatmap } from "../osu/Beatmap/Beatmap";
-import { Overlay } from "../osu/Graphics/Overlay";
 import { Replay } from "../osu/Replay/Replay";
 import { Settings } from "../settings/Settings";
 import { SliderTextureGenerator } from "./Drawable/HitObject/SliderTextureGenerator";
-import { FlashlightTextureGenerator } from "./Drawable/Overlay/FlashlightTextureGenerator";
-import { Background, BeatmapField, OverlayLayer, ReplayField } from "./Layers";
+import { Background, BeatmapField, ReplayField } from "./Layers";
 
 class Renderer {
     public pixi: PIXI.Application;
@@ -26,13 +24,11 @@ class Renderer {
         this.background.draw(time);
         this.beatmapField.draw(time);
         this.replayField.draw(time);
-        this.overlay.draw(time);
     }
 
     private background: Background;
     private beatmapField: BeatmapField;
     private replayField: ReplayField;
-    private overlay: OverlayLayer;
 
     constructor(querySelector: string) {
         // Set PIXI Application
@@ -51,7 +47,6 @@ class Renderer {
 
         // Set TextureRenderer Renderer
         SliderTextureGenerator.setRenderer(this.pixi.renderer as PIXI.Renderer);
-        FlashlightTextureGenerator.setRenderer(this.pixi.renderer as PIXI.Renderer);
 
         // Set Background
         this.background = new Background(this.pixi, { brightness: 0.25, fit: "horizontal" });
@@ -68,11 +63,6 @@ class Renderer {
         this.replayField.interactiveChildren = false;
         this.pixi.stage.addChild(this.replayField);
 
-        // Set HUDOverlay
-        this.overlay = new OverlayLayer(this.pixi);
-        this.overlay.interactiveChildren = false;
-        this.pixi.stage.addChild(this.overlay);
-
         const view = document.querySelector(querySelector);
         view && view.appendChild(this.pixi.view);
     }
@@ -80,15 +70,10 @@ class Renderer {
     loadBeatmap(beatmap: Beatmap) {
         this.beatmapField.loadBeatmap(beatmap);
         this.background.loadBeatmap(beatmap);
-        this.overlay.loadBeatmap(beatmap);
     }
 
     loadReplay(replay: Replay) {
         this.replayField.loadReplay(replay);
-    }
-
-    loadOverlay(overlay: Overlay) {
-        this.overlay.loadOverlay(overlay);
     }
 }
 
