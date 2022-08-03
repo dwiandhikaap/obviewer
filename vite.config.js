@@ -13,5 +13,7 @@ export default defineConfig({
             fileName: "obviewer",
             formats: ["umd", "es", "cjs"],
         },
+        outDir: "../../dist",
+        emptyOutDir: "true",
     },
 });
