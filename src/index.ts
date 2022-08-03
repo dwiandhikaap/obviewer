@@ -31,13 +31,13 @@ class Obviewer {
     public isPaused: boolean = true;
     private timestamp: number = 0;
 
-    private _playbackRate: number = 1;
-    public get playbackRate(): number {
-        return this._playbackRate;
+    private _rate: number = 1;
+    public get rate(): number {
+        return this._rate;
     }
-    public set playbackRate(value: number) {
-        this._playbackRate = value;
-        this.gameInstance.playbackRate = value;
+    public set rate(value: number) {
+        this._rate = value;
+        this.gameInstance.rate = value;
     }
 
     constructor(obviewerConfig: ObviewerConfig) {
@@ -45,6 +45,10 @@ class Obviewer {
         this.renderer = new Renderer(container);
         this.audioHandler = new AudioHandler();
         this.gameInstance = new GameInstance(this.renderer, this.audioHandler);
+        this.gameInstance._setAppRate = (rate: number) => {
+            this.rate = rate;
+        };
+
         this.assetsLoader = AssetsLoader.instance;
 
         const middleware = audioMiddleware(this.audioHandler);
@@ -85,7 +89,7 @@ class Obviewer {
         const isPlaying = !this.isPaused;
         this.pause();
 
-        const beatmap = new Beatmap(beatmapString);
+        const beatmap = new Beatmap(beatmapString, this.mods ?? undefined);
         const beatmapDeps = getBeatmapDependencies(this.beatmapAssets, beatmap);
         const skinDeps = getSkinDependencies(this.skinAssets);
 
@@ -135,6 +139,7 @@ class Obviewer {
         this.mods = mods;
         this.replay && (this.replay.mods = mods);
         const oldMods = this.beatmap?.getMods().numeric;
+
         if (this.beatmap && oldMods !== mods.numeric) {
             this.beatmap.setMods(mods);
             this.renderer.loadBeatmap(this.beatmap);
@@ -145,6 +150,7 @@ class Obviewer {
         // console.log(`Disabling Overrides! Previous Beatmap Mods : ${this.beatmap?.getMods().list}`);
 
         this.mods = null;
+        this.isModsOverriden = false;
         if (this._replayModsNumeric === null) {
             return;
         }
@@ -166,7 +172,7 @@ class Obviewer {
 
         let deltaTime = time - this.lastFrameTimestamp;
 
-        this.timestamp += deltaTime * this.playbackRate;
+        this.timestamp += deltaTime * this._rate;
         this.renderer.timestamp = this.timestamp;
         this.gameInstance.time = this.timestamp;
         this.lastFrameTimestamp = time;

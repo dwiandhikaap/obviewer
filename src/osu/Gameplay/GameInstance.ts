@@ -3,6 +3,7 @@ import { AudioHandler } from "../../audio/AudioHandler";
 import { Renderer } from "../../renderer/Renderer";
 import { Settings } from "../../settings/Settings";
 import { Beatmap } from "../Beatmap/Beatmap";
+import { Mod } from "../Mods/Mods";
 import { Replay } from "../Replay/Replay";
 
 class GameInstance {
@@ -14,12 +15,12 @@ class GameInstance {
 
     private beatmapAudio?: Howl;
 
-    private _playbackRate: number = 1;
-    public get playbackRate(): number {
-        return this._playbackRate;
+    private _rate: number = 1;
+    public get rate(): number {
+        return this._rate;
     }
-    public set playbackRate(value: number) {
-        this._playbackRate = value;
+    public set rate(value: number) {
+        this._rate = value;
         this.beatmapAudio?.rate(value);
     }
 
@@ -40,9 +41,10 @@ class GameInstance {
         this.audioHandler = audioHandler;
     }
 
-    public loadBeatmap(beatmap: Beatmap) {
+    public async loadBeatmap(beatmap: Beatmap) {
         this.beatmap = beatmap;
-        this.reloadAudio();
+        this.handleMods(beatmap);
+        await this.reloadAudio();
     }
 
     public loadReplay(replay: Replay) {
@@ -84,7 +86,7 @@ class GameInstance {
             const timeDiff = currTime - offset - this.time;
             this.averageTimeDiff = (this.averageTimeDiff * this._autoSyncCount + timeDiff) / (this._autoSyncCount + 1);
             //console.log(`Time diff : ${Math.abs(timeDiff)}`);
-            //console.log(currTime, offset, this.time);
+            console.log(currTime, offset, this.time);
 
             if (Math.abs(timeDiff) > Settings.get("AudioAutoSyncThresholdMS")) {
                 this.beatmapAudio.seek(this.time / 1000);
@@ -107,17 +109,37 @@ class GameInstance {
         }
     }
 
-    private reloadAudio() {
+    private async reloadAudio() {
         if (!this.beatmap) return;
 
         const audioFilename = this.beatmap.getAudioFilename();
         this.beatmapAudio?.pause();
-        this.beatmapAudio = this.audioHandler.loadedAudio[audioFilename];
+        this.beatmapAudio = await this.getAudioInstance(audioFilename);
         this.beatmapAudio?.seek(this.time / 1000);
+        this.beatmapAudio?.rate(this.rate);
 
         if (this.isPlaying) {
-            this.beatmapAudio.play();
+            this.beatmapAudio?.play();
         }
+    }
+
+    // avoiding circular dependency by not passing
+    // the whole app instance to the constructor, (rollup warning)
+    public _setAppRate: (rate: number) => void = () => {};
+    private handleMods(beatmap: Beatmap) {
+        if (beatmap.getMods().hasSimilar(Mod.DoubleTime)) {
+            this._setAppRate(1.5);
+        } else if (beatmap.getMods().hasSimilar(Mod.HalfTime)) {
+            this._setAppRate(0.75);
+        }
+    }
+
+    private async getAudioInstance(audioFilename: string) {
+        const mods = this.beatmap?.getMods();
+        if ((mods?.contains(Mod.DoubleTime) && !mods?.contains(Mod.Nightcore)) || mods?.contains(Mod.HalfTime)) {
+            return await this.audioHandler.getHTMLAudio(audioFilename)?.then((audio) => audio?.instance);
+        }
+        return this.audioHandler.find(audioFilename)?.instance;
     }
 }
 
