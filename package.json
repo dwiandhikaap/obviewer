@@ -6,8 +6,8 @@
     "scripts": {
         "test": "jest",
         "postinstall": "npx patch-package",
-        "build": "rollup --config rollup.config.prod.js",
-        "dev": "rollup --config rollup.config.dev.js && concurrently \"rollup --watch --config rollup.config.dev.js\" \"vite\""
+        "build": "vite build",
+        "dev": "vite --host"
     },
     "author": "siveroo",
     "license": "ISC",
