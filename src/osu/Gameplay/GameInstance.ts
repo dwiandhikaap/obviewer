@@ -86,7 +86,7 @@ class GameInstance {
             const timeDiff = currTime - offset - this.time;
             this.averageTimeDiff = (this.averageTimeDiff * this._autoSyncCount + timeDiff) / (this._autoSyncCount + 1);
             //console.log(`Time diff : ${Math.abs(timeDiff)}`);
-            console.log(currTime, offset, this.time);
+            //console.log(currTime, offset, this.time);
 
             if (Math.abs(timeDiff) > Settings.get("AudioAutoSyncThresholdMS")) {
                 this.beatmapAudio.seek(this.time / 1000);
