@@ -19,4 +19,4 @@ class HitCircle extends HitObject {
     }
 }
 
-export { HitCircle, HitObjectConfig };
+export { HitCircle };

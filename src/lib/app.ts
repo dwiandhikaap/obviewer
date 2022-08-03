@@ -203,9 +203,9 @@ class Obviewer {
     }
 }
 
-export default Obviewer;
+export { Obviewer };
 export * from "./osu/Mods/Mods";
 export * from "./osu/Replay/Replay";
 export * from "./osu/Beatmap/Beatmap";
 export * from "./settings/Settings";
-export * as utils from "./util/";
+export * as utils from "./util";

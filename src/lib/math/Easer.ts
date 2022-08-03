@@ -1,4 +1,5 @@
-import { EasingFunction, EasingType } from "./EasingFunction";
+import { EasingFunction } from "./EasingFunction";
+import type { EasingType } from "./EasingFunction";
 
 interface Easing {
     startTime: number;

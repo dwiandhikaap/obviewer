@@ -112,6 +112,7 @@ class Beatmap {
     }
 
     // TODO: include storyboards assets
+    // TODO: add more information to assets deps, like audio type ("hitsound", "song", etc), etc
     getAssetsFilename(): string[] {
         const assets: string[] = [];
 

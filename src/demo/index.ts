@@ -1,13 +1,15 @@
-import Obviewer, { utils } from "./lib/obviewer";
+import { Obviewer, Mod, Mods, utils } from "../lib/app";
 import $ from "jquery";
-import { wait } from "./util";
+import { wait } from "../lib/util";
 
 async function downloadReplay() {
-    return await fetch(`/assets/test2/replay.osr`).then((map) => map.blob());
+    return await fetch(`/assets/test2/siveroo - Aitsuki Nakuru & Kabocha - Lilith [Vigor] (2022-07-15) Osu.osr`).then((map) =>
+        map.blob()
+    );
 }
 
 async function downloadBeatmap() {
-    return await fetch(`/assets/test2/beatmap2.osz`).then((map) => map.blob());
+    return await fetch(`/assets/test2/1261931 Aitsuki Nakuru & Kabocha - Lilith.osz`).then((map) => map.blob());
 }
 
 async function downloadBeatmap2() {
@@ -15,7 +17,7 @@ async function downloadBeatmap2() {
 }
 
 async function downloadSkin() {
-    return await fetch(`/assets/test2/skin.osk`).then((map) => map.blob());
+    return await fetch(`/assets/test2/skin5.osk`).then((map) => map.blob());
 }
 
 function addListeners(obviewer: Obviewer) {
@@ -36,8 +38,8 @@ function addListeners(obviewer: Obviewer) {
         console.log("Downloading Beatmap");
         const beatmapBlob = await downloadBeatmap();
 
-        /*   console.log("Downloading Replay");
-        const replay = await downloadReplay().then((map) => BlobReader.extractOsr(map)); */
+        console.log("Downloading Replay");
+        const replay = await downloadReplay().then((map) => utils.extractOsr(map));
 
         console.log("Extracting Skin");
         const skin = await utils.extractOsk(skinBlob);
@@ -50,12 +52,19 @@ function addListeners(obviewer: Obviewer) {
 
         console.log("Loading Beatmap");
         obviewer.addBeatmap(beatmap);
+        //obviewer.disableModsOverride();
 
-        //console.log("Loading Replay");
-        //obviewer.loadReplay(replay);
+        const mods = new Mods();
+        mods.enable(Mod.HalfTime);
+        obviewer.enableModsOverride(mods);
+        await obviewer.load("Aitsuki Nakuru & Kabocha - Lilith (Celine) [Vigor].osu", replay);
 
-        await obviewer.loadBeatmap("Reol - No title (VINXIS) [Celsius' Extra].osu");
         obviewer.play();
+        obviewer.seek(74000);
+        obviewer.checkResources();
+
+        await wait(1000);
+        obviewer.seek(120000);
     });
 }
 
@@ -68,4 +77,6 @@ async function main() {
     addListeners(obviewer);
 }
 
-await main();
+(async function () {
+    await main();
+})();
