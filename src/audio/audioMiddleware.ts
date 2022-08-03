@@ -29,8 +29,7 @@ export function audioMiddleware(audioHandler: AudioHandler) {
                     });
                 });
 
-                resource.data = audio;
-                audioHandler.add(resource.name, audio);
+                audioHandler.add(resource.name, audio, resource.url);
             }
         }
 
