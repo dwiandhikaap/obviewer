@@ -174,6 +174,11 @@ class Mods {
         this._disable(mod);
         return this;
     }
+
+    // Can be used to detect DT and NC from checking DT only
+    public hasSimilar(mod: number | Mod) {
+        return (this.numeric & mod) === mod;
+    }
 }
 
 /* Reduce from "[..., Nightcore, DoubleTime]" to [..., Nightcore] */
