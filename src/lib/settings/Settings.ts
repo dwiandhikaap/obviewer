@@ -1,4 +1,4 @@
-import DEFAULT_SETTINGS from "./settings.json";
+import DEFAULT_SETTINGS from "./default_settings";
 
 // fuck generics
 type ISettings = typeof DEFAULT_SETTINGS;
