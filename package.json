@@ -6,19 +6,16 @@
     "scripts": {
         "test": "jest",
         "postinstall": "npx patch-package",
-        "build": "rollup --config rollup.config.prod.js",
-        "dev": "rollup --config rollup.config.dev.js && concurrently \"rollup --watch --config rollup.config.dev.js\" \"vite\""
+        "dev": "vite --host",
+        "build": "vite build && npm run build:dts && npm run build:dts:rollup",
+        "build:dts": "tsc src/lib/app.ts --declaration --emitDeclarationOnly --esModuleInterop --target es6 --resolveJsonModule --outDir dist/dts_temp --moduleResolution node",
+        "build:dts:rollup": "npx rollup --config rollup.config.js"
     },
     "author": "siveroo",
     "license": "ISC",
     "devDependencies": {
-        "@rollup/plugin-commonjs": "^22.0.1",
-        "@rollup/plugin-inject": "^4.0.4",
-        "@rollup/plugin-json": "^4.1.0",
-        "@rollup/plugin-typescript": "^8.3.3",
         "@types/jest": "^27.4.1",
         "@types/jquery": "^3.5.9",
-        "concurrently": "^7.2.2",
         "jest": "^27.5.1",
         "jquery": "^3.6.0",
         "rollup": "^2.70.2",
@@ -30,10 +27,16 @@
     },
     "dependencies": {
         "@types/bytebuffer": "^5.0.42",
+        "@types/howler": "^2.2.7",
+        "@types/mime": "^2.0.3",
+        "@types/offscreencanvas": "^2019.7.0",
         "@types/pixi.js": "^5.0.0",
+        "@zip.js/zip.js": "^2.5.9",
         "buffer": "^6.0.3",
         "bytebuffer": "^5.0.1",
+        "howler": "^2.2.3",
         "leb": "^0.3.0",
+        "mime": "^3.0.0",
         "patch-package": "^6.4.7",
         "pixi-filters": "^4.1.5",
         "pixi.js": "^6.2.2"

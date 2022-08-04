@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "outDir": "./build",
         "sourceMap": true,
         "noImplicitAny": true,
         "module": "es6",
@@ -14,5 +15,5 @@
         "strictPropertyInitialization": false,
         "lib": ["ES6", "DOM"]
     },
-    "exclude": ["./demo/**/*"]
+    "exclude": ["**/demo/**/*", "**/build/**/*"]
 }

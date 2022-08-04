@@ -1,12 +1,9 @@
 node_modules
 
 # Build folder/file
-/build
-/dts
+/dist
 
 # Assets stuff for demo
-/demo/assets/*
-/demo/lib/obviewer
+/src/demo/assets/*
 
-!/demo/assets/osu/
-!/demo/assets/replay-tale
+!/src/demo/assets/skin.osk
