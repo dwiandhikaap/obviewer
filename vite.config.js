@@ -2,7 +2,7 @@
  * @type {import('vite').UserConfig}
  */
 import { resolve } from "path";
-import { defineConfig } from "rollup";
+import { defineConfig } from "vite";
 
 export default defineConfig({
     root: "./src/demo",
@@ -11,7 +11,7 @@ export default defineConfig({
             entry: resolve(__dirname, "src/lib/app.ts"),
             name: "Obviewer",
             fileName: "obviewer",
-            formats: ["umd", "es", "cjs"],
+            formats: ["cjs", "umd", "es"],
         },
         outDir: "../../dist",
         emptyOutDir: "true",

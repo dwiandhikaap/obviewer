@@ -9,7 +9,8 @@
         "dev": "vite --host",
         "build": "vite build && npm run build:dts && npm run build:dts:rollup",
         "build:dts": "tsc src/lib/app.ts --declaration --emitDeclarationOnly --esModuleInterop --target es6 --resolveJsonModule --outDir dist/dts_temp --moduleResolution node",
-        "build:dts:rollup": "npx rollup --config rollup.config.js"
+        "build:dts:rollup": "npx rollup --config rollup.config.js",
+        "buildDemo": "vite build --config vite.buildDemo.config.js"
     },
     "author": "siveroo",
     "license": "ISC",

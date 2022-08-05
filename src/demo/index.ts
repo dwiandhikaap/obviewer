@@ -1,3 +1,6 @@
+import "./style.css";
+import "./assets/skin.osk?url";
+
 import { Obviewer, utils } from "../lib/app";
 import $ from "jquery";
 import { AssetsReference } from "../lib/util";
@@ -49,7 +52,7 @@ async function downloadBeatmapAssets(url: string, onProgress?: (progress: number
 }
 
 async function downloadSkin() {
-    return await fetch(`/assets/skin.osk`)
+    return await fetch("./assets/skin.osk")
         .then((map) => map.blob())
         .then((blob) => utils.extractOsk(blob));
 }

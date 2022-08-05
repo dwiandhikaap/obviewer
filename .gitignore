@@ -2,6 +2,7 @@ node_modules
 
 # Build folder/file
 /dist
+/demo
 
 # Assets stuff for demo
 /src/demo/assets/*
