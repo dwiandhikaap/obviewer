@@ -1,0 +1,123 @@
+body {
+    background-color: black;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#main-canvas {
+    width: 1280px;
+    height: 720px;
+}
+
+.selection {
+    width: 100%;
+    background-color: hsl(0, 0%, 5%);
+    color: white;
+    padding: 1rem;
+}
+
+.selection-url {
+    display: flex;
+}
+
+.selection h2 {
+    margin-top: 0;
+}
+
+.selection span {
+    color: hsl(0, 0%, 60%);
+}
+
+.selection input {
+    background-color: hsl(0, 0%, 10%);
+    border: none;
+
+    margin: 4px 0;
+    padding: 4px 8px;
+    color: white;
+    font-size: large;
+    width: 100%;
+}
+
+.selection input:focus {
+    outline: 1px solid hsl(0, 0%, 50%);
+}
+
+.selection-load {
+    display: flex;
+}
+
+#selection-load-button {
+    color: white;
+    background-color: hsl(122, 50%, 40%);
+    border-radius: 8px;
+    border: none;
+    font-size: large;
+    font-weight: bold;
+    padding: 4px 8px;
+    width: 12rem;
+
+    transition: background-color 0.1s;
+}
+
+#selection-load-button:hover {
+    cursor: pointer;
+    background-color: hsl(122, 50%, 30%);
+}
+
+#selection-load-button:active {
+    cursor: pointer;
+    background-color: hsl(122, 50%, 35%);
+}
+
+.hidden {
+    display: none;
+}
+
+.load-progress-bg {
+    width: 100%;
+    background-color: hsl(0, 0%, 10%);
+    border-radius: 8px;
+    margin: 0 8px;
+}
+
+.load-progress-fg {
+    height: 100%;
+    background-color: hsl(122, 50%, 40%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.load-difficulty {
+    display: flex;
+    margin: 0px 8px;
+}
+
+.load-difficulty select {
+    width: 24ch;
+    background-color: hsl(0, 0%, 10%);
+    border: none;
+    border-radius: 8px;
+    padding: 4px 8px;
+    color: white;
+    font-size: large;
+    font-weight: bold;
+    padding-right: 24px;
+}
+
+.load-difficulty select option[value=""][disabled] {
+    display: none;
+}
