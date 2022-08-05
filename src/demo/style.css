@@ -9,6 +9,13 @@ body {
     align-items: center;
 }
 
+kbd {
+    margin: 0 8px;
+    background-color: hsl(0, 0%, 20%);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
 #app {
     display: flex;
     flex-direction: column;
@@ -31,8 +38,14 @@ body {
     display: flex;
 }
 
-.selection h2 {
+.selection .header {
+    display: flex;
+    align-items: center;
+}
+
+.selection .header h2 {
     margin-top: 0;
+    margin-right: 1rem;
 }
 
 .selection span {
