@@ -1,6 +1,7 @@
 import { Obviewer, utils } from "../lib/app";
 import $ from "jquery";
 import { AssetsReference } from "../lib/util";
+import { fixJQueryPassiveHandler } from "./jQueryPassiveFix";
 
 function createDiffSelection(maps: AssetsReference, obviewer: Obviewer) {
     const diffSelector = $(`<select id="diff-selector">`);
@@ -100,6 +101,16 @@ function addListeners(obviewer: Obviewer) {
             obviewer.isPaused ? obviewer.play() : obviewer.pause();
         }
     });
+
+    $("#main-canvas").on("wheel", async function (e) {
+        if ((e.originalEvent as WheelEvent).deltaY < 0) {
+            const time = obviewer.time;
+            obviewer.seek(time - 200);
+        } else {
+            const time = obviewer.time;
+            obviewer.seek(time + 200);
+        }
+    });
 }
 
 async function main() {
@@ -111,5 +122,6 @@ async function main() {
 }
 
 (async function () {
+    fixJQueryPassiveHandler();
     await main();
 })();
