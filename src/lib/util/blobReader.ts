@@ -58,12 +58,25 @@ async function extractOsz(file: Blob) {
             const blobWriter = new zip.BlobWriter();
             const data = await entry.getData?.(blobWriter);
 
+            const metadata = {} as any;
+            // If ends with .osu, it's a beatmap
+            if (fileFormat === "osu") {
+                const textData = (await data?.text()) ?? "";
+                const diffName = textData
+                    .match(/Version:.*/gi)?.[0]
+                    .split(":")[1]
+                    .trim();
+
+                metadata.difficultyName = diffName;
+            }
+
             if (!data) return;
             const url = generateBlobURL(data, fileFormat);
             assets.push({
                 name: fileName,
                 url: url,
                 mimeType: fileMime ?? "",
+                metadata: metadata,
             });
         });
 

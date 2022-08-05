@@ -94,15 +94,16 @@ class GameInstance {
                 // Check quick repeating autosync in short intervals
                 if (Settings.get("AudioAutoSyncDetectIssue")) {
                     this._autoSyncCount++;
-                    if (time - this._autoSyncLastTime > 500) {
+
+                    if (Math.abs(performance.now() - this._autoSyncLastTime) > 200) {
                         this._autoSyncCount = 0;
                     }
-                    this._autoSyncLastTime = time;
+                    this._autoSyncLastTime = performance.now();
                 }
             }
         }
 
-        if (this._autoSyncCount > 10) {
+        if (this._autoSyncCount > 50) {
             console.warn("[Audio] Auto sync issue detected! Disabling audio auto sync!");
             Settings.set("AudioAutoSyncEnabled", false);
             this._autoSyncCount = 0;
@@ -114,6 +115,7 @@ class GameInstance {
 
         const audioFilename = this.beatmap.getAudioFilename();
         this.beatmapAudio?.pause();
+        this.beatmapAudio?.unload();
         this.beatmapAudio = await this.getAudioInstance(audioFilename);
         this.beatmapAudio?.seek(this.time / 1000);
         this.beatmapAudio?.rate(this.rate);
@@ -135,10 +137,10 @@ class GameInstance {
     }
 
     private async getAudioInstance(audioFilename: string) {
-        const mods = this.beatmap?.getMods();
+        /* const mods = this.beatmap?.getMods();
         if ((mods?.contains(Mod.DoubleTime) && !mods?.contains(Mod.Nightcore)) || mods?.contains(Mod.HalfTime)) {
             return await this.audioHandler.getHTMLAudio(audioFilename)?.then((audio) => audio?.instance);
-        }
+        } */
         return this.audioHandler.find(audioFilename)?.instance;
     }
 }

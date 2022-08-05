@@ -31,6 +31,10 @@ class Obviewer {
     public isPaused: boolean = true;
     private timestamp: number = 0;
 
+    public get time() {
+        return this.timestamp;
+    }
+
     private _rate: number = 1;
     public get rate(): number {
         return this._rate;
@@ -173,8 +177,8 @@ class Obviewer {
         let deltaTime = time - this.lastFrameTimestamp;
 
         this.timestamp += deltaTime * this._rate;
-        this.renderer.timestamp = this.timestamp;
         this.gameInstance.time = this.timestamp;
+        this.renderer.timestamp = this.timestamp;
         this.lastFrameTimestamp = time;
 
         this._rafID = requestAnimationFrame(this.loop);
@@ -198,8 +202,11 @@ class Obviewer {
     }
 
     seek(timestamp: number) {
+        timestamp = Math.max(0, timestamp);
+
         this.timestamp = timestamp;
         this.renderer.timestamp = timestamp;
+        this.gameInstance.time = timestamp;
     }
 }
 

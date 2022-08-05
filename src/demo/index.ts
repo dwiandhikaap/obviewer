@@ -1,28 +1,105 @@
-import { Obviewer, Mod, Mods, utils } from "../lib/app";
+import { Obviewer, utils } from "../lib/app";
 import $ from "jquery";
-import { wait } from "../lib/util";
+import { AssetsReference } from "../lib/util";
+import { fixJQueryPassiveHandler } from "./jQueryPassiveFix";
 
-async function downloadReplay() {
-    return await fetch(`/assets/test2/siveroo - Aitsuki Nakuru & Kabocha - Lilith [Vigor] (2022-07-15) Osu.osr`).then((map) =>
-        map.blob()
-    );
+function createDiffSelection(maps: AssetsReference, obviewer: Obviewer) {
+    const diffSelector = $(`<select id="diff-selector">`);
+    diffSelector.empty();
+    diffSelector.append(`<option value="" disabled="disabled" selected="selected">Select Difficulty</option>`);
+    for (const [index, map] of maps.entries()) {
+        const diff = map.metadata.difficultyName;
+        const diffOption = $(`<option value="${index}">${diff}</option>`);
+        diffSelector.append(diffOption);
+    }
+
+    $(".load-difficulty").append(diffSelector);
+    diffSelector.on("change", async function () {
+        const index = parseInt($(this).val() as string);
+        const map = maps[index];
+        $("#selection-load-button").prop("disabled", true);
+
+        await obviewer.load(map.name);
+        obviewer.play();
+        $("#selection-load-button").prop("disabled", false);
+    });
 }
 
-async function downloadBeatmap() {
-    return await fetch(`/assets/test2/1261931 Aitsuki Nakuru & Kabocha - Lilith.osz`).then((map) => map.blob());
-}
+async function downloadBeatmapAssets(url: string, onProgress?: (progress: number) => void) {
+    const response = await fetch(url);
 
-async function downloadBeatmap2() {
-    return await fetch(`/assets/test2/beatmap2.osz`).then((map) => map.blob());
+    const reader = response.body!.getReader();
+    const contentLength = +response.headers.get("Content-Length")!;
+
+    const chunks: ArrayBuffer[] = [];
+    let bytesRead = 0;
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+            break;
+        }
+        chunks.push(value);
+        bytesRead += value.byteLength;
+        if (onProgress) {
+            onProgress(bytesRead / contentLength);
+        }
+    }
+    const blob = new Blob(chunks);
+    return utils.extractOsz(blob);
 }
 
 async function downloadSkin() {
-    return await fetch(`/assets/test2/skin5.osk`).then((map) => map.blob());
+    return await fetch(`/assets/skin.osk`)
+        .then((map) => map.blob())
+        .then((blob) => utils.extractOsk(blob));
+}
+
+function parseBeatmapPageURL(url: string) {
+    // Use direct link if there's any
+    if (url.endsWith(".osz")) {
+        return url;
+    }
+
+    // Use 3rd party site for external download
+    if (url && !isNaN(+url)) {
+        return `https://api.chimu.moe/v1/download/${url}`;
+    }
+
+    let match = url.match(/(osu.ppy.sh\/beatmapsets\/\d+)/g);
+    if (match && match.length > 0) {
+        const id = match[0].match(/(\d+)/g);
+        return `https://api.chimu.moe/v1/download/${id}`;
+    }
+
+    return null;
 }
 
 function addListeners(obviewer: Obviewer) {
-    $("#togglePause").on("click", () => {
-        obviewer.isPaused ? obviewer.play() : obviewer.pause();
+    $("#selection-load-button").on("click", async () => {
+        const url = $("#selection-url-input").val() as string;
+
+        const downloadURI = parseBeatmapPageURL(url);
+        if (!downloadURI) {
+            alert("Invalid input!");
+            return;
+        }
+
+        $(".load-progress-bg").removeClass("hidden");
+        $(".load-difficulty").empty();
+
+        const beatmapAssets = await downloadBeatmapAssets(downloadURI, (progress) => {
+            $("#load-progress-bar").css("width", `${progress * 100}%`);
+            $("#load-progress-bar").text(`${Math.floor(progress * 100)}%`);
+        });
+        const skinAssets = await downloadSkin();
+
+        obviewer.addBeatmap(beatmapAssets);
+        obviewer.addSkin(skinAssets);
+
+        const maps = beatmapAssets.filter((asset) => asset.metadata.difficultyName !== undefined);
+
+        createDiffSelection(maps, obviewer);
+        $(".load-progress-bg").addClass("hidden");
     });
 
     $("body").on("keypress", async function (e) {
@@ -31,45 +108,20 @@ function addListeners(obviewer: Obviewer) {
         }
     });
 
-    $("#startTest").on("click", async function (e) {
-        console.log("Downloading Skin");
-        const skinBlob = await downloadSkin();
+    $("#main-canvas").on("wheel", async function (e) {
+        if (!obviewer.beatmap) return;
 
-        console.log("Downloading Beatmap");
-        const beatmapBlob = await downloadBeatmap();
-
-        console.log("Downloading Replay");
-        const replay = await downloadReplay().then((map) => utils.extractOsr(map));
-
-        console.log("Extracting Skin");
-        const skin = await utils.extractOsk(skinBlob);
-
-        console.log("Extracting Beatmap");
-        const beatmap = await utils.extractOsz(beatmapBlob);
-
-        console.log("Loading Skin");
-        obviewer.addSkin(skin);
-
-        console.log("Loading Beatmap");
-        obviewer.addBeatmap(beatmap);
-        //obviewer.disableModsOverride();
-
-        const mods = new Mods();
-        mods.enable(Mod.HalfTime);
-        obviewer.enableModsOverride(mods);
-        await obviewer.load("Aitsuki Nakuru & Kabocha - Lilith (Celine) [Vigor].osu", replay);
-
-        obviewer.play();
-        obviewer.seek(74000);
-        obviewer.checkResources();
-
-        await wait(1000);
-        obviewer.seek(120000);
+        if ((e.originalEvent as WheelEvent).deltaY < 0) {
+            const time = obviewer.time;
+            obviewer.seek(time - 200);
+        } else {
+            const time = obviewer.time;
+            obviewer.seek(time + 200);
+        }
     });
 }
 
 async function main() {
-    const skin = await downloadSkin();
     const obviewer = new Obviewer({
         container: "#main-canvas",
     });
@@ -78,5 +130,6 @@ async function main() {
 }
 
 (async function () {
+    fixJQueryPassiveHandler();
     await main();
 })();

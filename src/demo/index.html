@@ -3,22 +3,36 @@
     <head>
         <meta charset="utf-8" />
         <title>Obviewer - Beatmap viewer for osu! standard</title>
+        <link rel="stylesheet" href="style.css" />
     </head>
     <body>
-        <input type="file" id="replayFile" name="replayFile" accept=".osr" />
-        <br />
-
-        <input type="file" id="mapsFile" name="mapsFile" multiple />
-        <br />
-        OSZ FILE : <input type="file" name="oszFile" id="oszFile" accept=".osz" />
-        <button id="replay-download">Download Replay</button>
-        <button id="startTest" style="width: 160px; height: 80px">Start Test</button>
-        <button id="startTest2" style="width: 160px; height: 80px">Start Test 2</button>
-        <div id="main-canvas"></div>
-        <span id="combo" style="font-size: 48px; font-weight: bold"></span>
-        <div id="logger"></div>
-        <button id="togglePause">Toggle Pause</button>
-
+        <div id="app">
+            <div class="selection">
+                <div class="header">
+                    <h2>Open Beatmap</h2>
+                    Press <kbd>SPACE</kbd> to pause/unpause, Use <kbd>Mouse Scroll</kbd> to seek forward/backward
+                </div>
+                <hr />
+                <div class="selection-url">
+                    <span>Enter Beatmap Page URL, Beatmap ID, or Direct <b>.osz</b> Link</span>
+                    <input
+                        id="selection-url-input"
+                        type="url"
+                        placeholder="e.g 1717841, https://osu.ppy.sh/beatmapsets/1717841#osu/3529537, http://localhost:3000/assets/beatmap.osz"
+                        value=""
+                    />
+                </div>
+                <br />
+                <div class="selection-load">
+                    <button id="selection-load-button">Load Beatmap</button>
+                    <div class="load-progress-bg hidden">
+                        <div id="load-progress-bar" class="load-progress-fg" style="width: 0%">0%</div>
+                    </div>
+                    <div class="load-difficulty"></div>
+                </div>
+            </div>
+            <div id="main-canvas"></div>
+        </div>
         <script type="module" src="/index.ts"></script>
     </body>
 </html>
