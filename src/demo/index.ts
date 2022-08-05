@@ -52,7 +52,8 @@ async function downloadBeatmapAssets(url: string, onProgress?: (progress: number
 }
 
 async function downloadSkin() {
-    return await fetch("./assets/skin.osk")
+    const skinUrl = new URL("./assets/skin.osk", import.meta.url).href;
+    return await fetch(skinUrl)
         .then((map) => map.blob())
         .then((blob) => utils.extractOsk(blob));
 }
