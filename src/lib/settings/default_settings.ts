@@ -5,5 +5,5 @@ export default {
     AudioOffset: 0,
     AudioAutoSyncEnabled: true,
     AudioAutoSyncThresholdMS: 150,
-    AudioAutoSyncDetectIssue: true,
+    AudioAutoSyncDetectIssue: false,
 };

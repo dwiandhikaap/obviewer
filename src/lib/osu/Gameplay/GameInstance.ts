@@ -94,15 +94,16 @@ class GameInstance {
                 // Check quick repeating autosync in short intervals
                 if (Settings.get("AudioAutoSyncDetectIssue")) {
                     this._autoSyncCount++;
-                    if (time - this._autoSyncLastTime > 500) {
+
+                    if (Math.abs(performance.now() - this._autoSyncLastTime) > 200) {
                         this._autoSyncCount = 0;
                     }
-                    this._autoSyncLastTime = time;
+                    this._autoSyncLastTime = performance.now();
                 }
             }
         }
 
-        if (this._autoSyncCount > 10) {
+        if (this._autoSyncCount > 50) {
             console.warn("[Audio] Auto sync issue detected! Disabling audio auto sync!");
             Settings.set("AudioAutoSyncEnabled", false);
             this._autoSyncCount = 0;
