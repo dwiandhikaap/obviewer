@@ -1,6 +1,6 @@
 # obviewer - Beatmap viewer for osu! standard
 
-> Web based application to view an osu! standard beatmap
+> Web based application to view an osu! standard beatmap - [**View Demo**](https://siveroo.github.io/obviewer)
 
 This repository was forked from old project of mine
 
