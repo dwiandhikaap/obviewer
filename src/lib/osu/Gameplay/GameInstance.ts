@@ -114,6 +114,7 @@ class GameInstance {
 
         const audioFilename = this.beatmap.getAudioFilename();
         this.beatmapAudio?.pause();
+        this.beatmapAudio?.unload();
         this.beatmapAudio = await this.getAudioInstance(audioFilename);
         this.beatmapAudio?.seek(this.time / 1000);
         this.beatmapAudio?.rate(this.rate);
@@ -135,10 +136,10 @@ class GameInstance {
     }
 
     private async getAudioInstance(audioFilename: string) {
-        const mods = this.beatmap?.getMods();
+        /* const mods = this.beatmap?.getMods();
         if ((mods?.contains(Mod.DoubleTime) && !mods?.contains(Mod.Nightcore)) || mods?.contains(Mod.HalfTime)) {
             return await this.audioHandler.getHTMLAudio(audioFilename)?.then((audio) => audio?.instance);
-        }
+        } */
         return this.audioHandler.find(audioFilename)?.instance;
     }
 }
