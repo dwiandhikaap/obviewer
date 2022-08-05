@@ -6,13 +6,9 @@ This repository was forked from old project of mine
 
 ## Why?
 
----
-
 This project is just for me to learn TypeScript/JavaScript with some OOP stuff with no end-goal. ~~*(also to fill my portfolio :trollface:)*~~
 
 ## Getting Started
-
----
 
 - First, you need to clone this repository using Git
 
@@ -46,8 +42,6 @@ This project is just for me to learn TypeScript/JavaScript with some OOP stuff w
     However, i haven't tested the build result in another environtment/projects, for example on a project that uses Vanilla JS, React.js, Svelte, or any other frameworks/library
 
 ## Credits
-
----
 
 - [Danser](https://github.com/Wieku/danser-go) for some number/constants for animation timing
 - [McOsu](https://github.com/McKay42/McOsu) for slider rendering stuff
