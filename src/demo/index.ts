@@ -103,6 +103,8 @@ function addListeners(obviewer: Obviewer) {
     });
 
     $("#main-canvas").on("wheel", async function (e) {
+        if (!obviewer.beatmap) return;
+
         if ((e.originalEvent as WheelEvent).deltaY < 0) {
             const time = obviewer.time;
             obviewer.seek(time - 200);
