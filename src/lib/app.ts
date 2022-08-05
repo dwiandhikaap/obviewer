@@ -31,6 +31,10 @@ class Obviewer {
     public isPaused: boolean = true;
     private timestamp: number = 0;
 
+    public get time() {
+        return this.timestamp;
+    }
+
     private _rate: number = 1;
     public get rate(): number {
         return this._rate;
@@ -199,6 +203,7 @@ class Obviewer {
 
     seek(timestamp: number) {
         this.timestamp = timestamp;
+        this.gameInstance.time = timestamp;
         this.renderer.timestamp = timestamp;
     }
 }
