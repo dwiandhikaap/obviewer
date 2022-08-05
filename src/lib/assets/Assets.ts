@@ -10,6 +10,7 @@ type AssetsReference = {
     url: string;
     mimeType: string;
 
+    metadata?: any;
     sequenceIndex?: number;
 }[];
 
