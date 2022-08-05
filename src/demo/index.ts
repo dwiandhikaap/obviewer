@@ -14,11 +14,14 @@ function createDiffSelection(maps: AssetsReference, obviewer: Obviewer) {
     }
 
     $(".load-difficulty").append(diffSelector);
-    diffSelector.on("change", function () {
+    diffSelector.on("change", async function () {
         const index = parseInt($(this).val() as string);
         const map = maps[index];
-        obviewer.load(map.name);
+        $("#selection-load-button").prop("disabled", true);
+
+        await obviewer.load(map.name);
         obviewer.play();
+        $("#selection-load-button").prop("disabled", false);
     });
 }
 
@@ -58,7 +61,7 @@ function parseBeatmapPageURL(url: string) {
     }
 
     // Use 3rd party site for external download
-    if (!isNaN(+url)) {
+    if (url && !isNaN(+url)) {
         return `https://api.chimu.moe/v1/download/${url}`;
     }
 
@@ -76,7 +79,10 @@ function addListeners(obviewer: Obviewer) {
         const url = $("#selection-url-input").val() as string;
 
         const downloadURI = parseBeatmapPageURL(url);
-        if (!downloadURI) return;
+        if (!downloadURI) {
+            alert("Invalid input!");
+            return;
+        }
 
         $(".load-progress-bg").removeClass("hidden");
         $(".load-difficulty").empty();

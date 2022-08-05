@@ -94,6 +94,11 @@ kbd {
     background-color: hsl(122, 50%, 35%);
 }
 
+#selection-load-button[disabled] {
+    cursor: not-allowed;
+    background-color: hsl(122, 0%, 30%);
+}
+
 .hidden {
     display: none;
 }
