@@ -177,8 +177,8 @@ class Obviewer {
         let deltaTime = time - this.lastFrameTimestamp;
 
         this.timestamp += deltaTime * this._rate;
-        this.renderer.timestamp = this.timestamp;
         this.gameInstance.time = this.timestamp;
+        this.renderer.timestamp = this.timestamp;
         this.lastFrameTimestamp = time;
 
         this._rafID = requestAnimationFrame(this.loop);
@@ -202,9 +202,11 @@ class Obviewer {
     }
 
     seek(timestamp: number) {
+        timestamp = Math.max(0, timestamp);
+
         this.timestamp = timestamp;
-        this.gameInstance.time = timestamp;
         this.renderer.timestamp = timestamp;
+        this.gameInstance.time = timestamp;
     }
 }
 
