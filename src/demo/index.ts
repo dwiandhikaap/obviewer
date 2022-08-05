@@ -52,19 +52,33 @@ async function downloadSkin() {
 }
 
 function parseBeatmapPageURL(url: string) {
-    const link = url.match(/(osu.ppy.sh\/beatmapsets\/\d+)/g);
-    return `https://${link}/download`;
+    // Use direct link if there's any
+    if (url.endsWith(".osz")) {
+        return url;
+    }
+
+    // Use 3rd party site for external download
+    if (!isNaN(+url)) {
+        return `https://api.chimu.moe/v1/download/${url}`;
+    }
+
+    let match = url.match(/(osu.ppy.sh\/beatmapsets\/\d+)/g);
+    if (match && match.length > 0) {
+        const id = match[0].match(/(\d+)/g);
+        return `https://api.chimu.moe/v1/download/${id}`;
+    }
+
+    return null;
 }
 
 function addListeners(obviewer: Obviewer) {
     $("#selection-load-button").on("click", async () => {
         const url = $("#selection-url-input").val() as string;
-        const id = parseBeatmapPageURL(url).match(/(\d+)/g);
 
-        if (!id) return;
+        const downloadURI = parseBeatmapPageURL(url);
+        if (!downloadURI) return;
+
         $(".load-progress-bg").removeClass("hidden");
-
-        const downloadURI = `https://api.chimu.moe/v1/download/${id}`;
         const beatmapAssets = await downloadBeatmapAssets(downloadURI, (progress) => {
             $("#load-progress-bar").css("width", `${progress * 100}%`);
             $("#load-progress-bar").text(`${Math.floor(progress * 100)}%`);
