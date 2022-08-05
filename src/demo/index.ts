@@ -12,7 +12,6 @@ function createDiffSelection(maps: AssetsReference, obviewer: Obviewer) {
         diffSelector.append(diffOption);
     }
 
-    $(".load-difficulty").empty();
     $(".load-difficulty").append(diffSelector);
     diffSelector.on("change", function () {
         const index = parseInt($(this).val() as string);
@@ -46,7 +45,7 @@ async function downloadBeatmapAssets(url: string, onProgress?: (progress: number
 }
 
 async function downloadSkin() {
-    return await fetch(`/assets/test2/skin5.osk`)
+    return await fetch(`/assets/skin.osk`)
         .then((map) => map.blob())
         .then((blob) => utils.extractOsk(blob));
 }
@@ -79,6 +78,8 @@ function addListeners(obviewer: Obviewer) {
         if (!downloadURI) return;
 
         $(".load-progress-bg").removeClass("hidden");
+        $(".load-difficulty").empty();
+
         const beatmapAssets = await downloadBeatmapAssets(downloadURI, (progress) => {
             $("#load-progress-bar").css("width", `${progress * 100}%`);
             $("#load-progress-bar").text(`${Math.floor(progress * 100)}%`);
