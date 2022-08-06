@@ -7,11 +7,9 @@ import { Mod } from "../Mods/Mods";
 import { Replay } from "../Replay/Replay";
 
 class GameInstance {
-    private renderer: Renderer;
     private audioHandler: AudioHandler;
 
     private beatmap?: Beatmap;
-    private replay?: Replay;
 
     private beatmapAudio?: Howl;
 
@@ -36,8 +34,7 @@ class GameInstance {
 
     public isPlaying = false;
 
-    constructor(renderer: Renderer, audioHandler: AudioHandler) {
-        this.renderer = renderer;
+    constructor(audioHandler: AudioHandler) {
         this.audioHandler = audioHandler;
     }
 
@@ -45,10 +42,6 @@ class GameInstance {
         this.beatmap = beatmap;
         this.handleMods(beatmap);
         await this.reloadAudio();
-    }
-
-    public loadReplay(replay: Replay) {
-        this.replay = replay;
     }
 
     public play() {
@@ -60,6 +53,15 @@ class GameInstance {
     public pause() {
         this.isPlaying = false;
         this.beatmapAudio?.pause();
+    }
+
+    public getMaximumDuration(): number {
+        if (!this.beatmap) return 0;
+
+        const lastObjectTime = this.beatmap.hitObjects.objects[this.beatmap.hitObjects.objects.length - 1].endTime ?? 0;
+        const audioTime = (this.beatmapAudio?.duration() ?? 0) * 1000;
+
+        return Math.max(lastObjectTime, audioTime);
     }
 
     private draw(time: number) {
@@ -80,7 +82,11 @@ class GameInstance {
     private _autoSyncLastTime = 0;
     private averageTimeDiff: number = 0;
     private _autoSync(time: number) {
-        if (Settings.get("AudioAutoSyncEnabled") && document.hasFocus() && this.beatmapAudio?.playing()) {
+        if (Settings.get("AudioAutoSyncEnabled") && document.hasFocus() && this.beatmapAudio && this.isPlaying) {
+            if (!this.beatmapAudio.playing()) {
+                this.beatmapAudio.play();
+            }
+
             const currTime = this.beatmapAudio.seek() * 1000;
             const offset = Settings.get("AudioOffset");
             const timeDiff = currTime - offset - this.time;
@@ -95,10 +101,10 @@ class GameInstance {
                 if (Settings.get("AudioAutoSyncDetectIssue")) {
                     this._autoSyncCount++;
 
-                    if (Math.abs(performance.now() - this._autoSyncLastTime) > 200) {
+                    if (Math.abs(time - this._autoSyncLastTime) > 200) {
                         this._autoSyncCount = 0;
                     }
-                    this._autoSyncLastTime = performance.now();
+                    this._autoSyncLastTime = time;
                 }
             }
         }

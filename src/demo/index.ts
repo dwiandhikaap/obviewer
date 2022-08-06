@@ -117,10 +117,10 @@ function addListeners(obviewer: Obviewer) {
 
         if ((e.originalEvent as WheelEvent).deltaY < 0) {
             const time = obviewer.time;
-            obviewer.seek(time - 200);
+            obviewer.seek(time - 500);
         } else {
             const time = obviewer.time;
-            obviewer.seek(time + 200);
+            obviewer.seek(time + 500);
         }
     });
 }
