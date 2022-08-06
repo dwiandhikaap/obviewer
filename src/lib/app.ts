@@ -44,6 +44,11 @@ class Obviewer {
         this.gameInstance.rate = value;
     }
 
+    private _duration = 0;
+    public get duration() {
+        return this._duration;
+    }
+
     constructor(obviewerConfig: ObviewerConfig) {
         const { container } = obviewerConfig;
         this.renderer = new Renderer(container);
@@ -104,8 +109,10 @@ class Obviewer {
         await this.assetsLoader.loadBeatmap(beatmapDeps);
 
         this.beatmap = beatmap;
-        this.gameInstance.loadBeatmap(beatmap);
+        await this.gameInstance.loadBeatmap(beatmap);
         this.renderer.loadBeatmap(beatmap);
+
+        this._duration = this.gameInstance.getMaximumDuration();
 
         if (isPlaying) {
             this.play();
@@ -174,6 +181,11 @@ class Obviewer {
     private loop = (time: number) => {
         if (this.isPaused) return;
 
+        if (this.timestamp > this.duration) {
+            this.pause();
+            return;
+        }
+
         let deltaTime = time - this.lastFrameTimestamp;
 
         this.timestamp += deltaTime * this._rate;
@@ -202,7 +214,7 @@ class Obviewer {
     }
 
     seek(timestamp: number) {
-        timestamp = Math.max(0, timestamp);
+        timestamp = Math.min(Math.max(0, timestamp), this.duration);
 
         this.timestamp = timestamp;
         this.renderer.timestamp = timestamp;

@@ -62,6 +62,15 @@ class GameInstance {
         this.beatmapAudio?.pause();
     }
 
+    public getMaximumDuration(): number {
+        if (!this.beatmap) return 0;
+
+        const lastObjectTime = this.beatmap.hitObjects.objects[this.beatmap.hitObjects.objects.length - 1].endTime ?? 0;
+        const audioTime = (this.beatmapAudio?.duration() ?? 0) * 1000;
+
+        return Math.max(lastObjectTime, audioTime);
+    }
+
     private draw(time: number) {
         if (!this.beatmap) return;
 
@@ -80,7 +89,11 @@ class GameInstance {
     private _autoSyncLastTime = 0;
     private averageTimeDiff: number = 0;
     private _autoSync(time: number) {
-        if (Settings.get("AudioAutoSyncEnabled") && document.hasFocus() && this.beatmapAudio?.playing()) {
+        if (Settings.get("AudioAutoSyncEnabled") && document.hasFocus() && this.beatmapAudio && this.isPlaying) {
+            if (!this.beatmapAudio.playing()) {
+                this.beatmapAudio.play();
+            }
+
             const currTime = this.beatmapAudio.seek() * 1000;
             const offset = Settings.get("AudioOffset");
             const timeDiff = currTime - offset - this.time;
@@ -95,10 +108,10 @@ class GameInstance {
                 if (Settings.get("AudioAutoSyncDetectIssue")) {
                     this._autoSyncCount++;
 
-                    if (Math.abs(performance.now() - this._autoSyncLastTime) > 200) {
+                    if (Math.abs(time - this._autoSyncLastTime) > 200) {
                         this._autoSyncCount = 0;
                     }
-                    this._autoSyncLastTime = performance.now();
+                    this._autoSyncLastTime = time;
                 }
             }
         }
