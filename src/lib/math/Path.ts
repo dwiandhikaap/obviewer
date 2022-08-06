@@ -71,7 +71,7 @@ export class Path {
         const maxLength = this._cachedPointsTime.length;
         let result = 0;
 
-        if (t > this._cachedPointsTime[maxLength - 1]) {
+        if (t >= this._cachedPointsTime[maxLength - 1]) {
             result = maxLength - 1;
         } else {
             for (let i = 1; i < this._cachedPointsTime.length; i++) {
