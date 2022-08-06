@@ -3,9 +3,6 @@ import { Spinner } from "../../../osu/Beatmap/BeatmapAttributes/HitObjects";
 import { AssetsLoader } from "../../../assets/Assets";
 import { Drawable } from "../DrawableTypes";
 
-// hack
-const ADJUSTMENT_SCALE = 1 / 0.9;
-
 function createSpinnerBackground(fieldScale: number) {
     const texture = AssetsLoader.instance.getTexture("spinner-background");
 
@@ -13,7 +10,6 @@ function createSpinnerBackground(fieldScale: number) {
     const playfieldHeight = 384 * fieldScale;
 
     const sprite = new Sprite(texture);
-    sprite.scale.set(ADJUSTMENT_SCALE);
     sprite.position.set(playfieldWidth / 2, playfieldHeight / 2);
     sprite.anchor.set(0.5);
     sprite.blendMode = BLEND_MODES.MULTIPLY;
@@ -27,7 +23,6 @@ function createSpinnerMeter(fieldScale: number) {
     const playfieldHeight = 384 * fieldScale;
 
     const sprite = new Sprite(texture);
-    sprite.scale.set(ADJUSTMENT_SCALE);
     sprite.position.set(playfieldWidth / 2, (playfieldHeight - 7) / 2); // hack
     sprite.anchor.set(0.5);
 
@@ -41,13 +36,11 @@ function createSpinnerMeterMask(fieldScale: number) {
     const playfieldHeight = 384 * fieldScale;
 
     const mask = new Sprite(Texture.WHITE);
-    mask.width = texture.width;
+    mask.width = texture.width * 1.5;
     mask.height = texture.height;
-    mask.y = 0;
-    mask.x = 0;
 
     mask.position.set(playfieldWidth / 2, playfieldHeight);
-    mask.anchor.set(0.5, 1.0);
+    mask.anchor.set(0.5);
 
     return mask;
 }
@@ -59,7 +52,6 @@ function createSpinnerCircle(fieldScale: number) {
     const playfieldHeight = 384 * fieldScale;
 
     const sprite = new Sprite(texture);
-    sprite.scale.set(ADJUSTMENT_SCALE);
     sprite.position.set(playfieldWidth / 2, playfieldHeight / 2);
     sprite.anchor.set(0.5);
 
@@ -72,7 +64,6 @@ function createSpinnerSpin(fieldScale: number) {
     const playfieldWidth = 512 * fieldScale;
     const playfieldHeight = 384 * fieldScale;
     const sprite = new Sprite(texture);
-    sprite.scale.set(ADJUSTMENT_SCALE);
     sprite.position.set(playfieldWidth / 2, (playfieldHeight * 3) / 4);
     sprite.anchor.set(0.5, 0.25);
 
