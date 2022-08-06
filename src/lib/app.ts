@@ -53,7 +53,7 @@ class Obviewer {
         const { container } = obviewerConfig;
         this.renderer = new Renderer(container);
         this.audioHandler = new AudioHandler();
-        this.gameInstance = new GameInstance(this.renderer, this.audioHandler);
+        this.gameInstance = new GameInstance(this.audioHandler);
         this.gameInstance._setAppRate = (rate: number) => {
             this.rate = rate;
         };
@@ -135,7 +135,6 @@ class Obviewer {
         }
 
         this.replay = replay;
-        this.gameInstance.loadReplay(replay);
         this.renderer.loadReplay(replay);
     }
 

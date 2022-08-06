@@ -7,11 +7,9 @@ import { Mod } from "../Mods/Mods";
 import { Replay } from "../Replay/Replay";
 
 class GameInstance {
-    private renderer: Renderer;
     private audioHandler: AudioHandler;
 
     private beatmap?: Beatmap;
-    private replay?: Replay;
 
     private beatmapAudio?: Howl;
 
@@ -36,8 +34,7 @@ class GameInstance {
 
     public isPlaying = false;
 
-    constructor(renderer: Renderer, audioHandler: AudioHandler) {
-        this.renderer = renderer;
+    constructor(audioHandler: AudioHandler) {
         this.audioHandler = audioHandler;
     }
 
@@ -45,10 +42,6 @@ class GameInstance {
         this.beatmap = beatmap;
         this.handleMods(beatmap);
         await this.reloadAudio();
-    }
-
-    public loadReplay(replay: Replay) {
-        this.replay = replay;
     }
 
     public play() {
