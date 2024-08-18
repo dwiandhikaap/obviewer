@@ -4,10 +4,6 @@
 
 This repository was forked from old project of mine
 
-## Why?
-
-This project is just for me to learn TypeScript/JavaScript with some OOP stuff with no end-goal. ~~*(also to fill my portfolio :trollface:)*~~
-
 ## Getting Started
 
 - First, you need to clone this repository using Git
