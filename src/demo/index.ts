@@ -66,13 +66,13 @@ function parseBeatmapPageURL(url: string) {
 
     // Use 3rd party site for external download
     if (url && !isNaN(+url)) {
-        return `https://api.chimu.moe/v1/download/${url}`;
+        return `https://catboy.best/d/${url}`;
     }
 
     let match = url.match(/(osu.ppy.sh\/beatmapsets\/\d+)/g);
     if (match && match.length > 0) {
         const id = match[0].match(/(\d+)/g);
-        return `https://api.chimu.moe/v1/download/${id}`;
+        return `https://catboy.best/d/${id}`;
     }
 
     return null;
@@ -117,10 +117,14 @@ function addListeners(obviewer: Obviewer) {
 
         if ((e.originalEvent as WheelEvent).deltaY < 0) {
             const time = obviewer.time;
+            obviewer.pause();
             obviewer.seek(time - 500);
+            obviewer.play();
         } else {
             const time = obviewer.time;
+            obviewer.pause();
             obviewer.seek(time + 500);
+            obviewer.play();
         }
     });
 }
